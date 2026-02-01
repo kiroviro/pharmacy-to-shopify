@@ -120,7 +120,10 @@ class ShopifyCSVExporter:
         tags_str = ', '.join(product.tags)
         published = 'TRUE' if product.published else 'FALSE'
         requires_shipping = 'TRUE' if product.requires_shipping else 'FALSE'
-        charge_tax = 'TRUE'
+        continue_selling = 'deny' if product.inventory_policy == 'deny' else 'continue'
+
+        # Determine status based on product type (prescription = draft)
+        status = 'Draft' if product.availability == "Само с рецепта" else 'Active'
 
         return {
             'Title': product.title,
@@ -131,7 +134,7 @@ class ShopifyCSVExporter:
             'Type': product.product_type,
             'Tags': tags_str,
             'Published on online store': published,
-            'Status': 'Active',
+            'Status': status,
             'SKU': product.sku,
             'Barcode': product.barcode,
             'Option1 name': '',
@@ -146,13 +149,13 @@ class ShopifyCSVExporter:
             'Price': product.price,
             'Compare-at price': product.original_price if product.original_price else '',
             'Cost per item': '',
-            'Charge tax': charge_tax,
+            'Charge tax': 'TRUE',
             'Tax code': '',
             'Inventory tracker': 'shopify',
             'Inventory quantity': 11,
-            'Continue selling when out of stock': 'continue',
+            'Continue selling when out of stock': continue_selling,
             'Weight value (grams)': product.weight_grams if product.weight_grams > 0 else '',
-            'Weight unit for display': product.weight_unit if product.weight_grams > 0 else 'g',
+            'Weight unit for display': 'g' if product.weight_grams > 0 else '',
             'Requires shipping': requires_shipping,
             'Fulfillment service': 'manual',
             'Product image URL': product.images[0].source_url if product.images else '',
@@ -310,25 +313,3 @@ class ShopifyCSVExporter:
                 writer.writerow(row)
 
 
-# Convenience function for backward compatibility
-def export_to_shopify_csv(
-    product: ExtractedProduct,
-    output_path: str,
-    download_images: bool = False
-):
-    """
-    Export product to Shopify-compatible CSV format.
-
-    This is a convenience function for backward compatibility.
-    For new code, use ShopifyCSVExporter class directly.
-
-    Args:
-        product: ExtractedProduct to export
-        output_path: Path to save CSV file
-        download_images: Whether to download images locally (not implemented here)
-    """
-    if download_images:
-        print("Note: Image downloading should be done separately before export.")
-
-    exporter = ShopifyCSVExporter()
-    exporter.export_single(product, output_path)

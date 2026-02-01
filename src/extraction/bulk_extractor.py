@@ -165,7 +165,7 @@ class BulkExtractor:
         tags_str = ', '.join(product.tags)
         published = 'TRUE' if product.published else 'FALSE'
         requires_shipping = 'TRUE' if product.requires_shipping else 'FALSE'
-        continue_selling = 'DENY' if product.inventory_policy == 'deny' else 'CONTINUE'
+        continue_selling = 'deny' if product.inventory_policy == 'deny' else 'continue'
 
         # Determine status based on product type (prescription = draft)
         status = 'Draft' if product.availability == "Само с рецепта" else 'Active'
@@ -181,7 +181,7 @@ class BulkExtractor:
             'Tags': tags_str,
             'Published on online store': published,
             'Status': status,
-            'SKU': '',
+            'SKU': product.sku,
             'Barcode': product.barcode,
             'Option1 name': '',
             'Option1 value': '',
@@ -200,7 +200,7 @@ class BulkExtractor:
             # TODO: Make inventory configurable via CLI argument
             'Inventory tracker': 'shopify',
             'Inventory quantity': 11,  # Hardcoded - see README Known Issues
-            'Continue selling when out of stock': 'continue',
+            'Continue selling when out of stock': continue_selling,
             'Weight value (grams)': product.weight_grams if product.weight_grams > 0 else '',
             'Weight unit for display': 'g' if product.weight_grams > 0 else '',
             'Requires shipping': requires_shipping,

@@ -20,7 +20,8 @@ webcrawler-shopify/
 │   ├── cleanup_tags.py            # Tag normalization
 │   ├── create_shopify_collections.py
 │   ├── create_shopify_menus.py
-│   └── configure_shopify_filters.py
+│   ├── configure_shopify_filters.py
+│   └── shopify_oauth.py
 │
 ├── src/                           # Business logic modules
 │   ├── models/                    # Data models
@@ -167,6 +168,7 @@ All configuration in `config/` directory (YAML format).
 | `tag_normalization.yaml` | Tag casing rules |
 | `promotional_patterns.yaml` | Patterns to filter out |
 | `vendor_defaults.yaml` | Default tags per vendor |
+| `seo_settings.yaml` | SEO title/description limits, store name, Google Shopping category map |
 
 ---
 
@@ -215,7 +217,7 @@ data/
 
 ## CLI Scripts
 
-All CLI scripts are thin wrappers (~70-150 lines) that:
+All CLI scripts are wrappers that:
 - Parse command-line arguments
 - Import business logic from `src/`
 - Handle input/output paths
@@ -231,6 +233,7 @@ All CLI scripts are thin wrappers (~70-150 lines) that:
 | `create_shopify_collections.py` | `ShopifyCollectionCreator` | Create collections |
 | `create_shopify_menus.py` | `ShopifyMenuCreator` | Create menus |
 | `configure_shopify_filters.py` | `ShopifyAPIClient` | Configure sidebar filters + translations |
+| `shopify_oauth.py` | `ShopifyAPIClient` | OAuth token helper |
 
 ---
 
@@ -343,9 +346,9 @@ Standard Shopify product import format with 2 custom metafield columns:
 - `За кого (product.metafields.custom.target_audience)` — target audience
 
 **Inventory Settings:**
-- `Inventory tracker`: empty (no tracking)
-- `Continue selling when out of stock`: CONTINUE
-- No stock quantities tracked - products always available
+- `Inventory tracker`: `shopify`
+- `Inventory quantity`: `11` (hardcoded — see README Known Issues)
+- `Continue selling when out of stock`: uses `inventory_policy` from product model (default: `deny`)
 
 ### JSON (detailed)
 

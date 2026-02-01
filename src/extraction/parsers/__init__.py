@@ -4,7 +4,7 @@ Specialized parsers for product data extraction.
 Each parser handles a specific data source:
 - StructuredDataParser: JSON-LD structured data (schema.org)
 - GTMDataParser: Google Tag Manager dl4Objects
-- HTMLParser: HTML element extraction
+- HTMLContentParser: HTML element extraction
 - LeafletParser: Pharmaceutical leaflet sections
 """
 

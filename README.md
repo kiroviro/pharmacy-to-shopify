@@ -140,7 +140,8 @@ webcrawler-shopify/
 │   ├── known_brands.yaml          # Known brand names
 │   ├── tag_normalization.yaml     # Tag casing rules
 │   ├── promotional_patterns.yaml  # Patterns to strip from tags
-│   └── vendor_defaults.yaml       # Default tags for specific vendors
+│   ├── vendor_defaults.yaml       # Default tags for specific vendors
+│   └── seo_settings.yaml          # SEO limits, store name, Google Shopping categories
 │
 ├── data/{site}/                   # Per-site data (raw + processed)
 ├── output/{site}/                 # Export output (CSV files)
@@ -179,6 +180,7 @@ All category and tag settings are in YAML files under `config/`:
 - **`tag_normalization.yaml`** -- canonical brand name casing (e.g., "AboPharma")
 - **`promotional_patterns.yaml`** -- patterns to strip from tags (e.g., "Black Friday")
 - **`vendor_defaults.yaml`** -- default tags for specific vendors
+- **`seo_settings.yaml`** -- SEO title/description limits, store name, Google Shopping category mapping
 
 After editing config files, re-run `cleanup_tags.py` to apply changes.
 
@@ -317,6 +319,8 @@ Products without a barcode in their "Допълнителна информаци
 - **Hardcoded inventory quantity** -- currently set to `11` for all products. Should be configurable via CLI argument.
 - **Products without images** -- skipped during extraction to avoid Shopify import errors.
 - **Image URL encoding** -- special characters in filenames are URL-encoded to prevent import failures.
+
+See also `TODO.md` for AI-generated storefront image tasks.
 
 ---
 
