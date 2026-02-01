@@ -322,7 +322,7 @@ class BenuExtractor:
                 return False
             url_lower = url.lower()
             # Exclude icons, logos, placeholders, cached versions, and non-product images
-            exclude_patterns = ['.svg', 'icon', 'logo', 'heart', 'cart', 'arrow', 'close', 'search', 'default.jpg', 'default.png', '/media/cache/']
+            exclude_patterns = ['.svg', 'icon', 'logo', 'heart', 'cart', 'arrow', 'close', 'search', 'default.jpg', 'default.png', '/media/cache/product_in_category_list', '/media/cache/brands_nav_slider']
             for pattern in exclude_patterns:
                 if pattern in url_lower:
                     return False
@@ -330,9 +330,13 @@ class BenuExtractor:
             return '/images/products/' in url or url_lower.endswith(('.webp', '.jpg', '.jpeg', '.png', '.gif'))
 
         def normalize_url(url: str) -> str:
-            """Normalize URL for deduplication."""
-            # Remove cache/size suffixes to detect duplicates
-            return re.sub(r'/media/cache/[^/]+/', '/media/', url)
+            """Normalize URL for deduplication.
+
+            Both uploads/images/products/X/Y and media/cache/{variant}/images/products/X/Y
+            normalize to the same key so we don't get duplicate images.
+            """
+            match = re.search(r'/images/products/.*', url)
+            return match.group(0) if match else url
 
         def encode_url(url: str) -> str:
             """URL-encode special characters in filename."""
@@ -359,9 +363,17 @@ class BenuExtractor:
                     img_urls = []
 
                 for url in img_urls:
+                    if not url:
+                        continue
+                    # Rewrite uploads/ to product_view_default (higher quality, always available)
+                    url_stripped = url.lstrip('/')
+                    if url_stripped.startswith('uploads/'):
+                        url_stripped = url_stripped.replace('uploads/', 'media/cache/product_view_default/', 1)
                     # Make absolute URL if relative
-                    if url and not url.startswith(('http://', 'https://')):
-                        url = f"https://{self.SITE_DOMAIN}/{url.lstrip('/')}"
+                    if not url_stripped.startswith(('http://', 'https://')):
+                        url = f"https://{self.SITE_DOMAIN}/{url_stripped}"
+                    else:
+                        url = url_stripped
 
                     if is_product_image(url):
                         normalized = normalize_url(url)
@@ -391,6 +403,28 @@ class BenuExtractor:
                             position=len(images) + 1,
                             alt_text=img.get("alt", self._extract_title())
                         ))
+
+        # Validate image URLs with HEAD requests; fallback to product_view_default if broken
+        for img in images:
+            try:
+                resp = requests.head(img.source_url, timeout=10, allow_redirects=True)
+                if resp.status_code != 200:
+                    # Try product_view_default fallback
+                    fallback_url = re.sub(
+                        r'/uploads/',
+                        '/media/cache/product_view_default/',
+                        img.source_url
+                    )
+                    if fallback_url != img.source_url:
+                        try:
+                            resp2 = requests.head(fallback_url, timeout=10, allow_redirects=True)
+                            if resp2.status_code == 200:
+                                print(f"  Image fallback: {img.source_url} -> product_view_default")
+                                img.source_url = fallback_url
+                        except requests.RequestException:
+                            pass
+            except requests.RequestException:
+                pass
 
         return images
 

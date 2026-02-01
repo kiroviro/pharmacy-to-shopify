@@ -69,6 +69,7 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 - **Complete product data** -- title, brand, SKU, price (BGN + EUR), categories, descriptions, images
 - **Content sections** -- product details, composition, usage instructions, contraindications
 - **Brand matching** -- 450+ known pharmacy brands
+- **Image URL resolution** -- rewrites vendor `uploads/` paths to CDN `product_view_default/` for higher quality images that work for all products, with HEAD-request validation and automatic fallback
 - **95%+ compliance** with Shopify product specification
 
 ### Shopify Integration
@@ -236,6 +237,19 @@ Once your products are imported, you can use [Claude Code](https://docs.anthropi
 - beautifulsoup4, requests, lxml, pyyaml
 
 All dependencies are in `requirements.txt`.
+
+---
+
+## SKU Strategy
+
+SKUs are extracted from the vendor site and stored in the Shopify CSV `SKU` field, but they are **not displayed** on the storefront. They exist purely for internal operations:
+
+- **Product mapping** -- align products between the vendor's wholesale catalogue and your Shopify store
+- **Promotion sync** -- check which products the vendor has on promotion and mirror pricing
+- **Order integration** -- match Shopify orders back to vendor SKUs for procurement
+- **Inventory alignment** -- keep your catalogue in sync with what the vendor actually stocks
+
+SKUs are the vendor's internal identifiers. Exposing them publicly on your storefront would reveal the wholesale source. Shopify's `SKU` field is only visible in Admin, not to customers, which makes it the right place for this data.
 
 ---
 

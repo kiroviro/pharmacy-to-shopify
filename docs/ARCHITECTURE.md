@@ -247,9 +247,41 @@ The extractor uses multiple data sources with fallback priority:
 | Brand | JSON-LD | GTM data | Title prefix | Known brands list |
 | Price (EUR) | JSON-LD offers | HTML .product-prices | - | - |
 | Price (BGN) | HTML .product-prices | Calculated from EUR | - | - |
+| SKU | JSON-LD | - | - | - |
 | Categories | Breadcrumb | - | - | - |
 | Tags | From categories | - | - | - |
+| Images | JSON-LD (rewritten to CDN) | Gallery selectors | - | HEAD validation |
 | Content | Accordion tabs | JSON-LD fields | Leaflet sections | HTML panels |
+
+### benu.bg Image URL Resolution
+
+benu.bg serves product images at two URL patterns:
+
+| Pattern | Example |
+|---------|---------|
+| Raw upload | `https://benu.bg/uploads/images/products/{id}/{file}` |
+| CDN cache | `https://benu.bg/media/cache/product_view_default/images/products/{id}/{file}` |
+
+The `uploads/` path returns 404 for ~3.4% of products, while `product_view_default/` works for all products and returns higher-quality images (1.6-3.2x larger files).
+
+**Resolution strategy in `_extract_images()`:**
+
+1. **URL rewrite** -- JSON-LD image paths starting with `uploads/` are rewritten to `media/cache/product_view_default/`
+2. **Selective filtering** -- only non-product cache paths are excluded (`product_in_category_list`, `brands_nav_slider`); `product_view_default` images pass through
+3. **Normalized deduplication** -- both URL patterns normalize to `/images/products/...` so the same image isn't added twice from JSON-LD and gallery HTML
+4. **HEAD validation** -- after collection, each image URL is verified with a HEAD request; non-200 responses trigger a fallback to `product_view_default`
+
+### SKU Handling
+
+SKUs are extracted from JSON-LD structured data and stored in the Shopify CSV `SKU` field. They are **not visible on the storefront** -- Shopify only exposes SKU in Admin.
+
+SKUs serve as the internal key for vendor integration:
+- Product mapping between vendor wholesale catalogue and Shopify store
+- Promotion synchronization (detect vendor promotions, mirror pricing)
+- Order-to-vendor SKU matching for procurement
+- Catalogue alignment (detect new/removed products)
+
+The vendor's SKU is also written to `google_mpn` for Google Shopping feeds.
 
 ### benu.bg Content Sections
 
@@ -301,3 +333,4 @@ Full extraction data including:
 3. **Image Upload**: Upload images to Shopify CDN
 4. **Scheduling**: Automated periodic extraction
 5. **Delta Updates**: Only extract changed products
+6. **Vendor Integration**: Automated promotion sync and order mapping using extracted SKUs
