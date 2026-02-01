@@ -696,44 +696,49 @@ class BenuExtractor:
 
         title_lower = title.lower()
 
-        # Ordered specific→general to avoid false matches
+        # Ordered specific→general to avoid false matches.
+        # Each tuple: (keyword, label, is_stem).
+        # Stem keywords use leading \b only (e.g., "пластир" matches "пластири").
+        # Full keywords use \b on both sides to prevent false positives
+        # (e.g., "гел" won't match inside "гелатинови" or "ангел").
         form_patterns = [
             # Solid oral
-            ("таблетки", "Таблетки"),
-            ("капсули", "Капсули"),
-            ("сашета", "Сашета"),
-            ("саше", "Сашета"),
-            ("пастили", "Пастили"),
-            ("драже", "Драже"),
+            ("таблетки", "Таблетки", False),
+            ("капсули", "Капсули", False),
+            ("сашета", "Сашета", False),
+            ("саше", "Сашета", True),
+            ("пастили", "Пастили", False),
+            ("драже", "Драже", False),
             # Topical
-            ("крем", "Крем"),
-            ("мехлем", "Мехлем"),
-            ("гел", "Гел"),
-            ("маска", "Маска"),
-            ("серум", "Серум"),
-            ("лосион", "Лосион"),
-            ("балсам", "Балсам"),
-            ("пяна", "Пяна"),
-            ("тоник", "Тоник"),
-            ("паста", "Паста"),
-            ("пудра", "Пудра"),
+            ("крем", "Крем", False),
+            ("мехлем", "Мехлем", False),
+            ("гел", "Гел", False),
+            ("маска", "Маска", False),
+            ("серум", "Серум", False),
+            ("лосион", "Лосион", False),
+            ("балсам", "Балсам", False),
+            ("пяна", "Пяна", False),
+            ("тоник", "Тоник", False),
+            ("паста", "Паста", False),
+            ("пудра", "Пудра", False),
             # Liquid
-            ("спрей", "Спрей"),
-            ("капки", "Капки"),
-            ("разтвор", "Разтвор"),
-            ("сироп", "Сироп"),
-            ("суспензия", "Суспензия"),
-            ("олио", "Олио"),
-            ("масло", "Масло"),
+            ("спрей", "Спрей", False),
+            ("капки", "Капки", False),
+            ("разтвор", "Разтвор", False),
+            ("сироп", "Сироп", False),
+            ("суспензия", "Суспензия", False),
+            ("олио", "Олио", False),
+            ("масло", "Масло", False),
             # Care
-            ("шампоан", "Шампоан"),
+            ("шампоан", "Шампоан", False),
             # Other
-            ("пластир", "Пластири"),
-            ("супозитори", "Супозитории"),
+            ("пластир", "Пластири", True),
+            ("супозитори", "Супозитории", True),
         ]
 
-        for keyword, label in form_patterns:
-            if keyword in title_lower:
+        for keyword, label, is_stem in form_patterns:
+            pattern = rf'\b{keyword}' if is_stem else rf'\b{keyword}\b'
+            if re.search(pattern, title_lower):
                 return label
 
         return ""

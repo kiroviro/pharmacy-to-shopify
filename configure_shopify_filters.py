@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import sys
+from typing import Optional
 
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -179,7 +180,7 @@ def create_metafield_definitions(client: ShopifyAPIClient, dry_run: bool = False
         print()
 
 
-def get_active_theme_id(client: ShopifyAPIClient) -> str | None:
+def get_active_theme_id(client: ShopifyAPIClient) -> Optional[str]:
     """Get the ID of the currently active (published) theme."""
     result = client.rest_request("GET", "themes.json")
     if not result or "themes" not in result:
