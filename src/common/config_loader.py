@@ -189,6 +189,17 @@ def load_known_brands() -> set:
     return set(brands)
 
 
+def load_seo_settings() -> Dict[str, Any]:
+    """
+    Load SEO settings configuration.
+
+    Returns:
+        Dictionary with SEO settings including store_name, title/description limits,
+        Google Shopping default category, and category mapping.
+    """
+    return load_config('seo_settings.yaml')
+
+
 def get_brands_lowercase_map(brands: Optional[set] = None) -> Dict[str, str]:
     """
     Get mapping from lowercase brand name to canonical form.

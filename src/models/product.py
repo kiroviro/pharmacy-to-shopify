@@ -88,6 +88,11 @@ class ExtractedProduct:
     seo_title: str = ""         # Meta title (max 70 chars)
     seo_description: str = ""   # Meta description (max 155 chars)
 
+    # Google Shopping
+    google_product_category: str = ""  # Google taxonomy path
+    google_mpn: str = ""               # Manufacturer part number (from SKU)
+    google_age_group: str = ""         # "adult" or "kids"
+
     # Shopify Inventory
     inventory_quantity: int = 0
     inventory_policy: str = "deny"  # "deny" or "continue" selling when OOS

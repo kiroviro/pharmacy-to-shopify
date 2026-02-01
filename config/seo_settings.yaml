@@ -1,0 +1,18 @@
+# SEO Settings for ViaPharma store
+# Used by benu_extractor.py for generating SEO titles, descriptions, and Google Shopping fields
+
+store_name: "ViaPharma"
+title_max_length: 70
+description_max_length: 155
+
+google_shopping:
+  default_category: "Health & Beauty > Health Care > Pharmacy"
+
+# Maps Bulgarian L1 categories to Google Shopping taxonomy paths
+google_shopping_category_map:
+  "Козметика": "Health & Beauty > Personal Care > Cosmetics"
+  "Майка и дете": "Baby & Toddler"
+  "Медицински изделия": "Health & Beauty > Health Care > Medical Devices"
+  "Спорт": "Health & Beauty > Health Care > Fitness & Nutrition"
+  "Здравословно хранене": "Food, Beverages & Tobacco > Beverages > Tea & Infusions"
+  "Лечение и здраве": "Health & Beauty > Health Care > Pharmacy"

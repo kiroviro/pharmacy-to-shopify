@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
 from ..common.transliteration import transliterate
+from ..common.config_loader import load_seo_settings
 
 
 class BenuExtractor:
@@ -28,6 +29,7 @@ class BenuExtractor:
         self.json_ld = None
         self.brand_matcher = BrandMatcher()
         self.product_type = "otc"
+        self._seo_settings = load_seo_settings()
 
     def fetch(self) -> None:
         """Fetch the product page HTML."""
@@ -65,33 +67,55 @@ class BenuExtractor:
         brand = self._extract_brand(title)
         categories = self._extract_categories()
         price_bgn, price_eur = self._extract_prices()
+        sku = self._extract_sku()
+
+        # Extract content sections once, reuse for description + SEO
+        details = self._extract_tab_content("Какво представлява")
+        composition = self._extract_tab_content("Активни съставки")
+        usage = self._extract_tab_content("Дозировка и начин на употреба")
+        contraindications = self._extract_tab_content("Противопоказания")
+        more_info = self._extract_tab_content("Допълнителна информация")
+
+        sections = {
+            "details": details,
+            "composition": composition,
+            "usage": usage,
+            "contraindications": contraindications,
+            "more_info": more_info,
+        }
 
         # Build tags from categories (for Shopify smart collections)
         tags = list(categories)  # Copy categories as tags
+
+        images = self._extract_images()
+        self._optimize_image_alt_texts(images, brand, title)
 
         return ExtractedProduct(
             title=title,
             url=self.url,
             handle=self._generate_handle(title),
             brand=brand,
-            sku=self._extract_sku(),
+            sku=sku,
             price=price_bgn,
             price_eur=price_eur,
             original_price=self._extract_original_price(),
             availability=self._extract_availability(),
             category_path=categories,
             highlights=self._extract_highlights(),
-            details=self._extract_tab_content("Какво представлява"),
-            composition=self._extract_tab_content("Активни съставки"),
-            usage=self._extract_tab_content("Дозировка и начин на употреба"),
-            contraindications=self._extract_tab_content("Противопоказания"),
-            more_info=self._extract_tab_content("Допълнителна информация"),
-            description=self._build_description(),
-            images=self._extract_images(),
+            details=details,
+            composition=composition,
+            usage=usage,
+            contraindications=contraindications,
+            more_info=more_info,
+            description=self._build_description(brand, sections),
+            images=images,
             tags=tags,
             weight_grams=self._extract_weight(),
-            seo_title=title[:70] if title else "",
-            seo_description=self._generate_seo_description(),
+            seo_title=self._generate_seo_title(title, brand, categories),
+            seo_description=self._generate_seo_description(title, brand, categories, sections),
+            google_product_category=self._determine_google_category(categories),
+            google_mpn=sku,
+            google_age_group=self._determine_google_age_group(categories),
         )
 
     def _extract_title(self) -> str:
@@ -411,9 +435,18 @@ class BenuExtractor:
 
         return 0
 
-    def _build_description(self) -> str:
-        """Build full HTML description from all sections."""
+    def _build_description(self, brand: str, sections: dict) -> str:
+        """Build full HTML description from all sections.
+
+        Args:
+            brand: Product brand name
+            sections: Dict with keys: details, composition, usage, contraindications, more_info
+        """
         parts = []
+
+        # Brand display
+        if brand:
+            parts.append(f"<p><strong>Марка:</strong> {brand}</p>")
 
         highlights = self._extract_highlights()
         if highlights:
@@ -422,18 +455,21 @@ class BenuExtractor:
                 parts.append(f"<li>{h}</li>")
             parts.append("</ul>")
 
-        sections = [
-            ("Описание", self._extract_tab_content("Какво представлява")),
-            ("Състав", self._extract_tab_content("Активни съставки")),
-            ("Начин на употреба", self._extract_tab_content("Дозировка и начин на употреба")),
-            ("Противопоказания", self._extract_tab_content("Противопоказания")),
-            ("Допълнителна информация", self._extract_tab_content("Допълнителна информация")),
+        section_labels = [
+            ("Описание", sections.get("details", "")),
+            ("Състав", sections.get("composition", "")),
+            ("Начин на употреба", sections.get("usage", "")),
+            ("Противопоказания", sections.get("contraindications", "")),
+            ("Допълнителна информация", sections.get("more_info", "")),
         ]
 
-        for title, content in sections:
+        for title, content in section_labels:
             if content:
                 parts.append(f"<h3>{title}</h3>")
-                parts.append(f"<p>{content}</p>")
+                # Split multi-line content into separate <p> tags
+                lines = [line.strip() for line in content.split("\n") if line.strip()]
+                for line in lines:
+                    parts.append(f"<p>{line}</p>")
 
         return "\n".join(parts)
 
@@ -471,13 +507,164 @@ class BenuExtractor:
 
         return handle[:200]  # Shopify handle limit
 
-    def _generate_seo_description(self) -> str:
-        """Generate SEO description."""
-        highlights = self._extract_highlights()
-        if highlights:
-            return highlights[0][:155]
+    def _generate_seo_title(self, title: str, brand: str, categories: List[str]) -> str:
+        """Generate SEO title with progressive fallback.
 
-        if self.json_ld and self.json_ld.get("description"):
-            return self.json_ld["description"][:155]
+        Tries formats in order until one fits within max length:
+        1. "Brand Product - Category | ViaPharma"
+        2. "Brand Product | ViaPharma"
+        3. "Product | ViaPharma"
+        4. "Product... | ViaPharma" (truncated)
+        """
+        if not title:
+            return ""
 
-        return ""
+        store_name = self._seo_settings.get("store_name", "ViaPharma")
+        max_len = self._seo_settings.get("title_max_length", 70)
+        suffix = f" | {store_name}"
+
+        # Deduplicate brand from title if title already starts with brand
+        display_title = title
+        if brand and title.lower().startswith(brand.lower()):
+            display_title = title[len(brand):].lstrip(" -–—")
+
+        category = categories[0] if categories else ""
+
+        # Try: "Brand Product - Category | ViaPharma"
+        if brand and category:
+            candidate = f"{brand} {display_title} - {category}{suffix}"
+            if len(candidate) <= max_len:
+                return candidate
+
+        # Try: "Brand Product | ViaPharma"
+        if brand:
+            candidate = f"{brand} {display_title}{suffix}"
+            if len(candidate) <= max_len:
+                return candidate
+
+        # Try: "Product | ViaPharma"
+        candidate = f"{title}{suffix}"
+        if len(candidate) <= max_len:
+            return candidate
+
+        # Truncate title to fit store name suffix
+        available = max_len - len(suffix) - 3  # 3 for "..."
+        if available > 0:
+            return f"{title[:available]}...{suffix}"
+
+        return title[:max_len]
+
+    def _generate_seo_description(self, title: str, brand: str, categories: List[str], sections: dict) -> str:
+        """Generate structured SEO meta description in Bulgarian.
+
+        Format: "Купете {Brand} {Title}. {FirstSentence}. Поръчайте в {Category} на ViaPharma."
+        Progressive fallback if too long.
+        """
+        store_name = self._seo_settings.get("store_name", "ViaPharma")
+        max_len = self._seo_settings.get("description_max_length", 155)
+
+        category = categories[0] if categories else ""
+
+        # Build product name (deduplicate brand from title)
+        if brand and title.lower().startswith(brand.lower()):
+            product_name = title
+        elif brand:
+            product_name = f"{brand} {title}"
+        else:
+            product_name = title
+
+        # Extract first sentence from details for benefit text
+        details = sections.get("details", "")
+        first_sentence = ""
+        if details:
+            # Split on sentence-ending punctuation
+            sentences = re.split(r'[.!?]', details)
+            if sentences and sentences[0].strip():
+                first_sentence = sentences[0].strip()
+
+        # Build CTA suffix
+        if category:
+            cta = f"Поръчайте в {category} на {store_name}."
+        else:
+            cta = f"Поръчайте на {store_name}."
+
+        # Try: "Купете {product_name}. {first_sentence}. {cta}"
+        if first_sentence:
+            candidate = f"Купете {product_name}. {first_sentence}. {cta}"
+            if len(candidate) <= max_len:
+                return candidate
+
+        # Try: "Купете {product_name}. {cta}"
+        candidate = f"Купете {product_name}. {cta}"
+        if len(candidate) <= max_len:
+            return candidate
+
+        # Truncate to fit
+        candidate = f"Купете {product_name}."
+        if len(candidate) <= max_len:
+            return candidate
+
+        return candidate[:max_len]
+
+    def _optimize_image_alt_texts(self, images: List[ProductImage], brand: str, title: str) -> None:
+        """Optimize image alt texts with brand and position context.
+
+        Single image: "Brand ProductName"
+        Multiple: "Brand ProductName - Снимка 1 от 3", etc.
+        Max 125 chars.
+        """
+        if not images:
+            return
+
+        # Deduplicate brand from alt text if title already starts with brand
+        if brand and title.lower().startswith(brand.lower()):
+            base_alt = title
+        elif brand:
+            base_alt = f"{brand} {title}"
+        else:
+            base_alt = title
+        total = len(images)
+
+        for img in images:
+            if total == 1:
+                img.alt_text = base_alt[:125]
+            else:
+                position_text = f" - Снимка {img.position} от {total}"
+                available = 125 - len(position_text)
+                if available > 0:
+                    img.alt_text = f"{base_alt[:available]}{position_text}"
+                else:
+                    img.alt_text = base_alt[:125]
+
+    def _determine_google_category(self, categories: List[str]) -> str:
+        """Map product categories to Google Shopping taxonomy via config.
+
+        Uses startswith matching so "Козметика, красота и лична хигиена"
+        matches config key "Козметика".
+        """
+        category_map = self._seo_settings.get("google_shopping_category_map", {})
+        default = self._seo_settings.get("google_shopping", {}).get(
+            "default_category", "Health & Beauty > Health Care > Pharmacy"
+        )
+
+        for cat in categories:
+            # Exact match first
+            if cat in category_map:
+                return category_map[cat]
+            # Prefix match: category starts with a config key
+            for config_key, google_cat in category_map.items():
+                if cat.lower().startswith(config_key.lower()):
+                    return google_cat
+
+        return default
+
+    def _determine_google_age_group(self, categories: List[str]) -> str:
+        """Determine Google Shopping age group from categories."""
+        child_keywords = ["дете", "бебе", "деца", "бебета", "детски", "бебешки"]
+        categories_lower = " ".join(categories).lower()
+
+        for keyword in child_keywords:
+            if keyword in categories_lower:
+                return "kids"
+
+        return "adult"
