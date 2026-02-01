@@ -2,7 +2,7 @@
 
 ## Overview
 
-A modular product extraction and Shopify migration tool for Bulgarian pharmacy websites. Designed to be extensible for multiple vendor sites.
+A modular product extraction and Shopify migration tool for pharmacy websites. Designed to be extensible for multiple vendor sites.
 
 **Currently supported:** benu.bg (Phoenix Pharma / BENU Bulgaria)
 

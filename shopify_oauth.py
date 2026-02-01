@@ -76,7 +76,7 @@ class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):
 
 def get_authorization_url(shop: str, client_id: str, redirect_uri: str, state: str) -> str:
     """Build Shopify authorization URL."""
-    scopes = "read_products,write_products,read_product_listings,write_product_listings"
+    scopes = "read_products,write_products,read_product_listings,write_product_listings,read_themes,write_themes,read_online_store_navigation,write_online_store_navigation"
 
     params = {
         "client_id": client_id,
