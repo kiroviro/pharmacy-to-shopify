@@ -131,7 +131,7 @@ class ShopifyCSVExporter:
             'Published on online store': published,
             'Status': 'Active',
             'SKU': product.sku,
-            'Barcode': '',
+            'Barcode': product.barcode,
             'Option1 name': '',
             'Option1 value': '',
             'Option1 Linked To': '',

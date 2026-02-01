@@ -90,6 +90,8 @@ class BenuExtractor:
         images = self._extract_images()
         self._optimize_image_alt_texts(images, brand, title)
 
+        barcode = self._extract_barcode(more_info)
+
         return ExtractedProduct(
             title=title,
             url=self.url,
@@ -97,6 +99,7 @@ class BenuExtractor:
             brand=brand,
             sku=sku,
             price=price_bgn,
+            barcode=barcode,
             price_eur=price_eur,
             original_price=self._extract_original_price(),
             availability=self._extract_availability(),
@@ -117,6 +120,14 @@ class BenuExtractor:
             google_mpn=sku,
             google_age_group=self._determine_google_age_group(categories),
         )
+
+    @staticmethod
+    def _extract_barcode(more_info: str) -> str:
+        """Extract barcode from 'Допълнителна информация' text."""
+        if not more_info:
+            return ""
+        match = re.search(r'Баркод\s*:\s*(\S+)', more_info)
+        return match.group(1) if match else ""
 
     def _extract_title(self) -> str:
         """Extract product title."""

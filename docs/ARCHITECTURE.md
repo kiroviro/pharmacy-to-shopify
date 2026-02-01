@@ -105,6 +105,8 @@ Shopify integration for export and API operations.
 | `collections.py` | `ShopifyCollectionCreator` | Create smart collections |
 | `menus.py` | `ShopifyMenuCreator` | Create navigation menus |
 
+The API client also supports **theme asset management** -- reading and updating theme files (locale translations, templates, config) via the Asset API (`themes/{id}/assets.json`).
+
 ### `src/cleanup/`
 
 Post-processing for data quality.
@@ -323,6 +325,24 @@ Full extraction data including:
 - All extracted fields
 - Validation results
 - Extraction source metadata
+
+---
+
+## Theme Customization
+
+The API client can read and modify theme assets, enabling programmatic storefront customization:
+
+- **Locale files** (`locales/bg-BG.json`, etc.) -- modify translation strings
+- **Theme templates** -- read/update Liquid templates
+- **Settings** -- adjust theme configuration
+
+**REST endpoints used:**
+- `GET /themes.json` -- list themes (find active theme by `role: "main"`)
+- `GET /themes/{id}/assets.json?asset[key]=...` -- read a theme file
+- `PUT /themes/{id}/assets.json` -- update a theme file
+
+**Applied customizations:**
+- Cleared `products.product.shipping_policy_html` in `bg-BG` locale to remove "Доставката се изчислява при плащане" from product pages
 
 ---
 

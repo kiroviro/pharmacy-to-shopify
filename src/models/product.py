@@ -54,6 +54,7 @@ class ExtractedProduct:
     brand: str
     sku: str
     price: str              # Price in BGN (лв.)
+    barcode: str = ""       # EAN/barcode from "Допълнителна информация"
     price_eur: str = ""     # Price in EUR (€) - for Euro transition
     original_price: str = ""
     availability: str = ""

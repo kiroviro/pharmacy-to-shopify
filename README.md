@@ -66,7 +66,7 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 
 ### Extraction
 - **Structured data parsing** -- JSON-LD, HTML content, breadcrumb navigation
-- **Complete product data** -- title, brand, SKU, price (BGN + EUR), categories, descriptions, images
+- **Complete product data** -- title, brand, SKU, barcode (EAN), price (BGN + EUR), categories, descriptions, images
 - **Content sections** -- product details, composition, usage instructions, contraindications
 - **Brand matching** -- 450+ known pharmacy brands
 - **Image URL resolution** -- rewrites vendor `uploads/` paths to CDN `product_view_default/` for higher quality images that work for all products, with HEAD-request validation and automatic fallback
@@ -85,6 +85,7 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 - **Tag cleanup** -- normalize casing, remove promotional tags, infer missing categories
 - **Collection creation** -- automated Shopify collection setup via Admin API
 - **Navigation menus** -- automated Shopify menu creation from category hierarchy
+- **Theme customization** -- modify theme locale strings and assets via Admin API (e.g., storefront labels, tax/shipping messages)
 
 ---
 
@@ -223,11 +224,45 @@ python3 create_shopify_collections.py --csv data/benu.bg/processed/products_clea
 python3 create_shopify_menus.py --shop YOUR_STORE --token YOUR_TOKEN --csv data/benu.bg/processed/products_cleaned.csv
 ```
 
+### Theme Customization
+
+The Shopify API client supports reading and updating theme assets, including locale files. This is useful for customizing storefront text without touching the Shopify Admin UI.
+
+```python
+from src.shopify.api_client import ShopifyAPIClient
+import json
+
+client = ShopifyAPIClient(shop="YOUR_STORE", access_token="YOUR_TOKEN")
+
+# List themes and find the active one (role: "main")
+themes = client.rest_request("GET", "themes.json")
+
+# Read a locale file
+asset = client.rest_request("GET", "themes/THEME_ID/assets.json?asset[key]=locales/bg-BG.json")
+data = json.loads(asset["asset"]["value"])
+
+# Modify a translation string
+data["products"]["product"]["shipping_policy_html"] = ""
+
+# Upload the modified locale file
+client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
+    "asset": {"key": "locales/bg-BG.json", "value": json.dumps(data, ensure_ascii=False)}
+})
+```
+
+**Changes made via this workflow:**
+- Removed "Доставката се изчислява при плащане" from product pages -- storefront now shows only "С включени данъци."
+
 ---
 
 ## Managing Your Shopify Store with Claude Code
 
-Once your products are imported, you can use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) to manage your Shopify store directly -- updating products, creating collections, adjusting navigation, and more. This project includes Shopify API integration (`src/shopify/api_client.py`) that Claude Code can use as a foundation.
+Once your products are imported, you can use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) to manage your Shopify store directly -- updating products, creating collections, adjusting navigation, customizing theme translations, and more. This project includes Shopify API integration (`src/shopify/api_client.py`) that Claude Code can use as a foundation.
+
+Examples of store management tasks performed with Claude Code:
+- Creating smart collections and navigation menus from extracted categories
+- Modifying theme locale strings (e.g., removing shipping messages from product pages)
+- Reading and updating theme assets programmatically
 
 ---
 
@@ -250,6 +285,16 @@ SKUs are extracted from the vendor site and stored in the Shopify CSV `SKU` fiel
 - **Inventory alignment** -- keep your catalogue in sync with what the vendor actually stocks
 
 SKUs are the vendor's internal identifiers. Exposing them publicly on your storefront would reveal the wholesale source. Shopify's `SKU` field is only visible in Admin, not to customers, which makes it the right place for this data.
+
+### Barcode (EAN) Extraction
+
+Barcodes are parsed from the "Допълнителна информация" section of each product page (e.g., `Баркод : 3800232331104`) and exported to the Shopify CSV `Barcode` column. This populates the barcode field on each product variant in Shopify, which is useful for:
+
+- **POS scanning** -- identify products by barcode at point of sale
+- **Google Shopping** -- GTIN/EAN improves product matching in Google Merchant Center
+- **Inventory systems** -- barcode lookup for stock management
+
+Products without a barcode in their "Допълнителна информация" section will have an empty barcode field (no errors).
 
 ---
 

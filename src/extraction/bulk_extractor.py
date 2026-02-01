@@ -182,7 +182,7 @@ class BulkExtractor:
             'Published on online store': published,
             'Status': status,
             'SKU': '',
-            'Barcode': '',
+            'Barcode': product.barcode,
             'Option1 name': '',
             'Option1 value': '',
             'Option1 Linked To': '',
