@@ -1,0 +1,89 @@
+# =============================================================================
+# VENDOR DEFAULT TAGS CONFIGURATION
+# =============================================================================
+#
+# This file defines default tags to add for products from specific vendors
+# when those products end up with NO TAGS after the cleanup process.
+#
+# WHY IS THIS NEEDED?
+# -------------------
+# Some products in the source data only have:
+#   1. Brand name tags (e.g., "A-Derma")
+#   2. Promotional tags (e.g., "2026 Януари", "Black Friday")
+#
+# After cleanup removes both, these products have NO tags and won't appear
+# in any category collections. This file assigns sensible default categories.
+#
+# HOW TO USE:
+# -----------
+# 1. The key is the vendor name in LOWERCASE
+# 2. The value is a list of tags to add
+# 3. The FIRST tag should be the L1 category
+# 4. Additional tags can be L2 categories or descriptive tags
+#
+# HOW TO EDIT:
+# ------------
+# - To add defaults for a new vendor:
+#   "vendor name lowercase":
+#     - "L1 Category"
+#     - "L2 Subcategory"
+#     - "Optional Tag"
+#
+# EXAMPLE:
+# --------
+#   "johnson & johnson":
+#     - "Мама и бебе"
+#     - "Бебешка козметика"
+#
+# HOW TO FIND VENDORS NEEDING DEFAULTS:
+# -------------------------------------
+# Run this to find vendors with products missing L1 categories:
+#   python -c "
+#   import csv
+#   from collections import Counter
+#   L1 = {'козметика','терапия и здраве','мама и бебе','хранителни добавки',
+#         'апарати и медицински консумативи','био и натурални продукти'}
+#   vendors = Counter()
+#   with open('data/processed/products_missing_l1.csv') as f:
+#       for row in csv.DictReader(f):
+#           vendors[row['Vendor']] += 1
+#   for v, c in vendors.most_common(20):
+#       print(f'{v}: {c}')
+#   "
+#
+# =============================================================================
+
+vendor_defaults:
+  # ---------------------------------------------------------------------------
+  # COSMETICS BRANDS
+  # Default to Козметика category
+  # ---------------------------------------------------------------------------
+  "a-derma":
+    - "Козметика"
+    - "Дермокозметика"
+    - "Медицинска козметика"
+
+  # ---------------------------------------------------------------------------
+  # ADD MORE VENDORS HERE
+  # ---------------------------------------------------------------------------
+  # Example entries (uncomment and modify as needed):
+  #
+  # "avene":
+  #   - "Козметика"
+  #   - "Дермокозметика"
+  #
+  # "chicco":
+  #   - "Мама и бебе"
+  #   - "Бебешка козметика"
+  #
+  # "swanson":
+  #   - "Хранителни добавки"
+  #   - "Витамини и минерали"
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# - Vendor matching is case-insensitive
+# - Defaults are ONLY applied when a product has NO tags or NO L1 category
+# - Products that already have proper L1 tags are NOT modified
+# - The order of tags matters: L1 should be first for proper categorization

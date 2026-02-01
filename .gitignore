@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE / tools
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Data files (large, site-specific)
+data/*/raw/*.csv
+data/*/raw/*.json
+data/*/raw/*.txt
+data/*/processed/*.csv
+output/*/*.csv
+output/*/*.json
+output/*.json
+output/*.txt
+
+# Keep directory structure
+!data/*/.gitkeep
+!output/*/.gitkeep
+
+# Reports (generated)
+reports/*/*.txt
+reports/*/*.csv
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Credentials
+*.pem
+*.key
+credentials*.json
+.shopify_token.json

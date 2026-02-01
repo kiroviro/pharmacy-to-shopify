@@ -1,0 +1,143 @@
+# =============================================================================
+# CATEGORY CONFIGURATION - BENU.BG
+# =============================================================================
+#
+# This file defines the L1 (main) and L2 (sub) categories matching benu.bg tags.
+# Updated to match actual product tags from benu.bg extraction.
+#
+# HOW TO USE:
+# -----------
+# 1. L1 categories are the top-level menu items
+# 2. L2 categories are subcategories that appear under each L1
+# 3. Products are assigned to categories based on their tags
+# 4. A product's tag must EXACTLY match the category name (case-insensitive)
+#
+# =============================================================================
+
+categories:
+  # ---------------------------------------------------------------------------
+  # ЛЕЧЕНИЕ И ЗДРАВЕ (Treatment & Health)
+  # Main category for health and medical products (3,926 products)
+  # ---------------------------------------------------------------------------
+  "Лечение и здраве":
+    - "Грип и настинка"              # Flu and cold (646)
+    - "Хомеопатия"                   # Homeopathy (552)
+    - "Витамини и минерали"          # Vitamins and minerals (546)
+    - "Монопрепарати"                # Single preparations (445)
+    - "Храносмилателна система"      # Digestive system (333)
+    - "Кожни болести"                # Skin diseases (325)
+    - "Очи"                          # Eyes (318)
+    - "Депресия"                     # Depression (271)
+    - "Имунна система"               # Immune system (244)
+    - "Имуностимуланти за възрастни" # Adult immune boosters (240)
+    - "Витамини"                     # Vitamins (240)
+    - "Пробиотици"                   # Probiotics (225)
+    - "Сърдечно-съдова система"      # Cardiovascular system (200)
+    - "Уши"                          # Ears (188)
+    - "Нос и уста"                   # Nose and mouth (188)
+    - "Болкоуспокояващи"             # Pain relievers (180)
+    - "Опорно-двигателна система"    # Musculoskeletal system (179)
+    - "Мултивитамини"                # Multivitamins (177)
+    - "Висока температура"           # High temperature (173)
+    - "Кашлица"                      # Cough (166)
+    - "Болки в гърлото"              # Sore throat (158)
+    - "Антиоксиданти"                # Antioxidants (116)
+    - "Алергии"                      # Allergies
+    - "Мускулни и ставни болки"      # Muscle and joint pain
+
+  # ---------------------------------------------------------------------------
+  # КОЗМЕТИКА (Cosmetics)
+  # Main category for cosmetics and personal care (3,743 products)
+  # ---------------------------------------------------------------------------
+  "Козметика":
+    - "Грижа за лице"                           # Face care (1,278)
+    - "Грижа за коса"                           # Hair care (574)
+    - "Грижа за тяло"                           # Body care (458)
+    - "Кремове и флуиди за лице"                # Face creams and fluids (440)
+    - "Кремове за лице"                         # Face creams (416)
+    - "Серуми"                                  # Serums (377)
+    - "Слънцезащита и репеленти"                # Sun protection and repellents (338)
+    - "Душ гелове"                              # Shower gels (329)
+    - "Шампоани за коса"                        # Hair shampoos (289)
+    - "Орална хигиена"                          # Oral hygiene (276)
+    - "Почистване на кожата и премахване на грим" # Skin cleansing and makeup removal (275)
+    - "Слънцезащита"                            # Sun protection (255)
+    - "Коректори и други продукти за лице"      # Correctors and other face products (237)
+    - "Сапуни и продукти за баня"               # Soaps and bath products (232)
+    - "Кремове"                                 # Creams (157)
+    - "Сапуни"                                  # Soaps (51)
+    - "Балсами за коса"                         # Hair conditioners
+    - "Маски за лице"                           # Face masks
+    - "Дезодоранти и антиперспиранти"           # Deodorants and antiperspirants (154)
+
+  # ---------------------------------------------------------------------------
+  # МАЙКА И ДЕТЕ (Mother & Child)
+  # Products for mothers and children (244 products)
+  # ---------------------------------------------------------------------------
+  "Майка и дете":
+    - "Детско здраве"                           # Child health (116)
+    - "Имуностимуланти за деца"                 # Children's immune boosters (55)
+    - "Мултивитамини за деца"                   # Children's multivitamins (48)
+    - "Бебешко и детско хранене"                # Baby and child nutrition (39)
+    - "Адаптирани млека"                        # Infant formula (38)
+    - "Бебешка"                                 # Baby products (31)
+    - "Детска козметика и орална хигиена"       # Children's cosmetics and oral hygiene (31)
+    - "Бременност и кърмене"                    # Pregnancy and breastfeeding (27)
+    - "Козметика за бебета и деца"              # Cosmetics for babies and children (23)
+    - "Аксесоари за бебето и детето"            # Baby and child accessories (22)
+    - "Шишета"                                  # Bottles (22)
+    - "Витамини и добавки за бременни"          # Vitamins and supplements for pregnant (19)
+    - "Чаши и биберони"                         # Cups and pacifiers (19)
+    - "Биберони"                                # Pacifiers (16)
+    - "Пелени и бебешка хигиена"                # Diapers and baby hygiene (2)
+
+  # ---------------------------------------------------------------------------
+  # МЕДИЦИНСКИ ИЗДЕЛИЯ И КОНСУМАТИВИ (Medical Devices & Supplies)
+  # Medical devices and consumables (604 products)
+  # ---------------------------------------------------------------------------
+  "Медицински изделия и консумативи":
+    - "Превързочни материали и лични предпазни средства"  # Bandages and PPE (236)
+    - "Лепенки и адхезивни ленти"               # Patches and adhesive tapes (140)
+    - "Медицински инструменти и консумативи"    # Medical instruments (126)
+    - "Апарати и уреди"                         # Devices and equipment (90)
+    - "Помощни средства при инконтиненция"      # Incontinence aids (70)
+    - "Дезинфектанти и дезинфекция на рани"     # Disinfectants and wound care (63)
+    - "Ортопедични помощни средства"            # Orthopedic aids (42)
+    - "Инхалатори"                              # Inhalers (36)
+    - "Дезинфектанти"                           # Disinfectants (35)
+    - "Компреси и марли"                        # Compresses and gauze (34)
+    - "Диагностични тестове"                    # Diagnostic tests (33)
+    - "Пелени за възрастни"                     # Adult diapers (31)
+    - "Дезинфекция на рани"                     # Wound disinfection (28)
+    - "Апарати за измерване на кръвно налягане" # Blood pressure monitors (27)
+    - "Медицински превръзки"                    # Medical bandages (27)
+    - "Термометри"                              # Thermometers (22)
+    - "Глюкомери"                               # Glucometers (3)
+
+  # ---------------------------------------------------------------------------
+  # СПОРТ, ФИТНЕС И ПРОТЕИНОВИ ХРАНИ (Sports, Fitness & Protein Foods)
+  # Sports and fitness products (319 products)
+  # ---------------------------------------------------------------------------
+  "Спорт":
+    - "Фитнес и протеинови храни"   # Fitness and protein foods (319)
+    - "Контрол на теглото"          # Weight control (95)
+    - "Мастни киселини"             # Fatty acids (90)
+    - "Аминокиселини"               # Amino acids (84)
+    - "Протеини"                    # Proteins (30)
+    - "Суперхрани"                  # Superfoods (21)
+
+  # ---------------------------------------------------------------------------
+  # ЗДРАВОСЛОВНО ХРАНЕНЕ (Healthy Eating)
+  # Health foods, teas and herbs (234 products)
+  # ---------------------------------------------------------------------------
+  "Здравословно хранене чайове и билки":
+    - "Чайове и билки"                        # Teas and herbs (150)
+    - "Храни за специални медицински цели"    # Special medical foods (25)
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# - Categories updated on 2026-01-25 based on benu.bg extraction
+# - Product counts in comments are approximate
+# - Some products may have multiple tags (appear in multiple categories)
+# - "красота и лична хигиена" tag overlaps with "Козметика" (same products)

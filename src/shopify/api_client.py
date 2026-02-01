@@ -1,0 +1,204 @@
+"""
+Shopify API Client
+
+Shared client for Shopify Admin API (REST and GraphQL).
+Handles authentication, rate limiting, and error handling.
+"""
+
+import time
+from typing import Dict, Optional, Any
+from urllib.parse import urljoin
+
+import requests
+
+
+class ShopifyAPIClient:
+    """
+    Shared client for Shopify Admin API.
+
+    Handles:
+    - Authentication
+    - Rate limiting (2 requests/second)
+    - Error handling and retries
+    - Both REST and GraphQL endpoints
+
+    Usage:
+        client = ShopifyAPIClient(shop="my-store", access_token="shpat_xxx")
+
+        # REST request
+        result = client.rest_request("GET", "products.json")
+
+        # GraphQL request
+        result = client.graphql_request(query, variables)
+    """
+
+    API_VERSION = "2024-01"
+
+    def __init__(self, shop: str, access_token: str):
+        """
+        Initialize the API client.
+
+        Args:
+            shop: Shop name (without .myshopify.com) or full domain
+            access_token: Shopify Admin API access token
+        """
+        # Normalize shop name
+        if ".myshopify.com" in shop:
+            self.shop = shop.replace("https://", "").replace("http://", "").split(".myshopify.com")[0]
+        else:
+            self.shop = shop
+
+        self.access_token = access_token
+        self.base_url = f"https://{self.shop}.myshopify.com/admin/api/{self.API_VERSION}"
+        self.graphql_url = f"{self.base_url}/graphql.json"
+
+        self.session = requests.Session()
+        self.session.headers.update({
+            "X-Shopify-Access-Token": access_token,
+            "Content-Type": "application/json",
+        })
+
+        # Rate limiting
+        self.requests_made = 0
+        self.last_request_time = 0.0
+        self.min_request_interval = 0.5  # 2 req/sec
+
+    def _rate_limit(self):
+        """Implement rate limiting (2 requests/second max)."""
+        now = time.time()
+        elapsed = now - self.last_request_time
+
+        if elapsed < self.min_request_interval:
+            time.sleep(self.min_request_interval - elapsed)
+
+        self.last_request_time = time.time()
+        self.requests_made += 1
+
+    def rest_request(
+        self,
+        method: str,
+        endpoint: str,
+        data: Optional[Dict] = None,
+        timeout: int = 30
+    ) -> Optional[Dict]:
+        """
+        Make REST API request with rate limiting and error handling.
+
+        Args:
+            method: HTTP method (GET, POST, PUT, DELETE)
+            endpoint: API endpoint (e.g., "products.json")
+            data: Request body for POST/PUT
+            timeout: Request timeout in seconds
+
+        Returns:
+            Response JSON or None on error
+        """
+        self._rate_limit()
+
+        url = urljoin(self.base_url + "/", endpoint)
+
+        try:
+            if method == "GET":
+                response = self.session.get(url, timeout=timeout)
+            elif method == "POST":
+                response = self.session.post(url, json=data, timeout=timeout)
+            elif method == "PUT":
+                response = self.session.put(url, json=data, timeout=timeout)
+            elif method == "DELETE":
+                response = self.session.delete(url, timeout=timeout)
+            else:
+                raise ValueError(f"Unsupported method: {method}")
+
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 5))
+                print(f"  Rate limited, waiting {retry_after}s...")
+                time.sleep(retry_after)
+                return self.rest_request(method, endpoint, data, timeout)
+
+            # Check for errors
+            if response.status_code >= 400:
+                error_msg = response.text[:200]
+                print(f"  API Error {response.status_code}: {error_msg}")
+                return None
+
+            return response.json()
+
+        except requests.exceptions.Timeout:
+            print(f"  Request timeout: {endpoint}")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"  Request failed: {e}")
+            return None
+
+    def graphql_request(
+        self,
+        query: str,
+        variables: Optional[Dict] = None,
+        timeout: int = 30
+    ) -> Optional[Dict]:
+        """
+        Make GraphQL API request with rate limiting and error handling.
+
+        Args:
+            query: GraphQL query or mutation
+            variables: Query variables
+            timeout: Request timeout in seconds
+
+        Returns:
+            Response data (without 'data' wrapper) or None on error
+        """
+        self._rate_limit()
+
+        payload = {"query": query}
+        if variables:
+            payload["variables"] = variables
+
+        try:
+            response = self.session.post(
+                self.graphql_url,
+                json=payload,
+                timeout=timeout
+            )
+
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", 5))
+                print(f"  Rate limited, waiting {retry_after}s...")
+                time.sleep(retry_after)
+                return self.graphql_request(query, variables, timeout)
+
+            # Check for HTTP errors
+            if response.status_code >= 400:
+                print(f"  API Error {response.status_code}: {response.text[:200]}")
+                return None
+
+            result = response.json()
+
+            # Check for GraphQL errors
+            if "errors" in result:
+                print(f"  GraphQL Errors: {result['errors']}")
+                return None
+
+            return result.get("data")
+
+        except requests.exceptions.Timeout:
+            print(f"  GraphQL request timeout")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"  Request failed: {e}")
+            return None
+
+    def test_connection(self) -> bool:
+        """
+        Test API connection by fetching shop info.
+
+        Returns:
+            True if connection successful
+        """
+        result = self.rest_request("GET", "shop.json")
+        if result and "shop" in result:
+            shop_name = result["shop"].get("name", "Unknown")
+            print(f"  Connected to: {shop_name}")
+            return True
+        return False

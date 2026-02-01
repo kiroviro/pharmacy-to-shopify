@@ -1,0 +1,129 @@
+# =============================================================================
+# PROMOTIONAL PATTERNS CONFIGURATION
+# =============================================================================
+#
+# This file defines patterns that identify promotional or temporal tags.
+# These tags are automatically REMOVED during cleanup because they:
+#   1. Are time-limited (e.g., "2026 Януари")
+#   2. Are marketing campaigns (e.g., "Black Friday")
+#   3. Don't represent actual product categories
+#
+# HOW TO USE:
+# -----------
+# Tags are removed if they CONTAIN any of these patterns (case-insensitive).
+# The matching is substring-based, not exact.
+#
+# HOW TO EDIT:
+# ------------
+# - To add a new pattern: Add it to the appropriate section
+# - Patterns are case-insensitive
+# - Use lowercase for consistency
+# - Be careful with short patterns - they might match unintended tags
+#
+# EXAMPLE:
+# --------
+#   "promo" will remove: "Promo", "PROMO", "Summer Promo", "promo2026"
+#   "2026" will remove: "2026 Януари", "Февруари 2026", "Products 2026"
+#
+# =============================================================================
+
+promotional_patterns:
+  # ---------------------------------------------------------------------------
+  # YEAR PATTERNS
+  # Remove any tag containing a year (usually promotional campaigns)
+  # ---------------------------------------------------------------------------
+  - "2024"
+  - "2025"
+  - "2026"
+  - "2027"
+
+  # ---------------------------------------------------------------------------
+  # MONTH NAMES (BULGARIAN)
+  # Remove monthly promotional tags
+  # ---------------------------------------------------------------------------
+  - "януари"
+  - "февруари"
+  - "март"
+  - "април"
+  - "май"
+  - "юни"
+  - "юли"
+  - "август"
+  - "септември"
+  - "октомври"
+  - "ноември"
+  - "декември"
+
+  # ---------------------------------------------------------------------------
+  # MONTH NAMES (ENGLISH)
+  # In case English month names are used
+  # ---------------------------------------------------------------------------
+  - "january"
+  - "february"
+  - "march"
+  - "april"
+  - "june"
+  - "july"
+  - "august"
+  - "september"
+  - "october"
+  - "november"
+  - "december"
+  # Note: "may" excluded - too short, might match other words
+
+  # ---------------------------------------------------------------------------
+  # PROMOTIONAL KEYWORDS (BULGARIAN)
+  # Common promotional tag patterns in Bulgarian
+  # ---------------------------------------------------------------------------
+  - "промоции"
+  - "промоция"
+  - "разпродажба"
+  - "намаление"
+  - "акция"
+  - "нови продукти"
+  - "нов продукт"
+  - "блек фрайдей"
+
+  # ---------------------------------------------------------------------------
+  # PROMOTIONAL KEYWORDS (ENGLISH)
+  # Common promotional tag patterns in English
+  # ---------------------------------------------------------------------------
+  - "black friday"
+  - "sale"
+  - "outlet"
+  - "promo"
+  - "clearance"
+  - "discount"
+  - "special offer"
+  - "new arrival"
+
+  # ---------------------------------------------------------------------------
+  # CAMPAIGN-SPECIFIC PATTERNS
+  # Add specific campaign names that should be removed
+  # ---------------------------------------------------------------------------
+  - "bulletin"       # e.g., "Bulletin January"
+  - "month"          # e.g., "Stada Month"
+  # Add more campaign patterns as discovered
+
+# =============================================================================
+# TAGS TO PRESERVE
+# =============================================================================
+# Some tags that contain promotional-looking words but should be KEPT:
+#
+# - "Продукти по лекарско предписание" - Contains "продукти" but is a category
+# - "Нервна система" - Could match "нов" but is a category
+#
+# If you find tags being incorrectly removed, either:
+# 1. Make the pattern more specific
+# 2. Add the tag to categories.yaml (category tags are never removed)
+#
+# =============================================================================
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# - Matching is case-insensitive
+# - Matching is substring-based (pattern can appear anywhere in tag)
+# - Shorter patterns match more tags - use with caution
+# - Tags that are also L1/L2 categories are NEVER removed (category check first)
+# - To test patterns without applying: run cleanup with --dry-run flag

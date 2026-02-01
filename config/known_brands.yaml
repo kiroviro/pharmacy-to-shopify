@@ -1,0 +1,489 @@
+# Known brands for title prefix matching (fallback extraction)
+# This list includes brands with 2+ products plus identified variations
+#
+# Usage:
+#   - Primary source for brand extraction is JSON-LD/GTM data
+#   - This list is used as fallback when structured data doesn't contain brand
+#   - Brands are matched against product title prefix (case-insensitive)
+#
+# To add a new brand:
+#   1. Add it to the appropriate section below
+#   2. Use canonical capitalization (e.g., "AboPharma" not "abopharma")
+#   3. For brands with variations, add all forms (e.g., "Dr. Frei" and "Dr.Frei")
+
+brands:
+  # Top brands (50+ products)
+  - Boiron
+  - Nivea
+  - Garnier
+  - Avene
+  - Hipp
+  - Magnum
+  - "Nature's Way"
+  - Fortex
+  - Medix
+  - Medica
+  - Chicco
+  - Avent
+  - Bioderma
+  - Elgydium
+  - Hartmann
+  - Българска роза
+  - Fino
+  - Eucerin
+  - Flora Farma
+  - A-Derma
+  - AboPharma
+  - Bioten
+  - Klorane
+  - Natural Factors
+  - Sopharma
+  - Lemon Pharma
+  - La Roche-Posay
+  - Artesania Agricola
+  - Lumene
+  - Missha
+  - Astera
+  - Pharmadoct
+  - Filorga
+  - Ganchev
+  - Dove
+  - Biotrade
+  - Dr.Frei
+  - Nuk
+  - Martinelia
+  - Apivita
+  - Artemis
+  - Holle
+  - Doppelherz
+  - Alvina
+  - Areon
+  - Ducray
+
+  # Medium brands (20-49 products)
+  - Бебо
+  - Loreal Paris
+  - Agiva
+  - Naturprodukt
+  - Doori Cosmetics
+  - Magnalabs
+  - Jordan
+  - Maybelline New York
+  - Sandoz
+  - Microlife
+  - Curaprox
+  - Bilka
+  - BIC
+  - "La'dor"
+  - B.Well
+  - Isdin
+  - Lacalut
+  - Lecovita
+  - Lierac
+  - MedTextile
+  - Bayer
+  - Caudalie
+  - Double Wood
+  - Gliss
+  - Mixa
+  - Kokona Cosmetics
+  - Gum
+  - Colgate
+  - Barkin&Meowson
+  - Biobalance
+  - Teva
+  - Bebivita
+  - Bochko
+  - Esthederm
+  - Fa
+  - Aroma
+  - Krauterhof
+  - Naturpharma
+  - Шаркови
+  - Air Wick
+  - AquaFresh
+  - Naturaverde
+  - Adipharm
+  - Lee Stafford
+  - Bioherba
+  - Dr. Theiss
+  - Domestos
+  - Event
+  - Everyday
+  - Bodi Beauty
+  - INOPHARM
+  - Herbamedica
+  - Bebelan
+  - B-Max
+  - Borola
+  - Lenor
+  - Philips Sonicare
+
+  # Smaller brands (10-19 products)
+  - Clear Choice
+  - Jamieson
+  - KOCOSTAR
+  - Mustela
+  - Neopharm
+  - Novalac
+  - Zdrave
+  - Aboca
+  - Antonio Banderas
+  - Api Health - NZ
+  - AroLife
+  - BONOMELLI
+  - Babyjem
+  - Ikarov
+  - La Rosee
+  - Advent life
+  - Aeno
+  - B4me
+  - Bach
+  - CeraVe
+  - Dr.Schuessler Salts
+  - Elmex
+  - John Frieda
+  - "Johnson's"
+  - Kundal
+  - Listerine
+  - Chemax Pharma
+  - Dragon Superfoods
+  - Farm Stay
+  - Gerber
+  - Himalaya
+  - Lidia Pharma
+  - Berlin Chemie
+  - Bettina Barty
+  - Buccotherm
+  - Lara
+  - Livsane
+  - Babylino
+  - Eludril
+  - Blanx
+  - Elea
+  - Eveline
+  - General Fresh
+  - Iasi
+  - Korres
+  - Mirta Medicus
+  - Normal Clinic
+  - Plantis
+  - Elseve
+  - Kiepe
+  - Linea Bio
+  - Mattisson
+  - Medel
+  - "Moller's"
+  - Stada
+  - Alkaloid
+  - BIOVENE
+  - BREF
+  - Bella
+  - BioNino
+  - Huggies
+  - NAN
+  - Phyto
+  - ACM Laboratorie Dermatologique
+  - Denim
+  - Durex
+  - Giggles
+  - Lactacyd
+  - Libresse
+  - New Revital
+  - Philips OneBlade
+  - Sanofi
+  - Topfer
+  - US Pharmacia
+
+  # Smaller brands (5-9 products)
+  - Alan Jey
+  - Bio-kult
+  - Corega
+  - Cotoneve
+  - Danhson
+  - Dental
+  - Elode
+  - Fairy
+  - Labor8
+  - Medochemie
+  - Mium
+  - Naturella
+  - Panacea
+  - Pharma
+  - Sun Wave Pharma
+  - Каро
+  - Alpine
+  - Astonish
+  - Baby Crema
+  - Deva
+  - Enough
+  - Etat pur
+  - Lavena
+  - MELISSA
+  - Mommy Care
+  - Omron
+  - Remos
+  - AURA HERBALS-POLLAND
+  - Agetis
+  - Aptamil
+  - B.U
+  - Belkorn
+  - BioGaia
+  - Biolectra
+  - Clear
+  - Dermedic
+  - Footness
+  - Gillette
+  - Medex
+  - Medi-Peel
+  - Nutravita
+  - Rescue
+  - Valentis
+  - iWhite
+  - Always
+  - Angelini
+  - Better You
+  - Bionorica
+  - Botanic
+  - Canpol Babies
+  - Colief
+  - Dentissimo
+  - Dexeryl
+  - "Dr.Konopka's"
+  - Duracell
+  - Ecopharm
+  - Engelhard Arzneimittel
+  - Finish
+  - Fixodent
+  - Frisolac
+  - Gentique
+  - Guardline
+  - HALEON
+  - Jake Vitamincandy
+  - Kinnimo
+  - Kleenex
+  - Klosterfrau
+  - La Rive
+  - MIZON
+  - Maternea
+  - Papadopoulos
+  - Perrigo
+  - Tabanex
+  - Wet Hankies
+  - Yogi Tea
+  - МОЯТА ПРИРОДА
+  - Alfa Marketing
+  - Alpecin
+  - Autan
+  - Axe
+  - Bio-Oil
+  - Bioshield
+  - BIOshield
+  - Bombus
+  - Famille Mary
+  - Floradix
+  - Fresenius Kabi
+  - Got2b
+  - Herbal Time
+  - Humana
+  - Infantino
+  - Johnson & Johnson
+  - Leganza
+  - Marimer
+  - MediCube
+  - Medis
+  - Montavit
+  - Nobel
+  - Nobel Pharma
+  - Polpharma
+  - Sano
+  - Zeola
+  - Ален Мак
+  - Билек
+
+  # Brands with 2-4 products
+  - Ad Medicine
+  - Alcon
+  - Ariel
+  - Berlin-Chemie
+  - Biocodex
+  - Bionime
+  - CapeyPharma
+  - Carefree
+  - Cetaphil
+  - Cleanic
+  - Coccolino
+  - DHU
+  - DMG Italia
+  - Darin
+  - Discreet
+  - Doleran Pharma
+  - Dr.Tisha
+  - Drenax
+  - Erbagil
+  - Evelin
+  - Extract Pharma
+  - FitSpo
+  - Gaviscon
+  - Head&Shoulders
+  - Humer
+  - Jankar
+  - Lactoflor
+  - Multi-Gyn
+  - Natroceutics
+  - Nia Milva
+  - Nordisk
+  - Pohl Boskamp
+  - Specciasol S.R.L
+  - Upsa
+  - Venus
+  - Zeda
+  - БРАЙТ
+  - Боровец
+  - Кря-Кря
+  - Лидия
+  - ХЕРБИТУСИН
+  - Чисто
+  - Agu
+  - Aroma Difence
+  - Artsana Italia
+  - Arzneimittel
+  - Baygon
+  - Bebba
+  - Bebelan puree
+  - Bros
+  - Cardinova
+  - Carmolis
+  - Dorall
+  - Dr.Pavlovic
+  - ELLIPS
+  - Eudermol
+  - Farmigea
+  - GlaxoSmithKline
+  - Gusto Pharma
+  - Hansaplast
+  - Ina Essentials
+  - Isola Bio
+  - Kindii
+  - Kwizda Pharma
+  - Lilly of the Desert
+  - Lindaren
+  - Lumi
+  - MR.PROPER
+  - Medicopharm
+  - Moldex
+  - Naso Libero
+  - Nestle
+  - Niksen
+  - Pharmacia
+  - Pharmadent Bio
+  - Schwazkopf
+  - Se-Cure Pharmaceuticals
+  - Sendo
+  - Seni
+  - Tomil Herb
+  - Wesell Pharma
+  - Алин
+  - Балев Био
+  - Биопрограма
+  - Захарни Заводи
+  - "A'PIEU"
+  - A-Z Medica
+  - Abellie
+  - Almus Pharma
+  - Amos Vital
+  - Apipharma
+  - Arm & Hammer
+  - Atrix
+  - B.Braun
+  - Baby Care
+  - Barbel Drexel
+  - Bekley
+  - Bio-Care
+  - Biorepair
+  - Biotica
+  - Bouroff
+  - Centrum
+  - Embryolisse
+  - Ersamed
+  - Fadem International
+  - Fit Therapy
+  - HADA LABO
+  - Halek
+  - Helthline
+  - Isis Pharma
+  - Lansinoh Laboratories
+  - Manuka Health
+  - Mentos
+  - Milmex
+  - My Rose
+  - Mylan
+  - NATURA S.R.L
+  - Nasopure
+  - Natura Forta
+  - "Nature's finest"
+  - Nelsons
+  - PharmaSwiss
+  - Philips
+  - Plasmon
+  - Prolife
+  - Rosa Impex
+  - Rubella
+  - So.Se.Pharm
+  - Swanson
+  - Swedish Nutra AB
+  - Tvins Tek
+  - WEDO
+  - Webber Naturals
+  - Woerwag Pharma
+  - Zentiva
+  - ДЕПО
+  - ИНОВОКС
+  - Комплект
+  - ФОРТЕ
+
+  # NEW brands identified from missing brand analysis
+  - Lysi
+  - Aro Life
+  - BetterYou
+  - Biofar
+  - Biogame
+  - Dense
+  - Greenify
+  - H-biota
+  - Ferzym
+  - Zonapharm
+  - Marnys
+  - Active Iron
+
+  # Brand name variations (with/without spaces, dots)
+  - "Dr. Frei"
+  - "Dr. Frei Kids"
+  - "Dr. Schuessler Salts"
+  - Д-р Марио
+
+  # Character variations (curly apostrophes, special chars)
+  - "Nature's Way"  # Curly apostrophe version
+  - "Möller's"      # With umlaut
+  - "Drenax®"       # With trademark symbol
+  - Maxi Check
+  - Merz Special
+  - Фарма концентрат
+  - Maxmedica
+
+  # Additional brands from unmatched analysis
+  - Oilesen
+  - Gynofit
+  - Leaton
+  - Magnesium Diasporal
+  - Drenax®Cist
+  - Butirrisan
+  - Colon Stim
+  - Goldrelax
+  - Favio
+  - Selenogin
+  - Stamatin
+  - Helix Complex
+  - Mobilor
+  - Neovista Next
+  - Multi Choco Bimbi

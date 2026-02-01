@@ -1,0 +1,80 @@
+# =============================================================================
+# TAG NORMALIZATION CONFIGURATION
+# =============================================================================
+#
+# This file defines how tags with inconsistent casing should be normalized.
+# Some tags appear in multiple forms (e.g., "AboPharma" vs "Abopharma").
+# This file maps all variants to a single canonical form.
+#
+# HOW TO USE:
+# -----------
+# 1. The key is the LOWERCASE version of the tag
+# 2. The value is the CANONICAL (correct) form
+# 3. During cleanup, any tag matching the key will be replaced with the value
+#
+# HOW TO EDIT:
+# ------------
+# - To add a new normalization rule:
+#   lowercase_variant: "Canonical Form"
+# - The key must be all lowercase
+# - The value should have correct capitalization
+#
+# EXAMPLE:
+# --------
+#   "iphone": "iPhone"        # All "iphone", "IPHONE", "IPhone" become "iPhone"
+#   "mcdonald's": "McDonald's"
+#
+# HOW TO FIND DUPLICATES:
+# -----------------------
+# Run this command to find case-sensitive duplicates in your data:
+#   python -c "
+#   from collections import Counter
+#   import csv
+#   tags = Counter()
+#   with open('data/raw/products.csv') as f:
+#       for row in csv.DictReader(f):
+#           for t in row.get('Tags','').split(','):
+#               tags[t.strip()] += 1
+#   # Find tags that differ only by case
+#   lower_map = {}
+#   for tag in tags:
+#       low = tag.lower()
+#       if low not in lower_map:
+#           lower_map[low] = []
+#       lower_map[low].append((tag, tags[tag]))
+#   for low, variants in lower_map.items():
+#       if len(variants) > 1:
+#           print(f'{low}: {variants}')
+#   "
+#
+# =============================================================================
+
+# Brand name normalizations
+normalization:
+  # ---------------------------------------------------------------------------
+  # BRAND NAMES
+  # Ensure consistent brand name capitalization
+  # ---------------------------------------------------------------------------
+  "abopharma": "AboPharma"
+  "a-derma": "A-Derma"
+  "inopharm": "InoPharm"
+  "lecovita": "LecoVita"
+  "b4me": "B4ME"
+
+  # ---------------------------------------------------------------------------
+  # BULGARIAN WORDS
+  # Ensure consistent capitalization for Bulgarian category/tag names
+  # ---------------------------------------------------------------------------
+  "имунитет": "Имунитет"
+  "простуда и грип": "Простуда и грип"
+  "магнезий": "Магнезий"
+  "отслабване": "Отслабване"
+  "настинка": "Настинка"
+
+# =============================================================================
+# NOTES
+# =============================================================================
+# - This normalization is applied AFTER brand tag removal
+# - Only tags that remain after cleanup are normalized
+# - Case-insensitive matching is used (key is always lowercase)
+# - Add new entries as you discover more duplicates
