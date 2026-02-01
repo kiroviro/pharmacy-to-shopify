@@ -27,12 +27,12 @@ This is not about copyright infringement. It is about enabling a vendor's own cu
 
 ```
 Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
-(sitemap)          (structured data)      (53-column)      (Admin > Products)
+(sitemap)          (structured data)      (55-column)      (Admin > Products)
 ```
 
 1. **Discover** -- fetch all product URLs from the vendor's sitemap
 2. **Extract** -- parse each product page for title, price, description, images, categories
-3. **Export** -- generate Shopify-compatible CSV (official 53-column template)
+3. **Export** -- generate Shopify-compatible CSV (55-column template with custom metafields)
 4. **Import** -- upload CSV to Shopify Admin for direct product creation
 
 ---
@@ -66,15 +66,16 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 
 ### Extraction
 - **Structured data parsing** -- JSON-LD, HTML content, breadcrumb navigation
-- **Complete product data** -- title, brand, SKU, barcode (EAN), price (BGN + EUR), categories, descriptions, images
+- **Complete product data** -- title, brand, SKU, barcode (EAN), price (BGN + EUR), categories, descriptions, images, application form, target audience
 - **Content sections** -- product details, composition, usage instructions, contraindications
 - **Brand matching** -- 450+ known pharmacy brands
 - **Image URL resolution** -- rewrites vendor `uploads/` paths to CDN `product_view_default/` for higher quality images that work for all products, with HEAD-request validation and automatic fallback
 - **95%+ compliance** with Shopify product specification
 
 ### Shopify Integration
-- **Official CSV format** -- 53-column Shopify product import template
+- **55-column CSV format** -- Shopify product import template with 2 custom metafields for storefront filters
 - **Original image URLs** -- Shopify fetches and caches images from source during import
+- **Sidebar filters** -- Brand (Vendor), Product Type (L1 category), Application Form, and Target Audience as storefront filters with Bulgarian labels
 - **Smart collections** -- breadcrumb categories exported as tags for automatic collection rules
 - **Dual currency** -- BGN and EUR prices for Bulgaria's Euro transition
 - **Clean data** -- source site references automatically stripped from text fields
@@ -85,6 +86,7 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 - **Tag cleanup** -- normalize casing, remove promotional tags, infer missing categories
 - **Collection creation** -- automated Shopify collection setup via Admin API
 - **Navigation menus** -- automated Shopify menu creation from category hierarchy
+- **Filter configuration** -- create custom metafield definitions and translate theme filter labels to Bulgarian via Admin API
 - **Theme customization** -- modify theme locale strings and assets via Admin API (e.g., storefront labels, tax/shipping messages)
 
 ---
@@ -100,6 +102,7 @@ webcrawler-shopify/
 ├── cleanup_tags.py                # Tag cleanup and normalization
 ├── create_shopify_collections.py  # Shopify collection creation
 ├── create_shopify_menus.py        # Shopify navigation menu creation
+├── configure_shopify_filters.py   # Sidebar filter setup (metafields + translations)
 ├── shopify_oauth.py               # Shopify OAuth helper
 │
 ├── src/
@@ -118,7 +121,7 @@ webcrawler-shopify/
 │   │   └── benu_discoverer.py     # Sitemap-based URL discovery
 │   │
 │   ├── shopify/                   # Shopify integration
-│   │   ├── csv_exporter.py        # 53-column CSV export
+│   │   ├── csv_exporter.py        # 55-column CSV export
 │   │   ├── api_client.py          # Shopify Admin API client
 │   │   ├── collections.py         # Smart collection creation
 │   │   └── menus.py               # Navigation menu creation
@@ -222,7 +225,15 @@ python3 create_shopify_collections.py --csv data/benu.bg/processed/products_clea
 
 # Create navigation menus
 python3 create_shopify_menus.py --shop YOUR_STORE --token YOUR_TOKEN --csv data/benu.bg/processed/products_cleaned.csv
+
+# Configure sidebar filters (metafield definitions + Bulgarian translations)
+python3 configure_shopify_filters.py --shop YOUR_STORE --token YOUR_TOKEN
 ```
+
+The filter configuration script:
+1. Creates custom metafield definitions (`Форма`, `За кого`) via GraphQL — these become filter labels on the storefront
+2. Patches the active theme's Bulgarian locale file to translate built-in filter labels (`Availability` → `Наличност`, `Price` → `Цена`, `Vendor` → `Марка`, `Product Type` → `Категория`)
+3. Prints remaining manual steps (enabling filters in Shopify Admin > Navigation)
 
 ### Theme Customization
 
@@ -252,6 +263,7 @@ client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
 
 **Changes made via this workflow:**
 - Removed "Доставката се изчислява при плащане" from product pages -- storefront now shows only "С включени данъци."
+- Enabled product comparison by adding the `compare-product` section to `templates/product.json` with fields: product header, vendor, type, description
 
 ---
 
@@ -261,7 +273,9 @@ Once your products are imported, you can use [Claude Code](https://docs.anthropi
 
 Examples of store management tasks performed with Claude Code:
 - Creating smart collections and navigation menus from extracted categories
+- Configuring sidebar filters with Bulgarian translations (metafield definitions + theme locale)
 - Modifying theme locale strings (e.g., removing shipping messages from product pages)
+- Enabling theme features by updating product templates (e.g., product comparison)
 - Reading and updating theme assets programmatically
 
 ---

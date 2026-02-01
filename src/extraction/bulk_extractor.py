@@ -213,6 +213,8 @@ class BulkExtractor:
             'SEO title': product.seo_title,
             'SEO description': product.seo_description,
             'Color (product.metafields.shopify.color-pattern)': '',
+            'Форма (product.metafields.custom.application_form)': product.application_form,
+            'За кого (product.metafields.custom.target_audience)': product.target_audience,
             'Google Shopping / Google product category': product.google_product_category,
             'Google Shopping / Gender': 'Unisex',
             'Google Shopping / Age group': product.google_age_group,

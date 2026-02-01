@@ -79,6 +79,8 @@ class ExtractedProduct:
     handle: str = ""            # URL slug (transliterated from title)
     product_type: str = ""      # Shopify product type
     tags: List[str] = field(default_factory=list)  # Category tags
+    application_form: str = ""  # Product form (таблетки, капсули, крем, etc.)
+    target_audience: str = ""   # Target audience (Възрастни, Деца, Бебета)
 
     # Shipping info
     weight_grams: int = 0       # Weight in grams

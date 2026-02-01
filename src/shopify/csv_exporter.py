@@ -2,7 +2,7 @@
 Shopify CSV Exporter
 
 Exports products to Shopify-compatible CSV format (Official Template).
-Handles all 53 columns of the Shopify product import format.
+Handles all 55 columns of the Shopify product import format.
 """
 
 import csv
@@ -29,6 +29,8 @@ SHOPIFY_FIELDNAMES = [
     'Fulfillment service', 'Product image URL', 'Image position', 'Image alt text',
     'Variant image URL', 'Gift card', 'SEO title', 'SEO description',
     'Color (product.metafields.shopify.color-pattern)',
+    'Форма (product.metafields.custom.application_form)',
+    'За кого (product.metafields.custom.target_audience)',
     'Google Shopping / Google product category', 'Google Shopping / Gender',
     'Google Shopping / Age group', 'Google Shopping / Manufacturer part number (MPN)',
     'Google Shopping / Ad group name', 'Google Shopping / Ads labels',
@@ -161,6 +163,8 @@ class ShopifyCSVExporter:
             'SEO title': product.seo_title,
             'SEO description': product.seo_description,
             'Color (product.metafields.shopify.color-pattern)': '',
+            'Форма (product.metafields.custom.application_form)': product.application_form,
+            'За кого (product.metafields.custom.target_audience)': product.target_audience,
             'Google Shopping / Google product category': product.google_product_category,
             'Google Shopping / Gender': 'Unisex',
             'Google Shopping / Age group': product.google_age_group,

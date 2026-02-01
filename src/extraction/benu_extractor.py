@@ -113,6 +113,9 @@ class BenuExtractor:
             description=self._build_description(brand, sections),
             images=images,
             tags=tags,
+            product_type=categories[0] if categories else "",
+            application_form=self._extract_application_form(title),
+            target_audience=self._extract_target_audience(categories, title),
             weight_grams=self._extract_weight(),
             seo_title=self._generate_seo_title(title, brand, categories),
             seo_description=self._generate_seo_description(title, brand, categories, sections),
@@ -680,6 +683,82 @@ class BenuExtractor:
                     img.alt_text = f"{base_alt[:available]}{position_text}"
                 else:
                     img.alt_text = base_alt[:125]
+
+    @staticmethod
+    def _extract_application_form(title: str) -> str:
+        """Extract pharmaceutical application form from product title.
+
+        Pattern-matches Bulgarian form keywords, ordered specific→general.
+        Returns canonical Bulgarian label or empty string.
+        """
+        if not title:
+            return ""
+
+        title_lower = title.lower()
+
+        # Ordered specific→general to avoid false matches
+        form_patterns = [
+            # Solid oral
+            ("таблетки", "Таблетки"),
+            ("капсули", "Капсули"),
+            ("сашета", "Сашета"),
+            ("саше", "Сашета"),
+            ("пастили", "Пастили"),
+            ("драже", "Драже"),
+            # Topical
+            ("крем", "Крем"),
+            ("мехлем", "Мехлем"),
+            ("гел", "Гел"),
+            ("маска", "Маска"),
+            ("серум", "Серум"),
+            ("лосион", "Лосион"),
+            ("балсам", "Балсам"),
+            ("пяна", "Пяна"),
+            ("тоник", "Тоник"),
+            ("паста", "Паста"),
+            ("пудра", "Пудра"),
+            # Liquid
+            ("спрей", "Спрей"),
+            ("капки", "Капки"),
+            ("разтвор", "Разтвор"),
+            ("сироп", "Сироп"),
+            ("суспензия", "Суспензия"),
+            ("олио", "Олио"),
+            ("масло", "Масло"),
+            # Care
+            ("шампоан", "Шампоан"),
+            # Other
+            ("пластир", "Пластири"),
+            ("супозитори", "Супозитории"),
+        ]
+
+        for keyword, label in form_patterns:
+            if keyword in title_lower:
+                return label
+
+        return ""
+
+    @staticmethod
+    def _extract_target_audience(categories: List[str], title: str) -> str:
+        """Derive target audience from categories and title.
+
+        Priority: Бебета > Деца > Възрастни (default).
+        """
+        text = " ".join(categories).lower() + " " + title.lower()
+
+        # Baby keywords (highest priority)
+        baby_keywords = ["бебе", "бебета", "бебешк", "новородено", "кърмач"]
+        for kw in baby_keywords:
+            if kw in text:
+                return "Бебета"
+
+        # Child keywords
+        child_keywords = ["дете", "деца", "детск"]
+        for kw in child_keywords:
+            if kw in text:
+                return "Деца"
+
+        return "Възрастни"
 
     def _determine_google_category(self, categories: List[str]) -> str:
         """Map product categories to Google Shopping taxonomy via config.

@@ -19,7 +19,8 @@ webcrawler-shopify/
 │   ├── export_by_brand.py         # Brand-based export with splitting
 │   ├── cleanup_tags.py            # Tag normalization
 │   ├── create_shopify_collections.py
-│   └── create_shopify_menus.py
+│   ├── create_shopify_menus.py
+│   └── configure_shopify_filters.py
 │
 ├── src/                           # Business logic modules
 │   ├── models/                    # Data models
@@ -55,6 +56,9 @@ Pure data classes with no business logic.
 - `price_eur` - Price in EUR (€) for Bulgaria's Euro transition
 - `contraindications` - Product warnings/contraindications
 - `tags` - Generated from breadcrumb categories (for Shopify smart collections)
+- `product_type` - L1 breadcrumb category (for Shopify "Product Type" filter)
+- `application_form` - Pharmaceutical form extracted from title (Таблетки, Капсули, Крем, etc.)
+- `target_audience` - Target audience derived from categories + title (Възрастни, Деца, Бебета)
 
 ### `src/extraction/`
 
@@ -100,7 +104,7 @@ Shopify integration for export and API operations.
 
 | Module | Class | Purpose |
 |--------|-------|---------|
-| `csv_exporter.py` | `ShopifyCSVExporter` | Export to 53-column Shopify CSV |
+| `csv_exporter.py` | `ShopifyCSVExporter` | Export to 55-column Shopify CSV |
 | `api_client.py` | `ShopifyAPIClient` | REST/GraphQL client with rate limiting |
 | `collections.py` | `ShopifyCollectionCreator` | Create smart collections |
 | `menus.py` | `ShopifyMenuCreator` | Create navigation menus |
@@ -147,6 +151,7 @@ Shared utilities used across modules.
 5. SHOPIFY
    create_shopify_collections.py → ShopifyCollectionCreator → Shopify API
    create_shopify_menus.py → ShopifyMenuCreator → Shopify API
+   configure_shopify_filters.py → ShopifyAPIClient → Metafield definitions + theme locale
 ```
 
 ---
@@ -225,6 +230,7 @@ All CLI scripts are thin wrappers (~70-150 lines) that:
 | `export_by_brand.py` | `BrandExporter` | Export by brand with splitting |
 | `create_shopify_collections.py` | `ShopifyCollectionCreator` | Create collections |
 | `create_shopify_menus.py` | `ShopifyMenuCreator` | Create menus |
+| `configure_shopify_filters.py` | `ShopifyAPIClient` | Configure sidebar filters + translations |
 
 ---
 
@@ -252,6 +258,9 @@ The extractor uses multiple data sources with fallback priority:
 | SKU | JSON-LD | - | - | - |
 | Categories | Breadcrumb | - | - | - |
 | Tags | From categories | - | - | - |
+| Product Type | L1 breadcrumb | - | - | - |
+| Application Form | Title keyword match | - | - | - |
+| Target Audience | Categories + title | - | - | - |
 | Images | JSON-LD (rewritten to CDN) | Gallery selectors | - | HEAD validation |
 | Content | Accordion tabs | JSON-LD fields | Leaflet sections | HTML panels |
 
@@ -300,19 +309,38 @@ Content is extracted using a generic section marker-based approach:
 | Дозировка и начин на употреба | usage |
 | Допълнителна информация | more_info |
 
+### Sidebar Filter Extraction
+
+Four storefront filters are populated during extraction:
+
+| Filter | Shopify Field | Source | Values |
+|--------|--------------|--------|--------|
+| Марка (Brand) | Vendor | JSON-LD `brand` / title matching | 450+ brands |
+| Категория (Product Type) | Type | L1 breadcrumb category | e.g., Лечение и здраве, Козметика... |
+| Форма (Application Form) | `custom.application_form` metafield | Title keyword match (27 patterns) | Таблетки, Капсули, Крем, Спрей, etc. |
+| За кого (Target Audience) | `custom.target_audience` metafield | Categories + title keywords | Възрастни, Деца, Бебета |
+
+**Application Form extraction** — pattern-matches 27 Bulgarian pharmaceutical form keywords from the product title, ordered specific→general: solid (таблетки, капсули, сашета, пастили, драже), topical (крем, мехлем, гел, маска, серум, лосион, балсам, пяна, тоник, паста, пудра), liquid (спрей, капки, разтвор, сироп, суспензия, олио, масло), care (шампоан), other (пластири, супозитории). Returns empty string if no match.
+
+**Target Audience extraction** — derives audience from categories and title with priority: Бебета (baby keywords: бебе, бебета, бебешк, новородено, кърмач) > Деца (child keywords: дете, деца, детск) > Възрастни (default).
+
+**Filter configuration** (`configure_shopify_filters.py`) creates the metafield definitions via GraphQL and translates built-in filter labels (Availability, Price) to Bulgarian via theme locale patching.
+
 ---
 
 ## Output Formats
 
-### Shopify CSV (53 columns)
+### Shopify CSV (55 columns)
 
-Standard Shopify product import format:
+Standard Shopify product import format with 2 custom metafield columns:
 - One main row per product
 - Additional rows for extra images
 - HTML-formatted description
 - Tags from breadcrumb categories (for smart collections)
 - Vendor from brand (for brand collections)
 - Original image URLs (Shopify fetches during import)
+- `Форма (product.metafields.custom.application_form)` — pharmaceutical form
+- `За кого (product.metafields.custom.target_audience)` — target audience
 
 **Inventory Settings:**
 - `Inventory tracker`: empty (no tracking)
@@ -343,6 +371,8 @@ The API client can read and modify theme assets, enabling programmatic storefron
 
 **Applied customizations:**
 - Cleared `products.product.shipping_policy_html` in `bg-BG` locale to remove "Доставката се изчислява при плащане" from product pages
+- Added `compare-product` section to `templates/product.json` to enable product comparison (fields: product header, vendor, type, description)
+- Created `locales/bg.json` with Bulgarian translations for sidebar filter labels (Наличност, Цена, Марка, Категория) and sorting options
 
 ---
 
