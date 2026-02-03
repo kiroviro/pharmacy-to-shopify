@@ -88,6 +88,19 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 - **Navigation menus** -- automated Shopify menu creation from category hierarchy
 - **Filter configuration** -- create custom metafield definitions and translate theme filter labels to Bulgarian via Admin API
 - **Theme customization** -- modify theme locale strings and assets via Admin API (e.g., storefront labels, tax/shipping messages)
+- **Filter label translation** -- patched `snippets/facets.liquid` in the Mediva theme to use locale-based translations for sidebar filter labels (Availability → Наличност, Price → Цена, Vendor → Марка, Product Type → Категория)
+
+### Required Shopify Apps
+
+| App | Purpose | Cost |
+|-----|---------|------|
+| **Shopify Search & Discovery** | Collection sidebar filters + product recommendations | Free |
+
+The Mediva theme (by MUUP, preset of Meka) depends on Search & Discovery for:
+- **Collection filters** -- the sidebar with Availability, Price, Vendor, Product Type, and custom metafield filters
+- **Product recommendations** -- the "Подобни продукти" (Related Products) section on product pages
+
+Filters must be enabled manually in the app: **Apps → Search & Discovery → Filters tab → Add filter** (Product vendor, Product type, custom.application_form, custom.target_audience).
 
 ---
 
