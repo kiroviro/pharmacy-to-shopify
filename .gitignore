@@ -56,3 +56,4 @@ reports/*/*.csv
 *.key
 credentials*.json
 .shopify_token.json
+config/google-ads.yaml

@@ -321,7 +321,6 @@ def main():
         print("  3. Add image assets (logo, marketing images)")
         print("  4. Enable the campaign when ready")
         print()
-        print("Or run: python google_ads_manage.py --enable")
         print("=" * 60)
 
     except GoogleAdsException as ex:

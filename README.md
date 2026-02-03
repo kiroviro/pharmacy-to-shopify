@@ -104,6 +104,9 @@ webcrawler-shopify/
 ├── create_shopify_menus.py        # Shopify navigation menu creation
 ├── configure_shopify_filters.py   # Sidebar filter setup (metafields + translations)
 ├── shopify_oauth.py               # Shopify OAuth helper
+├── google_ads_auth.py             # Google Ads OAuth2 refresh token generator
+├── google_ads_auth_flow.py        # OAuth2 flow helper
+├── google_ads_pmax.py             # Performance Max campaign creation
 │
 ├── src/
 │   ├── models/                    # Data models
@@ -141,7 +144,8 @@ webcrawler-shopify/
 │   ├── tag_normalization.yaml     # Tag casing rules
 │   ├── promotional_patterns.yaml  # Patterns to strip from tags
 │   ├── vendor_defaults.yaml       # Default tags for specific vendors
-│   └── seo_settings.yaml          # SEO limits, store name, Google Shopping categories
+│   ├── seo_settings.yaml          # SEO limits, store name, Google Shopping categories
+│   └── google-ads.yaml            # Google Ads API credentials (gitignored)
 │
 ├── data/{site}/                   # Per-site data (raw + processed)
 ├── output/{site}/                 # Export output (CSV files)
@@ -282,10 +286,55 @@ Examples of store management tasks performed with Claude Code:
 
 ---
 
+## Google Ads Integration
+
+Create and manage Google Ads Performance Max campaigns via the API to drive traffic to the Shopify store.
+
+### Setup
+
+1. **Credentials** -- fill in `config/google-ads.yaml` with:
+   - Developer Token (Google Ads → Tools & Settings → API Center, requires a Manager/MCC account)
+   - OAuth2 Client ID + Secret (Google Cloud Console → APIs & Services → Credentials)
+   - Customer ID (Google Ads advertiser account, no dashes)
+   - Login Customer ID (Manager/MCC account ID, if applicable)
+   - Merchant Center ID (merchants.google.com)
+
+2. **Generate refresh token**:
+   ```bash
+   python google_ads_auth.py
+   ```
+   This opens a browser for OAuth2 authorization and prints a refresh token to paste into the config.
+
+3. **Create a Performance Max campaign**:
+   ```bash
+   # Validate config without creating anything
+   python google_ads_pmax.py --dry-run
+
+   # Create campaign with custom daily budget
+   python google_ads_pmax.py --budget 5.00
+   ```
+
+### What the Campaign Script Creates
+
+- **Campaign budget** -- daily budget (default $20, configurable via `--budget`)
+- **Performance Max campaign** -- linked to Merchant Center product feed, using Maximize Conversion Value bidding
+- **Asset group** -- with `viapharma.us` as the landing page
+- **Text assets** -- 5 headlines, 2 long headlines, 4 descriptions, business name
+- **Listing group filter** -- includes all products from the Merchant Center feed
+
+The campaign is created in **PAUSED** state. Review it in the Google Ads UI, add image assets (logo, marketing images), and enable when ready.
+
+### Google Ads Policy Note
+
+Google has strict policies on pharmaceutical advertising. Vitamins, supplements, and cosmetics are generally allowed. Prescription drugs and certain OTC medicines may require LegitScript certification.
+
+---
+
 ## Requirements
 
 - Python 3.9+
 - beautifulsoup4, requests, lxml, pyyaml
+- google-ads, google-auth-oauthlib (for Google Ads integration)
 
 All dependencies are in `requirements.txt`.
 

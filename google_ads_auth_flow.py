@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """OAuth2 flow for Google Ads API - generates a refresh token."""
 
+from typing import Optional
+
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 _SCOPE = "https://www.googleapis.com/auth/adwords"
 
 
-def get_refresh_token(client_id: str, client_secret: str) -> str | None:
+def get_refresh_token(client_id: str, client_secret: str) -> Optional[str]:
     """Run OAuth2 installed app flow and return a refresh token."""
     client_config = {
         "installed": {
