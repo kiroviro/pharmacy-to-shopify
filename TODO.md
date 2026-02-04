@@ -1,29 +1,53 @@
-# TODO: AI-Generated Images for Shopify Store
+# TODO: Storefront Images
 
-Replace product photos with AI-generated images for a professional storefront look.
+## Homepage Theme Images (DONE)
 
-## Homepage Theme Images
+Uploaded as shop images in Shopify Admin > Content > Files, referenced in Theme Customizer.
 
-Upload as shop images in Shopify Admin > Content > Files, then update in Theme Customizer.
+| # | Section | Status |
+|---|---------|--------|
+| 1 | Hero banner | Done |
+| 2 | Promo: Витамини | Done |
+| 3 | Promo: Козметика | Done |
+| 4 | Collage: Грижа за лице | Done |
+| 5 | Collage: Майка и дете | Done |
+| 6 | Collage: Медицински изделия | Done |
 
-| # | Section | shopify:// reference | Suggested image |
-|---|---------|---------------------|-----------------|
-| 1 | Hero banner | `shop_images/calendula_flowers_vitamin_E_capsules.png` | Professional pharmacy/wellness hero image |
-| 2 | Promo: Витамини | `shop_images/promo-vitamini.png` | Vitamins, supplements, colorful capsules arrangement |
-| 3 | Promo: Козметика | `shop_images/promo-kozmetika.png` | Skincare/cosmetics flatlay, creams and serums |
-| 4 | Collage: Грижа за лице | `shop_images/collection-grizha-za-litse.png` | Face care, woman applying cream or serum |
-| 5 | Collage: Майка и дете | `shop_images/collection-mayka-i-dete.webp` | Mother and baby, gentle care |
-| 6 | Collage: Медицински изделия | `shop_images/collection-meditsinski-izdeliya.png` | Medical supplies, stethoscope, bandages |
+## Collection Card Images (DONE)
 
-## Collection Card Images
+Uploaded via Shopify Admin > Products > Collections > select collection > edit image.
 
-Upload via Shopify Admin > Products > Collections > select collection > edit image.
-
-| # | Collection | Handle |
+| # | Collection | Status |
 |---|-----------|--------|
-| 7 | Лечение и здраве | `lechenie-i-zdrave` |
-| 8 | Козметика | `kozmetika` |
-| 9 | Майка и дете | `mayka-i-dete` |
-| 10 | Медицински изделия | `meditsinski-izdeliya-i-konsumativi` |
-| 11 | Спорт | `sport` |
-| 12 | Здравословно хранене | `zdravoslovno-hranene-chayove-i-bilki` |
+| 7 | Лечение и здраве | Done |
+| 8 | Козметика | Done |
+| 9 | Майка и дете | Done |
+| 10 | Медицински изделия | Done |
+| 11 | Спорт | Done |
+| 12 | Здравословно хранене | Done |
+
+## Collection Page Images (DONE)
+
+| # | Image | Section | Status |
+|---|-------|---------|--------|
+| 13 | Promo Card 1 (Горещи оферти) | `promo_yaghg4` in product-grid | Done -- `Promo_card_1.png` |
+| 14 | Promo Card 2 (ВИЖ ПОВЕЧЕ) | `promo_zj3gnd` in product-grid | Done -- `Promo_card_11.png` |
+| 15 | Discount Banner (Спестете до 50%) | `collection_discount_banner` | Done -- `Discount_banner.png` |
+
+## Trust Badge Icons (DONE)
+
+Created as SVG line icons matching theme palette (#1DA1D4 / #0A3244 / #EBF6FB). Uploaded via GraphQL staged uploads and wired into `multicolumn_xFpxpe` (collection) and `multicolumn_TPpXaJ` (product) sections.
+
+| # | Badge | File | Status |
+|---|-------|------|--------|
+| 16 | Оригинални лекарства | `icon-original-medicines.svg` | Done |
+| 17 | Поддръжка след покупка | `icon-support.svg` | Done |
+| 18 | Бърза и сигурна доставка | `icon-fast-delivery.svg` | Done |
+| 19 | Достъпно здравеопазване | `icon-affordable-healthcare.svg` | Done |
+
+## Remaining
+
+| # | Image | Location | Status |
+|---|-------|----------|--------|
+| 20-29 | Brand logos (10) | Homepage brand slider/grid | Pending |
+| 30-32 | Testimonial avatars (3) | Collection page: Мария К., Георги П., Елена Д. | Pending |
