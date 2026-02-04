@@ -21,6 +21,7 @@ webcrawler-shopify/
 │   ├── create_shopify_collections.py
 │   ├── create_shopify_menus.py
 │   ├── configure_shopify_filters.py
+│   ├── shopify_delete_products.py
 │   └── shopify_oauth.py
 │
 ├── src/                           # Business logic modules
@@ -233,6 +234,7 @@ All CLI scripts are wrappers that:
 | `create_shopify_collections.py` | `ShopifyCollectionCreator` | Create collections |
 | `create_shopify_menus.py` | `ShopifyMenuCreator` | Create menus |
 | `configure_shopify_filters.py` | `ShopifyAPIClient` | Configure sidebar filters + translations |
+| `shopify_delete_products.py` | `ShopifyAPIClient` | Bulk delete all products via GraphQL Bulk Operations |
 | `shopify_oauth.py` | `ShopifyAPIClient` | OAuth token helper |
 
 ---
@@ -376,6 +378,11 @@ The API client can read and modify theme assets, enabling programmatic storefron
 - Cleared `products.product.shipping_policy_html` in `bg-BG` locale to remove "Доставката се изчислява при плащане" from product pages
 - Added `compare-product` section to `templates/product.json` to enable product comparison (fields: product header, vendor, type, description)
 - Created `locales/bg.json` with Bulgarian translations for sidebar filter labels (Наличност, Цена, Марка, Категория) and sorting options
+- Moved product filters from right to left sidebar (`component-facets.css`: changed `flex-direction: row-reverse` → `row`)
+- Hid brand collections (`brand-*` handle) from `/collections` page and search category dropdown
+- Created `sections/brands-list.liquid` + `templates/page.brands.json` for a dedicated `/pages/brands` page
+- Assigned `categories-menu` to header drawer button; updated menu links to use `/pages/brands`
+- Added client-side category search input to `/collections` page
 
 ---
 

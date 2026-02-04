@@ -117,6 +117,7 @@ webcrawler-shopify/
 ├── create_shopify_menus.py        # Shopify navigation menu creation
 ├── configure_shopify_filters.py   # Sidebar filter setup (metafields + translations)
 ├── shopify_oauth.py               # Shopify OAuth helper
+├── shopify_delete_products.py     # Bulk product deletion via GraphQL
 ├── google_ads_auth.py             # Google Ads OAuth2 refresh token generator
 ├── google_ads_auth_flow.py        # OAuth2 flow helper
 ├── google_ads_pmax.py             # Performance Max campaign creation
@@ -247,6 +248,11 @@ python3 create_shopify_menus.py --shop YOUR_STORE --token YOUR_TOKEN --csv data/
 
 # Configure sidebar filters (metafield definitions + Bulgarian translations)
 python3 configure_shopify_filters.py --shop YOUR_STORE --token YOUR_TOKEN
+
+# Delete all products (for reimport scenarios)
+python3 shopify_delete_products.py --shop YOUR_STORE --token YOUR_TOKEN --dry-run   # preview
+python3 shopify_delete_products.py --shop YOUR_STORE --token YOUR_TOKEN              # delete with confirmation
+python3 shopify_delete_products.py --shop YOUR_STORE --token YOUR_TOKEN --yes        # skip prompt
 ```
 
 The filter configuration script:
@@ -283,6 +289,13 @@ client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
 **Changes made via this workflow:**
 - Removed "Доставката се изчислява при плащане" from product pages -- storefront now shows only "С включени данъци."
 - Enabled product comparison by adding the `compare-product` section to `templates/product.json` with fields: product header, vendor, type, description
+- Moved product filters from right sidebar to left sidebar (`component-facets.css`: `flex-direction: row-reverse` → `row`)
+- Hid brand collections from `/collections` page (`main-list-collections.liquid`: `unless collection.handle contains 'brand-'`)
+- Hid brand collections from search category dropdown (`header-search.liquid`: same filter)
+- Created dedicated brands page template (`sections/brands-list.liquid` + `templates/page.brands.json`)
+- Assigned categories-menu to header "Всички Категории" drawer button (`header-group.json`)
+- Updated "Марки" / "Всички марки" menu links to point to `/pages/brands`
+- Added category search input to `/collections` page (`main-list-collections.liquid`)
 
 ---
 
@@ -296,6 +309,9 @@ Examples of store management tasks performed with Claude Code:
 - Modifying theme locale strings (e.g., removing shipping messages from product pages)
 - Enabling theme features by updating product templates (e.g., product comparison)
 - Reading and updating theme assets programmatically
+- Bulk product deletion via GraphQL Bulk Operations API (`shopify_delete_products.py`)
+- Theme layout changes: moving filter sidebar from right to left, hiding brand collections from `/collections` page, adding category search to collection list page
+- Menu management: updating navigation links, assigning drawer menus to header buttons
 
 ---
 
