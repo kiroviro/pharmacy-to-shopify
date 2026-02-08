@@ -8,10 +8,10 @@ Each parser handles a specific data source:
 - LeafletParser: Pharmaceutical leaflet sections
 """
 
-from .structured_data import StructuredDataParser
 from .gtm_data import GTMDataParser
 from .html_parser import HTMLContentParser
 from .leaflet_parser import LeafletParser
+from .structured_data import StructuredDataParser
 
 __all__ = [
     'StructuredDataParser',

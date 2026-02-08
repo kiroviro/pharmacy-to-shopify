@@ -6,13 +6,16 @@ Each unique tag becomes a smart collection with rule: "tag equals [tag_name]"
 """
 
 import csv
+import logging
 import time
 from collections import Counter
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Set
 
-from .api_client import ShopifyAPIClient
-from ..common.transliteration import generate_handle
+logger = logging.getLogger(__name__)
+
 from ..common.csv_utils import configure_csv
+from ..common.transliteration import generate_handle
+from .api_client import ShopifyAPIClient
 
 # Configure CSV for large fields
 configure_csv()
@@ -54,7 +57,7 @@ class ShopifyCollectionCreator:
 
     def get_existing_collections(self) -> Set[str]:
         """Fetch existing collection titles to avoid duplicates."""
-        print("Fetching existing collections...")
+        logger.info("Fetching existing collections...")
 
         existing = set()
         endpoint = "smart_collections.json?limit=250"
@@ -78,7 +81,7 @@ class ShopifyCollectionCreator:
             else:
                 endpoint = None
 
-        print(f"  Found {len(existing)} existing smart collections")
+        logger.info("Found %d existing smart collections", len(existing))
         return existing
 
     def create_smart_collection(self, title: str, tag: str) -> bool:
@@ -118,10 +121,10 @@ class ShopifyCollectionCreator:
 
         if result and "smart_collection" in result:
             collection_id = result["smart_collection"]["id"]
-            print(f"  Created: {title} (ID: {collection_id})")
+            logger.info("Created: %s (ID: %s)", title, collection_id)
             return True
         else:
-            print(f"  Failed to create: {title}")
+            logger.error("Failed to create: %s", title)
             return False
 
     def create_vendor_collection(self, vendor: str) -> bool:
@@ -161,10 +164,10 @@ class ShopifyCollectionCreator:
 
         if result and "smart_collection" in result:
             collection_id = result["smart_collection"]["id"]
-            print(f"  Created brand collection: {title} (ID: {collection_id})")
+            logger.info("Created brand collection: %s (ID: %s)", title, collection_id)
             return True
         else:
-            print(f"  Failed to create brand collection: {title}")
+            logger.error("Failed to create brand collection: %s", title)
             return False
 
     def _load_vendors_from_csv(self, csv_path: str) -> Set[str]:
@@ -225,13 +228,13 @@ class ShopifyCollectionCreator:
         """
         # Load vendor names for brand detection
         known_vendors = self._load_vendors_from_csv(csv_path)
-        print(f"\nLoaded {len(known_vendors)} unique vendors from CSV")
+        logger.info("Loaded %d unique vendors from CSV", len(known_vendors))
 
         if vendors_only:
             self._create_vendor_collections(csv_path, min_products, skip_existing)
             return
 
-        print(f"\nReading tags from: {csv_path}")
+        logger.info("Reading tags from: %s", csv_path)
 
         # Count tags
         tags_counter = self._count_tags(csv_path)
@@ -239,8 +242,8 @@ class ShopifyCollectionCreator:
         # Filter by minimum products
         eligible_tags = {tag: count for tag, count in tags_counter.items() if count >= min_products}
 
-        print(f"  Total unique tags: {len(tags_counter)}")
-        print(f"  Tags with {min_products}+ products: {len(eligible_tags)}")
+        logger.info("Total unique tags: %d", len(tags_counter))
+        logger.info("Tags with %d+ products: %d", min_products, len(eligible_tags))
 
         # Filter out brand tags if requested
         brand_tags_skipped = 0
@@ -252,8 +255,8 @@ class ShopifyCollectionCreator:
                 else:
                     filtered_tags[tag] = count
             eligible_tags = filtered_tags
-            print(f"  Brand tags skipped: {brand_tags_skipped}")
-            print(f"  Tags after brand filter: {len(eligible_tags)}")
+            logger.info("Brand tags skipped: %d", brand_tags_skipped)
+            logger.info("Tags after brand filter: %d", len(eligible_tags))
 
         # Get existing collections
         existing = set()
@@ -262,15 +265,14 @@ class ShopifyCollectionCreator:
 
         # Create collections
         total = len(eligible_tags)
-        print(f"\nCreating {total} collections...")
+        logger.info("Creating %d collections...", total)
 
         for i, (tag, count) in enumerate(sorted(eligible_tags.items()), 1):
-            progress = f"[{i}/{total}]"
-            print(f"{progress} {tag} ({count} products)")
+            logger.info("[%d/%d] %s (%d products)", i, total, tag, count)
 
             # Check if exists
             if tag.lower() in existing:
-                print(f"  Skipped (already exists)")
+                logger.info("Skipped (already exists)")
                 self.skipped_collections.append(tag)
                 continue
 
@@ -293,7 +295,7 @@ class ShopifyCollectionCreator:
         skip_existing: bool = True
     ):
         """Create collections from Vendor field (brand collections)."""
-        print(f"\nCreating brand collections from Vendor field")
+        logger.info("Creating brand collections from Vendor field")
 
         # Count products per vendor
         vendor_counter = self._count_vendors(csv_path)
@@ -301,8 +303,8 @@ class ShopifyCollectionCreator:
         # Filter by minimum products
         eligible_vendors = {v: c for v, c in vendor_counter.items() if c >= min_products}
 
-        print(f"  Total unique vendors: {len(vendor_counter)}")
-        print(f"  Vendors with {min_products}+ products: {len(eligible_vendors)}")
+        logger.info("Total unique vendors: %d", len(vendor_counter))
+        logger.info("Vendors with %d+ products: %d", min_products, len(eligible_vendors))
 
         # Get existing collections
         existing = set()
@@ -311,15 +313,14 @@ class ShopifyCollectionCreator:
 
         # Create collections
         total = len(eligible_vendors)
-        print(f"\nCreating {total} brand collections...")
+        logger.info("Creating %d brand collections...", total)
 
         for i, (vendor, count) in enumerate(sorted(eligible_vendors.items()), 1):
-            progress = f"[{i}/{total}]"
-            print(f"{progress} {vendor} ({count} products)")
+            logger.info("[%d/%d] %s (%d products)", i, total, vendor, count)
 
             # Check if exists
             if vendor.lower() in existing or f"brand-{vendor}".lower() in existing:
-                print(f"  Skipped (already exists)")
+                logger.info("Skipped (already exists)")
                 self.skipped_collections.append(vendor)
                 continue
 

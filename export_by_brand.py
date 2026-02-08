@@ -31,13 +31,17 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import sys
 
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
-from src.cleanup import BrandExporter, DEFAULT_MAX_SIZE_MB
+from src.cleanup import DEFAULT_MAX_SIZE_MB, BrandExporter
+from src.common.log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 INPUT_CSV = "output/products.csv"
 IMAGES_DIR = "output/images"
@@ -94,8 +98,13 @@ Examples:
                         help='Skip copying images')
     parser.add_argument('--input', '-i', type=str, default=INPUT_CSV,
                         help=f'Input CSV file (default: {INPUT_CSV})')
+    parser.add_argument('--verbose', action='store_true',
+                        help='Enable verbose (debug) logging')
+    parser.add_argument('--quiet', action='store_true',
+                        help='Suppress info messages, show only warnings and errors')
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Validate input file exists
     if not os.path.exists(args.input):

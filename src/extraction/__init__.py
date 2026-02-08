@@ -13,16 +13,16 @@ Modules:
 from urllib.parse import urlparse
 
 from .benu_extractor import BenuExtractor
-from .validator import SpecificationValidator
 from .brand_matcher import BrandMatcher, get_brand_matcher, match_brand
 from .bulk_extractor import BulkExtractor
-from .utils import remove_source_references
 from .parsers import (
-    StructuredDataParser,
     GTMDataParser,
     HTMLContentParser,
     LeafletParser,
+    StructuredDataParser,
 )
+from .utils import remove_source_references
+from .validator import SpecificationValidator
 
 # Registry of supported site extractors
 SITE_EXTRACTORS = {

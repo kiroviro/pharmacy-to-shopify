@@ -6,8 +6,8 @@ Handles large field sizes and encoding issues.
 """
 
 import csv
-from typing import Dict, List, Iterator, Optional
 from pathlib import Path
+from typing import Dict, Iterator, List, Optional
 
 
 def configure_csv(field_size_limit: int = 10 * 1024 * 1024) -> None:

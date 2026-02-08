@@ -18,14 +18,18 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import sys
 
+from src.common.log_config import setup_logging
 from src.extraction import (
+    BulkExtractor,
     get_extractor_for_url,
     get_site_from_url,
-    BulkExtractor,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def detect_site_from_urls(urls: list) -> str:
@@ -77,7 +81,19 @@ def main():
         help="Save HTML of failed pages for debugging"
     )
 
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
+
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Read URLs from file
     if not os.path.exists(args.urls):
@@ -88,7 +104,7 @@ def main():
         urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
     if not urls:
-        print("No URLs found in input file")
+        logger.error("No URLs found in input file")
         sys.exit(1)
 
     # Auto-detect site from URLs
@@ -131,7 +147,7 @@ def main():
         continue_on_error=args.continue_on_error,
     )
 
-    print(f"\nExtraction complete. Output: {output_csv}")
+    logger.info("Extraction complete. Output: %s", output_csv)
 
 
 if __name__ == "__main__":

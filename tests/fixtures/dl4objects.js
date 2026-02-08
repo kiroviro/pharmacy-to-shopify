@@ -1,0 +1,1 @@
+var dl4Objects = [{"item_name": "Тест Продукт 500mg таблетки", "item_brand": "TestBrand", "item_id": "TST-001", "price": 6.39, "item_stock_status": "In Stock", "item_category": "Витамини и добавки"}];

@@ -6,7 +6,7 @@ No business logic - only data structure definitions.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
 
 
 @dataclass

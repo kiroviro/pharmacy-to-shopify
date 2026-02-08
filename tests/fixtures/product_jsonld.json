@@ -1,0 +1,19 @@
+{
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Тест Продукт 500mg таблетки",
+    "brand": {
+        "@type": "Brand",
+        "name": "TestBrand"
+    },
+    "sku": "TST-001",
+    "offers": {
+        "@type": "Offer",
+        "price": "6.39",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock"
+    },
+    "image": ["https://benu.bg/uploads/images/products/test/product1.jpg"],
+    "activeIngredient": "Витамин C 500mg",
+    "clinicalPharmacology": "Витамин C допринася за нормалната функция на имунната система."
+}

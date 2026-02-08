@@ -10,9 +10,13 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 
-from src.discovery import get_discoverer_for_site, get_supported_sites, BenuURLDiscoverer
+from src.common.log_config import setup_logging
+from src.discovery import get_discoverer_for_site, get_supported_sites
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -42,8 +46,14 @@ def main():
         action="store_true",
         help="Verbose output"
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Set default output path based on site
     output_path = args.output or f"data/{args.site}/raw/urls.txt"

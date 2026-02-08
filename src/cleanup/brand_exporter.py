@@ -14,10 +14,13 @@ Features:
 
 import csv
 import io
+import logging
 import os
 import shutil
 from collections import Counter, defaultdict
-from typing import Dict, List, Set, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
+
+logger = logging.getLogger(__name__)
 
 from ..common.csv_utils import configure_csv
 
@@ -185,8 +188,8 @@ class BrandExporter:
 
             # Check if brand alone exceeds max size
             if brand_size + self._get_header_size(fieldnames) > max_size_bytes:
-                print(f"  Warning: Brand '{brand}' ({brand_size / 1024 / 1024:.1f}MB) exceeds max file size")
-                print(f"           It will be placed in its own file")
+                logger.warning("Brand '%s' (%.1fMB) exceeds max file size, placing in its own file",
+                               brand, brand_size / 1024 / 1024)
                 # Put oversized brand in its own chunk
                 if current_chunk:
                     chunks.append(current_chunk)
@@ -270,10 +273,10 @@ class BrandExporter:
 
         if all_brands:
             brands_to_include = set(all_brand_stats.keys())
-            print(f"Exporting all {len(brands_to_include)} brands...")
+            logger.info("Exporting all %d brands...", len(brands_to_include))
         elif top_n:
             brands_to_include = {brand for brand, _ in all_brand_stats.most_common(top_n)}
-            print(f"Selected top {top_n} brands: {', '.join(sorted(brands_to_include))}")
+            logger.info("Selected top %d brands: %s", top_n, ', '.join(sorted(brands_to_include)))
 
         if brands_to_include:
             selected_brands = brands_to_include
@@ -282,9 +285,9 @@ class BrandExporter:
 
         if brands_to_exclude:
             selected_brands = selected_brands - brands_to_exclude
-            print(f"Excluding {len(brands_to_exclude)} brands")
+            logger.info("Excluding %d brands", len(brands_to_exclude))
 
-        print(f"Processing {len(selected_brands)} brands...")
+        logger.info("Processing %d brands...", len(selected_brands))
 
         # Load all products by brand
         products_by_brand, fieldnames = self._get_products_by_brand(selected_brands)
@@ -293,16 +296,16 @@ class BrandExporter:
             1 for rows in products_by_brand.values()
             for row in rows if row.get('Title', '').strip()
         )
-        print(f"Found {total_products} products")
+        logger.info("Found %d products", total_products)
 
         # Calculate max size in bytes
         max_size_bytes = int(self.max_size_mb * 1024 * 1024)
 
         # Split into chunks
-        print(f"\nSplitting into files (max {self.max_size_mb}MB each, keeping brands together)...")
+        logger.info("Splitting into files (max %.0fMB each, keeping brands together)...", self.max_size_mb)
         chunks = self._split_brands_into_chunks(products_by_brand, fieldnames, max_size_bytes)
 
-        print(f"Created {len(chunks)} file(s)")
+        logger.info("Created %d file(s)", len(chunks))
 
         # Prepare output paths
         output_dir = os.path.dirname(output_csv) or '.'
@@ -397,6 +400,6 @@ class BrandExporter:
         print("=" * 70)
 
         if len(chunks) > 1:
-            print(f"\nImport files to Shopify in order:")
+            print("\nImport files to Shopify in order:")
             for stat in file_stats:
                 print(f"  {stat['path']}")

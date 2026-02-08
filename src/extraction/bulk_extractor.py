@@ -12,14 +12,17 @@ Features:
 
 import csv
 import json
+import logging
 import os
 import time
 from datetime import datetime
-from typing import List, Dict, Optional, Set
+from typing import Dict, List, Set
 
-from ..models import ExtractedProduct, ProductImage
-from ..shopify import ShopifyCSVExporter, SHOPIFY_FIELDNAMES
+logger = logging.getLogger(__name__)
+
 from ..common.csv_utils import configure_csv
+from ..models import ExtractedProduct
+from ..shopify import SHOPIFY_FIELDNAMES, ShopifyCSVExporter
 
 # Configure CSV for large fields
 configure_csv()
@@ -84,19 +87,18 @@ class BulkExtractor:
 
                     # If image metrics are missing, recalculate from CSV
                     if self.total_image_rows == 0 and self.total_extracted > 0:
-                        print("Recalculating CSV stats...")
+                        logger.info("Recalculating CSV stats...")
                         csv_stats = self.recalculate_csv_stats()
                         self.total_extracted = csv_stats["products"]
                         self.total_image_rows = csv_stats["image_rows"]
                         self.total_images = csv_stats["total_rows"]
 
-                    print(f"Loaded state:")
-                    print(f"   URLs processed:    {len(self.processed_urls)}")
-                    print(f"   Unique products:   {self.total_extracted}")
-                    print(f"   CSV rows:          {self.total_extracted + self.total_image_rows} (+1 header)")
+                    logger.info("Loaded state: URLs processed=%d, products=%d, CSV rows=%d",
+                                len(self.processed_urls), self.total_extracted,
+                                self.total_extracted + self.total_image_rows)
                     return True
             except Exception as e:
-                print(f"Could not load state: {e}")
+                logger.warning("Could not load state: %s", e)
         return False
 
     def save_state(self):
@@ -136,7 +138,7 @@ class BulkExtractor:
                     else:
                         image_rows += 1
         except Exception as e:
-            print(f"Could not read CSV for stats: {e}")
+            logger.warning("Could not read CSV for stats: %s", e)
             return {"products": 0, "image_rows": 0, "total_rows": 0}
 
         return {
@@ -195,11 +197,9 @@ class BulkExtractor:
         total_input_urls = len(urls)
         already_processed = len(self.processed_urls)
 
-        print(f"\nExtraction Progress")
-        print(f"   Total URLs in input: {total_input_urls}")
+        logger.info("Extraction Progress: total=%d, remaining=%d", total_input_urls, total_urls)
         if resume and already_processed > 0:
-            print(f"   Already processed: {already_processed} ({100*already_processed/total_input_urls:.1f}%)")
-        print(f"   Remaining to process: {total_urls} ({100*total_urls/total_input_urls:.1f}%)")
+            logger.info("Already processed: %d (%.1f%%)", already_processed, 100*already_processed/total_input_urls)
 
         # Initialize CSV file
         csv_exists = os.path.exists(self.output_csv)
@@ -217,7 +217,7 @@ class BulkExtractor:
 
                 # Show progress relative to total input URLs
                 overall_progress = already_processed + i
-                print(f"[{overall_progress}/{total_input_urls}] {url[:60]}...")
+                logger.info("[%d/%d] %s...", overall_progress, total_input_urls, url[:60])
 
                 try:
                     extractor = extractor_class(url)
@@ -227,7 +227,7 @@ class BulkExtractor:
                     if product:
                         # Skip products without images
                         if not product.images:
-                            print(f"  Skipped (no images): {product.title[:50]}...")
+                            logger.info("Skipped (no images): %s...", product.title[:50])
                             self.processed_urls.add(url)
                             continue
 
@@ -242,13 +242,13 @@ class BulkExtractor:
                         self.total_image_rows += max(0, num_images - 1)
                         self.processed_urls.add(url)
 
-                        print(f"  OK: {product.title[:50]}... ({num_images} images)")
+                        logger.info("OK: %s... (%d images)", product.title[:50], num_images)
                     else:
                         raise Exception("No product extracted")
 
                 except Exception as e:
                     error_msg = str(e)[:100]
-                    print(f"  Error: {error_msg}")
+                    logger.error("Error: %s", error_msg)
 
                     self.failed_urls.append({
                         "url": url,
@@ -262,7 +262,7 @@ class BulkExtractor:
                         self._save_failed_html(url)
 
                     if not continue_on_error:
-                        print("Stopping due to error (use --continue-on-error to ignore)")
+                        logger.error("Stopping due to error (use --continue-on-error to ignore)")
                         break
 
                 # Save state periodically (every 10 products)
@@ -306,25 +306,25 @@ class BulkExtractor:
         print("\n" + "=" * 60)
         print("Extraction Summary")
         print("=" * 60)
-        print(f"\n  Progress:")
+        print("\n  Progress:")
         print(f"     URLs processed:     {len(self.processed_urls)}")
         print(f"     URLs failed:        {len(self.failed_urls)}")
-        print(f"\n  Products:")
+        print("\n  Products:")
         print(f"     Unique products:    {self.total_extracted}")
         print(f"     Total images:       {self.total_images}")
         avg_images = self.total_images / self.total_extracted if self.total_extracted > 0 else 0
         print(f"     Avg images/product: {avg_images:.2f}")
-        print(f"\n  CSV Output (Shopify format):")
+        print("\n  CSV Output (Shopify format):")
         print(f"     Product rows:       {self.total_extracted} (rows with Title)")
         print(f"     Image rows:         {self.total_image_rows} (additional images)")
         print(f"     Total CSV rows:     {total_csv_rows} (+1 header)")
-        print(f"\n  Performance:")
+        print("\n  Performance:")
         print(f"     Time elapsed:       {elapsed:.1f} seconds")
         if self.total_extracted > 0 and elapsed > 0:
             print(f"     Rate:               {self.total_extracted / elapsed:.2f} products/sec")
-        print(f"\n  Output files:")
+        print("\n  Output files:")
         print(f"     CSV:    {self.output_csv}")
-        print(f"     Images: Using original URLs (Shopify will fetch from source)")
+        print("     Images: Using original URLs (Shopify will fetch from source)")
         if self.failed_urls:
             print(f"     Failed: {self.failed_file}")
         print("=" * 60)

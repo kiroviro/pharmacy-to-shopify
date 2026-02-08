@@ -14,7 +14,7 @@ The dl4Objects array typically contains:
 
 import json
 import re
-from typing import Dict, Any, Optional
+from typing import Any, Dict
 
 
 class GTMDataParser:

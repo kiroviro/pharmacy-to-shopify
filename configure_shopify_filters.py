@@ -23,6 +23,7 @@ Usage:
 
 import argparse
 import json
+import logging
 import os
 import sys
 from typing import Optional
@@ -30,7 +31,10 @@ from typing import Optional
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
+from src.common.log_config import setup_logging
 from src.shopify import ShopifyAPIClient
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # 1. Metafield definitions (Bulgarian names → shown as filter labels)
@@ -214,7 +218,7 @@ def translate_theme_filters(client: ShopifyAPIClient, dry_run: bool = False):
         print("  ГРЕШКА: Не може да се намери активната тема")
         return
 
-    print(f"  Активна тема ID: {theme_id}")
+    logger.info("Активна тема ID: %s", theme_id)
 
     # Step 2: Try to read existing Bulgarian locale file
     # Shopify themes use locales/bg.json or locales/bg.default.json
@@ -232,13 +236,13 @@ def translate_theme_filters(client: ShopifyAPIClient, dry_run: bool = False):
                 existing_locale = json.loads(result["asset"].get("value", "{}"))
             except (json.JSONDecodeError, TypeError):
                 existing_locale = {}
-            print(f"  Намерен локал файл: {locale_key}")
+            logger.info("Намерен локал файл: %s", locale_key)
             break
 
     if not locale_key:
         # No Bulgarian locale exists yet — create one
         locale_key = "locales/bg.json"
-        print(f"  Български локал не е намерен, ще се създаде: {locale_key}")
+        logger.info("Български локал не е намерен, ще се създаде: %s", locale_key)
 
     # Step 3: Merge translations (preserve any existing keys)
     updated_locale = deep_merge(existing_locale, FILTER_TRANSLATIONS_BG)
@@ -250,7 +254,7 @@ def translate_theme_filters(client: ShopifyAPIClient, dry_run: bool = False):
         print(f"    {k}: {facets[k]}")
 
     if dry_run:
-        print(f"\n  -> ПРОПУСНАТО (dry run)")
+        print("\n  -> ПРОПУСНАТО (dry run)")
         print(f"     Щеше да се обнови: {locale_key}")
         return
 
@@ -309,8 +313,19 @@ def main():
         action="store_true",
         help="Преглед без промени",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors",
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     print("=" * 60)
     print("Конфигуриране на филтри в Shopify")

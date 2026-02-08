@@ -14,7 +14,8 @@ data (JSON-LD, GTM) is not available.
 """
 
 import re
-from typing import List, Tuple, Optional
+from typing import List, Tuple
+
 from bs4 import BeautifulSoup
 
 from ...models import ProductImage

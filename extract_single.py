@@ -12,17 +12,21 @@ Usage:
 
 import argparse
 import json
-import sys
+import logging
 import os
+import sys
 from dataclasses import asdict
 
+from src.common.log_config import setup_logging
 from src.extraction import (
+    SpecificationValidator,
     get_extractor_for_url,
     get_site_from_url,
-    SpecificationValidator,
 )
-from src.shopify import ShopifyCSVExporter
 from src.models import ExtractedProduct
+from src.shopify import ShopifyCSVExporter
+
+logger = logging.getLogger(__name__)
 
 
 def print_report(product: ExtractedProduct, validation: dict, product_type: str = "unknown", site: str = ""):
@@ -102,7 +106,7 @@ def print_report(product: ExtractedProduct, validation: dict, product_type: str 
 
     overall_pct = float(compliance['overall'].rstrip('%'))
     if overall_pct >= 95:
-        print(f"\n  MEETS TARGET (>=95%)")
+        print("\n  MEETS TARGET (>=95%)")
     else:
         print(f"\n  BELOW TARGET (95%), Current: {overall_pct:.1f}%")
 
@@ -144,13 +148,19 @@ def main():
         action="store_true",
         help="Show full extracted data"
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Detect site from URL
     site = get_site_from_url(args.url)
-    print(f"Extracting from: {site}")
-    print(f"URL: {args.url}")
+    logger.info("Extracting from: %s", site)
+    logger.info("URL: %s", args.url)
 
     # Set default output paths based on site
     output_json = args.output_json or f"output/{site}/extraction.json"
@@ -183,13 +193,13 @@ def main():
         with open(output_json, 'w', encoding='utf-8') as f:
             json.dump(output_data, f, indent=2, ensure_ascii=False)
 
-        print(f"\nResults saved to: {output_json}")
+        logger.info("Results saved to: %s", output_json)
 
         # Save Shopify CSV (source references cleaned by exporter)
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         csv_exporter = ShopifyCSVExporter(source_domain=site)
         csv_exporter.export_single(product, output_csv)
-        print(f"Shopify CSV saved to: {output_csv}")
+        logger.info("Shopify CSV saved to: %s", output_csv)
 
         # Verbose output
         if args.verbose:
@@ -202,12 +212,10 @@ def main():
         sys.exit(0 if validation["overall_valid"] else 1)
 
     except ValueError as e:
-        print(f"\nError: {e}")
+        logger.error("Error: %s", e)
         sys.exit(1)
     except Exception as e:
-        print(f"\nExtraction failed: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error("Extraction failed: %s", e, exc_info=True)
         sys.exit(1)
 
 

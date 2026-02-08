@@ -13,7 +13,6 @@ This parser also handles clinical pharmacology text from JSON-LD data,
 splitting it into logical sections.
 """
 
-from typing import Dict, Optional
 from bs4 import BeautifulSoup
 
 

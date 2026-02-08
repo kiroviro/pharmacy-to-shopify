@@ -7,11 +7,11 @@ Handles all 56 columns of the Shopify product import format.
 
 import csv
 import os
-from typing import List, Dict, Optional
+from typing import Dict, List
 
-from ..models import ExtractedProduct, ProductImage
-from ..common.text_utils import remove_source_references
 from ..common.csv_utils import configure_csv
+from ..common.text_utils import remove_source_references
+from ..models import ExtractedProduct, ProductImage
 
 # Configure CSV for large fields
 configure_csv()

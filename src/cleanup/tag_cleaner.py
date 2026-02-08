@@ -9,17 +9,20 @@ Post-processes a Shopify products CSV to:
 """
 
 import csv
+import logging
 import os
 from collections import Counter
 from typing import List, Set, Tuple
 
+logger = logging.getLogger(__name__)
+
 from ..common.config_loader import (
-    load_categories,
-    load_tag_normalization,
-    load_vendor_defaults,
-    load_promotional_patterns,
     build_subcategory_to_l1_map,
     get_l1_category_names,
+    load_categories,
+    load_promotional_patterns,
+    load_tag_normalization,
+    load_vendor_defaults,
 )
 from ..common.csv_utils import configure_csv
 
@@ -71,7 +74,7 @@ class TagCleaner:
 
     def _load_vendors(self):
         """Load all unique vendor names from CSV."""
-        print("Loading vendor names...")
+        logger.info("Loading vendor names...")
         with open(self.input_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -79,7 +82,7 @@ class TagCleaner:
                 if vendor:
                     self.vendor_names.add(vendor.lower())
 
-        print(f"  Found {len(self.vendor_names)} unique vendors")
+        logger.info("Found %d unique vendors", len(self.vendor_names))
 
     def _normalize_tag(self, tag: str) -> str:
         """Normalize tag casing using the normalization map."""
@@ -201,8 +204,8 @@ class TagCleaner:
         """Process the CSV file and write cleaned output."""
         self._load_vendors()
 
-        print(f"\nProcessing: {self.input_path}")
-        print(f"Output: {self.output_path}")
+        logger.info("Processing: %s", self.input_path)
+        logger.info("Output: %s", self.output_path)
 
         # Create output directory if needed
         output_dir = os.path.dirname(self.output_path)
@@ -255,9 +258,9 @@ class TagCleaner:
 
                     rows_processed += 1
                     if rows_processed % 1000 == 0:
-                        print(f"  Processed {rows_processed} products...")
+                        logger.info("Processed %d products...", rows_processed)
 
-        print(f"\nCompleted! Processed {rows_processed} products")
+        logger.info("Completed! Processed %d products", rows_processed)
         self._print_summary()
 
         if self.report_path:
@@ -272,7 +275,7 @@ class TagCleaner:
         print(f"\nProducts processed: {self.stats['total_products']}")
         print(f"Products with tags: {self.stats['products_with_tags']}")
 
-        print(f"\nL1 Category Coverage:")
+        print("\nL1 Category Coverage:")
         print(f"  Missing L1 before: {self.stats['products_missing_l1_before']}")
         print(f"  Missing L1 after:  {self.stats['products_missing_l1_after']}")
         print(f"  L1 categories added: {sum(self.stats['l1_categories_added'].values())}")
@@ -305,7 +308,7 @@ class TagCleaner:
 
     def _write_report(self):
         """Write detailed cleanup report to file."""
-        print(f"\nWriting report to: {self.report_path}")
+        logger.info("Writing report to: %s", self.report_path)
 
         # Create report directory if needed
         report_dir = os.path.dirname(self.report_path)
@@ -354,7 +357,7 @@ class TagCleaner:
             for tag, count in self.stats['promotional_removed'].most_common():
                 f.write(f"  {tag}: {count}\n")
 
-        print("Report written successfully.")
+        logger.info("Report written successfully.")
 
     def get_stats(self) -> dict:
         """Return the statistics dictionary."""

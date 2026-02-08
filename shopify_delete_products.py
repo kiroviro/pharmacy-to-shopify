@@ -18,6 +18,7 @@ Usage:
 
 import argparse
 import json
+import logging
 import os
 import sys
 import tempfile
@@ -28,7 +29,10 @@ import requests
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
+from src.common.log_config import setup_logging
 from src.shopify import ShopifyAPIClient
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -151,7 +155,7 @@ def fetch_all_product_ids(client: ShopifyAPIClient) -> list[str]:
         data = client.graphql_request(PRODUCTS_QUERY, variables)
 
         if not data or "products" not in data:
-            print(f"  Error fetching products at page {page}")
+            logger.error("Error fetching products at page %d", page)
             break
 
         edges = data["products"]["edges"]
@@ -162,7 +166,7 @@ def fetch_all_product_ids(client: ShopifyAPIClient) -> list[str]:
         if page_info["hasNextPage"]:
             cursor = page_info["endCursor"]
             if page % 10 == 0:
-                print(f"  Fetched {len(product_ids)} product IDs ({page} pages)...")
+                logger.info("Fetched %d product IDs (%d pages)...", len(product_ids), page)
         else:
             break
 
@@ -186,12 +190,12 @@ def stage_upload(client: ShopifyAPIClient) -> dict | None:
     result = data.get("stagedUploadsCreate", {})
     errors = result.get("userErrors", [])
     if errors:
-        print(f"  Staged upload errors: {errors}")
+        logger.error("Staged upload errors: %s", errors)
         return None
 
     targets = result.get("stagedTargets", [])
     if not targets:
-        print("  No staged upload targets returned")
+        logger.error("No staged upload targets returned")
         return None
 
     return targets[0]
@@ -210,8 +214,8 @@ def upload_jsonl(target: dict, jsonl_path: str) -> bool:
     if response.status_code in (200, 201):
         return True
     else:
-        print(f"  Upload failed: HTTP {response.status_code}")
-        print(f"  Response: {response.text[:500]}")
+        logger.error("Upload failed: HTTP %d", response.status_code)
+        logger.error("Response: %s", response.text[:500])
         return False
 
 
@@ -228,15 +232,15 @@ def run_bulk_delete(client: ShopifyAPIClient, staged_upload_path: str) -> str | 
     result = data.get("bulkOperationRunMutation", {})
     errors = result.get("userErrors", [])
     if errors:
-        print(f"  Bulk operation errors: {errors}")
+        logger.error("Bulk operation errors: %s", errors)
         return None
 
     op = result.get("bulkOperation")
     if not op:
-        print("  No bulk operation returned")
+        logger.error("No bulk operation returned")
         return None
 
-    print(f"  Bulk operation started: {op['id']} (status: {op['status']})")
+    logger.info("Bulk operation started: %s (status: %s)", op['id'], op['status'])
     return op["id"]
 
 
@@ -245,24 +249,24 @@ def poll_bulk_operation(client: ShopifyAPIClient, poll_interval: int = 10) -> di
     while True:
         data = client.graphql_request(BULK_OPERATION_STATUS)
         if not data or "currentBulkOperation" not in data:
-            print("  Could not fetch bulk operation status")
+            logger.error("Could not fetch bulk operation status")
             return None
 
         op = data["currentBulkOperation"]
         if op is None:
-            print("  No active bulk mutation operation found")
+            logger.error("No active bulk mutation operation found")
             return None
 
         status = op["status"]
         object_count = op.get("objectCount", "?")
-        print(f"  Status: {status} | Objects processed: {object_count}")
+        logger.info("Status: %s | Objects processed: %s", status, object_count)
 
         if status == "COMPLETED":
             return op
         elif status in ("FAILED", "CANCELED", "EXPIRED"):
-            print(f"  Bulk operation ended with status: {status}")
+            logger.error("Bulk operation ended with status: %s", status)
             if op.get("errorCode"):
-                print(f"  Error code: {op['errorCode']}")
+                logger.error("Error code: %s", op['errorCode'])
             return op
 
         time.sleep(poll_interval)
@@ -302,20 +306,31 @@ def main():
         default=10,
         help="Seconds between status polls (default: 10)"
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
     client = ShopifyAPIClient(args.shop, args.token)
 
     # Test connection
-    print("Connecting to Shopify...")
+    logger.info("Connecting to Shopify...")
     if not client.test_connection():
-        print("Failed to connect. Check shop name and token.")
+        logger.error("Failed to connect. Check shop name and token.")
         sys.exit(1)
 
     # Step 1: Count products
-    print("\nCounting products...")
+    logger.info("Counting products...")
     count = get_product_count(client)
-    print(f"  Total products: {count}")
+    logger.info("Total products: %d", count)
 
     if count == 0:
         print("No products to delete.")
@@ -333,65 +348,65 @@ def main():
             print("Aborted.")
             return
     else:
-        print(f"\nProceeding to delete {count} products (--yes flag set)")
+        logger.info("Proceeding to delete %d products (--yes flag set)", count)
 
     # Step 2: Fetch all product IDs
-    print("\nFetching all product IDs...")
+    logger.info("Fetching all product IDs...")
     product_ids = fetch_all_product_ids(client)
-    print(f"  Fetched {len(product_ids)} product IDs")
+    logger.info("Fetched %d product IDs", len(product_ids))
 
     if not product_ids:
-        print("No product IDs fetched. Aborting.")
+        logger.error("No product IDs fetched. Aborting.")
         return
 
     # Step 3: Write JSONL file
     jsonl_path = os.path.join(tempfile.gettempdir(), "shopify_bulk_delete.jsonl")
-    print(f"\nWriting JSONL to {jsonl_path}...")
+    logger.info("Writing JSONL to %s...", jsonl_path)
     write_jsonl(product_ids, jsonl_path)
     jsonl_size = os.path.getsize(jsonl_path)
-    print(f"  Written {len(product_ids)} lines ({jsonl_size:,} bytes)")
+    logger.info("Written %d lines (%s bytes)", len(product_ids), f"{jsonl_size:,}")
 
     # Step 4: Stage upload
-    print("\nCreating staged upload...")
+    logger.info("Creating staged upload...")
     target = stage_upload(client)
     if not target:
-        print("Failed to create staged upload. Aborting.")
+        logger.error("Failed to create staged upload. Aborting.")
         sys.exit(1)
-    print(f"  Upload URL obtained")
+    logger.info("Upload URL obtained")
 
     # Step 5: Upload JSONL
-    print("\nUploading JSONL file...")
+    logger.info("Uploading JSONL file...")
     if not upload_jsonl(target, jsonl_path):
-        print("Failed to upload JSONL. Aborting.")
+        logger.error("Failed to upload JSONL. Aborting.")
         sys.exit(1)
-    print("  Upload complete")
+    logger.info("Upload complete")
 
     # Step 6: Start bulk delete
-    print("\nStarting bulk delete operation...")
+    logger.info("Starting bulk delete operation...")
     # Extract the "key" parameter — this is the staged upload path Shopify expects
     staged_upload_path = next(
         p["value"] for p in target["parameters"] if p["name"] == "key"
     )
     op_id = run_bulk_delete(client, staged_upload_path)
     if not op_id:
-        print("Failed to start bulk delete. Aborting.")
+        logger.error("Failed to start bulk delete. Aborting.")
         sys.exit(1)
 
     # Step 7: Poll for completion
-    print(f"\nPolling for completion (every {args.poll_interval}s)...")
+    logger.info("Polling for completion (every %ds)...", args.poll_interval)
     result = poll_bulk_operation(client, args.poll_interval)
 
     if result and result["status"] == "COMPLETED":
         print(f"\nDeletion complete. Objects processed: {result.get('objectCount', '?')}")
     else:
         status = result["status"] if result else "UNKNOWN"
-        print(f"\nBulk operation finished with status: {status}")
+        logger.error("Bulk operation finished with status: %s", status)
         sys.exit(1)
 
     # Verify
-    print("\nVerifying...")
+    logger.info("Verifying...")
     remaining = get_product_count(client)
-    print(f"  Products remaining: {remaining}")
+    logger.info("Products remaining: %d", remaining)
 
     if remaining == 0:
         print("\nAll products deleted successfully.")

@@ -11,7 +11,7 @@ Usage:
 import argparse
 import http.server
 import json
-import os
+import logging
 import secrets
 import socketserver
 import sys
@@ -21,6 +21,10 @@ import webbrowser
 from pathlib import Path
 
 import requests
+
+from src.common.log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 # Token storage file
@@ -118,7 +122,7 @@ def save_token(shop: str, token_data: dict):
     with open(TOKEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-    print(f"\nToken saved to: {TOKEN_FILE}")
+    logger.info("Token saved to: %s", TOKEN_FILE)
 
 
 def load_token() -> dict:
@@ -178,7 +182,7 @@ def run_oauth_flow(shop: str, client_id: str, client_secret: str, port: int = 88
         input("\nPress Enter when you've added the redirect URI...")
 
     # Start local server
-    print(f"\nStarting local server on port {port}...")
+    logger.info("Starting local server on port %d...", port)
 
     server = socketserver.TCPServer(("", port), OAuthCallbackHandler)
     server_thread = threading.Thread(target=server.handle_request)
@@ -186,13 +190,13 @@ def run_oauth_flow(shop: str, client_id: str, client_secret: str, port: int = 88
 
     # Open browser for authorization
     auth_url = get_authorization_url(shop, client_id, redirect_uri, state)
-    print(f"\nOpening browser for authorization...")
-    print(f"If browser doesn't open, visit:\n{auth_url}\n")
+    logger.info("Opening browser for authorization...")
+    logger.info("If browser doesn't open, visit:\n%s", auth_url)
 
     webbrowser.open(auth_url)
 
     # Wait for callback
-    print("Waiting for authorization...")
+    logger.info("Waiting for authorization...")
     server_thread.join(timeout=300)  # 5 minute timeout
     server.server_close()
 
@@ -206,14 +210,14 @@ def run_oauth_flow(shop: str, client_id: str, client_secret: str, port: int = 88
     print("\n✓ Authorization code received!")
 
     # Exchange code for token
-    print("Exchanging code for access token...")
+    logger.info("Exchanging code for access token...")
     token_data = exchange_code_for_token(
         shop, client_id, client_secret,
         OAuthCallbackHandler.authorization_code
     )
 
     access_token = token_data.get("access_token")
-    print(f"\n✓ Access token obtained!")
+    print("\n✓ Access token obtained!")
     print(f"  Token: {access_token[:10]}...{access_token[-4:]}")
     print(f"  Scope: {token_data.get('scope', 'N/A')}")
 
@@ -260,8 +264,19 @@ def main():
         action="store_true",
         help="Skip the confirmation prompt (for non-interactive use)"
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     if args.test_only:
         # Just test existing token
@@ -284,11 +299,11 @@ def main():
         print("\n" + "=" * 60)
         print("SUCCESS! You can now run the collection creator:")
         print("=" * 60)
-        print(f"\npython3 create_shopify_collections.py \\")
-        print(f"  --csv data/benu.bg/raw/products.csv \\")
+        print("\npython3 create_shopify_collections.py \\")
+        print("  --csv data/benu.bg/raw/products.csv \\")
         print(f"  --shop {args.shop} \\")
         print(f"  --token {access_token[:15]}... \\")
-        print(f"  --dry-run")
+        print("  --dry-run")
         print("\n" + "=" * 60)
 
     except Exception as e:

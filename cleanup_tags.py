@@ -14,6 +14,7 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import sys
 
@@ -21,6 +22,9 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from src.cleanup import TagCleaner
+from src.common.log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -42,8 +46,19 @@ def main():
         default=None,
         help="Optional: Path to write detailed cleanup report"
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Validate input exists
     if not os.path.exists(args.input):

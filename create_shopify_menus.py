@@ -20,13 +20,17 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import sys
 
 # Add project root to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
+from src.common.log_config import setup_logging
 from src.shopify import ShopifyMenuCreator
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -80,8 +84,19 @@ def main():
         default=50,
         help="Maximum brands to include in brands menu (default: 50)"
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors"
+    )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     # Validate CSV exists
     if not os.path.exists(args.csv):

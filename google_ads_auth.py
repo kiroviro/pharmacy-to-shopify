@@ -8,11 +8,19 @@ Usage:
     4. Copy the refresh_token into config/google-ads.yaml
 """
 
+import logging
+
 import yaml
+
 from google_ads_auth_flow import get_refresh_token
+from src.common.log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 def main():
+    setup_logging()
+
     with open("config/google-ads.yaml", "r") as f:
         config = yaml.safe_load(f)
 

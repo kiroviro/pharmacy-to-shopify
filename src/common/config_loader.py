@@ -5,9 +5,8 @@ Loads YAML configuration files for categories, tag normalization,
 vendor defaults, promotional patterns, and known brands.
 """
 
-import os
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     import yaml

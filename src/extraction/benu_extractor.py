@@ -4,18 +4,21 @@ BENU.bg Product Extractor
 Extracts product data from benu.bg Bulgarian pharmacy website.
 """
 
-import re
 import json
-from typing import Optional, List, Dict
-from urllib.parse import urlparse, quote
+import logging
+import re
+from typing import List
+from urllib.parse import quote, urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger(__name__)
+
+from ..common.config_loader import load_seo_settings
+from ..common.transliteration import transliterate
 from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
-from ..common.transliteration import transliterate
-from ..common.config_loader import load_seo_settings
 
 
 class BenuExtractor:
@@ -434,7 +437,7 @@ class BenuExtractor:
                         try:
                             resp2 = requests.head(fallback_url, timeout=10, allow_redirects=True)
                             if resp2.status_code == 200:
-                                print(f"  Image fallback: {img.source_url} -> product_view_default")
+                                logger.debug("Image fallback: %s -> product_view_default", img.source_url)
                                 img.source_url = fallback_url
                         except requests.RequestException:
                             pass

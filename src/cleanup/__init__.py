@@ -6,8 +6,8 @@ Modules:
     brand_exporter - Export products by brand with file splitting
 """
 
+from .brand_exporter import DEFAULT_MAX_SIZE_MB, BrandExporter
 from .tag_cleaner import TagCleaner
-from .brand_exporter import BrandExporter, DEFAULT_MAX_SIZE_MB
 
 __all__ = [
     'TagCleaner',

@@ -42,6 +42,11 @@ output/
 reports/*/*.txt
 reports/*/*.csv
 
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
 # Logs
 *.log
 

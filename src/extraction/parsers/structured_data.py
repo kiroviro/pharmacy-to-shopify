@@ -9,7 +9,8 @@ Supported schema types: Drug, Product
 """
 
 import json
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict
+
 from bs4 import BeautifulSoup
 
 

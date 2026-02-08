@@ -4,10 +4,13 @@ URL Discovery for benu.bg
 Discovers all product URLs from the sitemap.
 """
 
+import logging
 import xml.etree.ElementTree as ET
-from typing import Set, Optional
+from typing import Optional, Set
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class BenuURLDiscoverer:
@@ -30,13 +33,12 @@ class BenuURLDiscoverer:
         self.product_urls: Set[str] = set()
 
     def log(self, message: str):
-        """Print message if verbose mode is on."""
-        if self.verbose:
-            print(message)
+        """Log message at debug level."""
+        logger.debug(message)
 
     def discover_from_sitemap(self) -> Set[str]:
         """Fetch all product URLs from the sitemap."""
-        print(f"Fetching sitemap from {self.SITEMAP_URL}...")
+        logger.info("Fetching sitemap from %s...", self.SITEMAP_URL)
 
         response = self.session.get(self.SITEMAP_URL, timeout=30)
         response.raise_for_status()
@@ -51,7 +53,7 @@ class BenuURLDiscoverer:
             if loc is not None and loc.text:
                 self.product_urls.add(loc.text)
 
-        print(f"Found {len(self.product_urls)} product URLs")
+        logger.info("Found %d product URLs", len(self.product_urls))
         return self.product_urls
 
     def discover_all_products(self, limit: int = 0, output_file: Optional[str] = None) -> Set[str]:
@@ -69,7 +71,7 @@ class BenuURLDiscoverer:
 
         if limit and len(self.product_urls) > limit:
             self.product_urls = set(sorted(self.product_urls)[:limit])
-            print(f"Limited to {limit} URLs")
+            logger.info("Limited to %d URLs", limit)
 
         if output_file:
             self.save_urls(output_file)
@@ -84,7 +86,7 @@ class BenuURLDiscoverer:
             for url in sorted_urls:
                 f.write(url + "\n")
 
-        print(f"Saved {len(sorted_urls)} URLs to {filepath}")
+        logger.info("Saved %d URLs to %s", len(sorted_urls), filepath)
 
     def get_stats(self) -> dict:
         """Return discovery statistics."""

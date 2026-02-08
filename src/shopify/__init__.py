@@ -10,11 +10,11 @@ Modules:
 
 from .api_client import ShopifyAPIClient
 from .collections import ShopifyCollectionCreator
-from .menus import ShopifyMenuCreator
 from .csv_exporter import (
-    ShopifyCSVExporter,
     SHOPIFY_FIELDNAMES,
+    ShopifyCSVExporter,
 )
+from .menus import ShopifyMenuCreator
 
 __all__ = [
     # API Client

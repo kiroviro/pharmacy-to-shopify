@@ -9,9 +9,9 @@ Matches product titles to known brand names using multiple strategies:
 The known brands list is loaded from config/known_brands.yaml.
 """
 
-from typing import Optional, Set, Dict
+from typing import Optional, Set
 
-from ..common.config_loader import load_known_brands, get_brands_lowercase_map
+from ..common.config_loader import get_brands_lowercase_map, load_known_brands
 
 
 class BrandMatcher:

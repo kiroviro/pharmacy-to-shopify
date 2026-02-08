@@ -6,13 +6,16 @@ Uses the Shopify Admin API (GraphQL) to create menus with nested items.
 """
 
 import csv
+import logging
 from collections import Counter
 from typing import Dict, List, Optional
 
-from .api_client import ShopifyAPIClient
-from ..common.transliteration import generate_handle
-from ..common.csv_utils import configure_csv
+logger = logging.getLogger(__name__)
+
 from ..common.config_loader import load_categories
+from ..common.csv_utils import configure_csv
+from ..common.transliteration import generate_handle
+from .api_client import ShopifyAPIClient
 
 # Configure CSV for large fields
 configure_csv()
@@ -49,7 +52,7 @@ class ShopifyMenuCreator:
 
     def get_existing_menus(self) -> Dict[str, str]:
         """Fetch existing menus and return {handle: id} mapping."""
-        print("Fetching existing menus...")
+        logger.info("Fetching existing menus...")
 
         query = """
         query {
@@ -73,7 +76,7 @@ class ShopifyMenuCreator:
         for edge in result.get("menus", {}).get("edges", []):
             node = edge["node"]
             menus[node["handle"]] = node["id"]
-            print(f"  Found menu: {node['title']} ({node['handle']})")
+            logger.info("Found menu: %s (%s)", node['title'], node['handle'])
 
         return menus
 
@@ -124,12 +127,12 @@ class ShopifyMenuCreator:
 
         if result and result.get("menuCreate", {}).get("menu"):
             menu = result["menuCreate"]["menu"]
-            print(f"  Created menu: {menu['title']} (ID: {menu['id']})")
+            logger.info("Created menu: %s (ID: %s)", menu['title'], menu['id'])
             return menu["id"]
 
         errors = result.get("menuCreate", {}).get("userErrors", []) if result else []
         if errors:
-            print(f"  Failed to create menu: {errors}")
+            logger.error("Failed to create menu: %s", errors)
 
         return None
 
@@ -181,12 +184,12 @@ class ShopifyMenuCreator:
         if result and result.get("menuItemCreate", {}).get("menuItem"):
             item = result["menuItemCreate"]["menuItem"]
             indent = "    " if parent_item_id else "  "
-            print(f"{indent}Added: {item['title']}")
+            logger.info("%sAdded: %s", indent, item['title'])
             return item["id"]
 
         errors = result.get("menuItemCreate", {}).get("userErrors", []) if result else []
         if errors:
-            print(f"  Failed to add menu item: {errors}")
+            logger.error("Failed to add menu item: %s", errors)
 
         return None
 
@@ -247,25 +250,25 @@ class ShopifyMenuCreator:
         tag_counts = self.analyze_tags_from_csv(csv_path, min_products)
         available_tags = set(tag_counts.keys())
 
-        print(f"Found {len(available_tags)} tags with {min_products}+ products")
+        logger.info("Found %d tags with %d+ products", len(available_tags), min_products)
 
         # Check for existing menus
         existing_menus = self.get_existing_menus()
 
         # Create or get menu ID
         if menu_handle in existing_menus:
-            print(f"\nMenu '{menu_handle}' already exists. Skipping creation.")
-            print("Note: To update an existing menu, delete it first in Shopify Admin.")
+            logger.warning("Menu '%s' already exists. Skipping creation.", menu_handle)
+            logger.info("Note: To update an existing menu, delete it first in Shopify Admin.")
             return
 
-        print(f"\nBuilding menu structure...")
+        logger.info("Building menu structure...")
 
         # Build menu items with L1 categories (L2 as nested items)
         menu_items = []
         for l1_category, l2_subcategories in self.menu_hierarchy.items():
             # Check if L1 category has products
             if l1_category not in available_tags:
-                print(f"  Skipping {l1_category} (not in data)")
+                logger.debug("Skipping %s (not in data)", l1_category)
                 continue
 
             l1_handle = generate_handle(l1_category)
@@ -284,7 +287,7 @@ class ShopifyMenuCreator:
                     "type": "HTTP"
                 })
 
-            print(f"  {l1_category} ({tag_counts.get(l1_category, 0)} products) with {len(l2_items)} subcategories")
+            logger.info("%s (%d products) with %d subcategories", l1_category, tag_counts.get(l1_category, 0), len(l2_items))
 
             # Add L1 with nested L2 items
             menu_items.append({
@@ -302,9 +305,9 @@ class ShopifyMenuCreator:
         )
 
         if menu_id:
-            print(f"\nMain menu creation complete!")
+            logger.info("Main menu creation complete!")
         else:
-            print(f"\nFailed to create main menu")
+            logger.error("Failed to create main menu")
 
     def create_menu_with_items(self, title: str, handle: str, items: List[Dict]) -> Optional[str]:
         """Create a menu with items in a single API call."""
@@ -338,12 +341,12 @@ class ShopifyMenuCreator:
 
         if result and result.get("menuCreate", {}).get("menu"):
             menu = result["menuCreate"]["menu"]
-            print(f"  Created menu: {menu['title']} with {len(items)} items (ID: {menu['id']})")
+            logger.info("Created menu: %s with %d items (ID: %s)", menu['title'], len(items), menu['id'])
             return menu["id"]
 
         errors = result.get("menuCreate", {}).get("userErrors", []) if result else []
         if errors:
-            print(f"  Failed to create menu: {errors}")
+            logger.error("Failed to create menu: %s", errors)
 
         return None
 
@@ -369,27 +372,27 @@ class ShopifyMenuCreator:
 
         # Get vendor counts
         vendor_counts = self.analyze_vendors_from_csv(csv_path, min_products)
-        print(f"Found {len(vendor_counts)} brands with {min_products}+ products")
+        logger.info("Found %d brands with %d+ products", len(vendor_counts), min_products)
 
         # Sort by product count and take top N
         top_brands = sorted(vendor_counts.items(), key=lambda x: -x[1])[:max_brands]
-        print(f"Including top {len(top_brands)} brands in menu")
+        logger.info("Including top %d brands in menu", len(top_brands))
 
         # Check for existing menus
         existing_menus = self.get_existing_menus()
 
         if menu_handle in existing_menus:
-            print(f"\nMenu '{menu_handle}' already exists. Skipping creation.")
+            logger.warning("Menu '%s' already exists. Skipping creation.", menu_handle)
             return
 
         # Build menu items list
-        print(f"\nBuilding menu items...")
+        logger.info("Building menu items...")
         menu_items = []
         for vendor, count in top_brands:
             # Brand collections use "brand-{handle}" pattern
             handle = generate_handle(vendor, prefix="brand-")
             url = self.build_collection_url(handle)
-            print(f"  {vendor} ({count} products) -> {url}")
+            logger.info("%s (%d products) -> %s", vendor, count, url)
             menu_items.append({
                 "title": vendor,
                 "url": url,
@@ -404,9 +407,9 @@ class ShopifyMenuCreator:
         )
 
         if menu_id:
-            print(f"\nBrands menu creation complete!")
+            logger.info("Brands menu creation complete!")
         else:
-            print(f"\nFailed to create brands menu")
+            logger.error("Failed to create brands menu")
 
     def preview_menu_structure(self, csv_path: str, min_products: int = 3):
         """Preview the menu structure that would be created."""
@@ -420,7 +423,7 @@ class ShopifyMenuCreator:
         print(f"\nTags with {min_products}+ products: {len(tag_counts)}")
         print(f"Brands with {min_products}+ products: {len(vendor_counts)}")
 
-        print(f"\n--- MAIN MENU ---")
+        print("\n--- MAIN MENU ---")
         for l1_category, l2_subcategories in self.menu_hierarchy.items():
             if l1_category not in tag_counts:
                 continue
@@ -430,7 +433,7 @@ class ShopifyMenuCreator:
                 if l2 in tag_counts:
                     print(f"  - {l2} ({tag_counts[l2]} products)")
 
-        print(f"\n--- TOP BRANDS ---")
+        print("\n--- TOP BRANDS ---")
         top_brands = sorted(vendor_counts.items(), key=lambda x: -x[1])[:20]
         for vendor, count in top_brands:
             print(f"  {vendor} ({count} products)")

@@ -13,6 +13,7 @@ This script creates:
 """
 
 import argparse
+import logging
 import sys
 import uuid
 from datetime import datetime, timedelta
@@ -20,6 +21,10 @@ from datetime import datetime, timedelta
 import yaml
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
+
+from src.common.log_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(config_path: str = "config/google-ads.yaml") -> dict:
@@ -32,7 +37,7 @@ def load_config(config_path: str = "config/google-ads.yaml") -> dict:
     for key in required:
         val = config.get(key, "")
         if not val or "INSERT_" in str(val):
-            print(f"ERROR: Please fill in '{key}' in {config_path}")
+            logger.error("Please fill in '%s' in %s", key, config_path)
             sys.exit(1)
 
     return config
@@ -69,7 +74,7 @@ def create_campaign_budget(client, customer_id: str, budget_amount_micros: int) 
         customer_id=customer_id, operations=[budget_operation]
     )
     budget_resource = response.results[0].resource_name
-    print(f"Created budget: {budget_resource}")
+    logger.info("Created budget: %s", budget_resource)
     return budget_resource
 
 
@@ -111,7 +116,7 @@ def create_pmax_campaign(
         customer_id=customer_id, operations=[campaign_operation]
     )
     campaign_resource = response.results[0].resource_name
-    print(f"Created PMax campaign: {campaign_resource}")
+    logger.info("Created PMax campaign: %s", campaign_resource)
     return campaign_resource
 
 
@@ -137,7 +142,7 @@ def create_asset_group(
         customer_id=customer_id, operations=[operation]
     )
     asset_group_resource = response.results[0].resource_name
-    print(f"Created asset group: {asset_group_resource}")
+    logger.info("Created asset group: %s", asset_group_resource)
     return asset_group_resource
 
 
@@ -221,7 +226,7 @@ def create_text_assets(client, customer_id: str, asset_group_resource: str):
     asset_group_asset_service.mutate_asset_group_assets(
         customer_id=customer_id, operations=link_operations
     )
-    print(f"Created and linked {len(link_operations)} text assets")
+    logger.info("Created and linked %d text assets", len(link_operations))
 
 
 def create_listing_group_filter(
@@ -244,7 +249,7 @@ def create_listing_group_filter(
     response = service.mutate_asset_group_listing_group_filters(
         customer_id=customer_id, operations=[operation]
     )
-    print(f"Created listing group filter: {response.results[0].resource_name}")
+    logger.info("Created listing group filter: %s", response.results[0].resource_name)
 
 
 def main():
@@ -268,7 +273,18 @@ def main():
         action="store_true",
         help="Validate config without creating anything",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose (debug) logging",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress info messages, show only warnings and errors",
+    )
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet)
 
     config = load_config(args.config)
     customer_id = str(config["customer_id"]).replace("-", "")
@@ -288,27 +304,27 @@ def main():
 
     try:
         # Step 1: Create budget
-        print("Step 1/5: Creating campaign budget...")
+        logger.info("Step 1/5: Creating campaign budget...")
         budget_resource = create_campaign_budget(client, customer_id, budget_micros)
 
         # Step 2: Create PMax campaign
-        print("Step 2/5: Creating Performance Max campaign...")
+        logger.info("Step 2/5: Creating Performance Max campaign...")
         campaign_resource = create_pmax_campaign(
             client, customer_id, budget_resource, merchant_center_id
         )
 
         # Step 3: Create asset group
-        print("Step 3/5: Creating asset group...")
+        logger.info("Step 3/5: Creating asset group...")
         asset_group_resource = create_asset_group(
             client, customer_id, campaign_resource
         )
 
         # Step 4: Create and link text assets
-        print("Step 4/5: Creating text assets (headlines, descriptions)...")
+        logger.info("Step 4/5: Creating text assets (headlines, descriptions)...")
         create_text_assets(client, customer_id, asset_group_resource)
 
         # Step 5: Create listing group filter (include all products)
-        print("Step 5/5: Creating product listing group filter...")
+        logger.info("Step 5/5: Creating product listing group filter...")
         create_listing_group_filter(client, customer_id, asset_group_resource)
 
         print()
@@ -324,12 +340,12 @@ def main():
         print("=" * 60)
 
     except GoogleAdsException as ex:
-        print(f"Google Ads API error: {ex.failure.errors[0].message}")
+        logger.error("Google Ads API error: %s", ex.failure.errors[0].message)
         for error in ex.failure.errors:
-            print(f"  Error: {error.message}")
+            logger.error("Error: %s", error.message)
             if error.location:
                 for field in error.location.field_path_elements:
-                    print(f"  Field: {field.field_name}")
+                    logger.error("Field: %s", field.field_name)
         sys.exit(1)
 
 

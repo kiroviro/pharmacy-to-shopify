@@ -5,11 +5,14 @@ Shared client for Shopify Admin API (REST and GraphQL).
 Handles authentication, rate limiting, and error handling.
 """
 
+import logging
 import time
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 from urllib.parse import urljoin
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class ShopifyAPIClient:
@@ -112,23 +115,23 @@ class ShopifyAPIClient:
             # Handle rate limiting
             if response.status_code == 429:
                 retry_after = int(response.headers.get("Retry-After", 5))
-                print(f"  Rate limited, waiting {retry_after}s...")
+                logger.warning("Rate limited, waiting %ds...", retry_after)
                 time.sleep(retry_after)
                 return self.rest_request(method, endpoint, data, timeout)
 
             # Check for errors
             if response.status_code >= 400:
                 error_msg = response.text[:200]
-                print(f"  API Error {response.status_code}: {error_msg}")
+                logger.error("API Error %d: %s", response.status_code, error_msg)
                 return None
 
             return response.json()
 
         except requests.exceptions.Timeout:
-            print(f"  Request timeout: {endpoint}")
+            logger.error("Request timeout: %s", endpoint)
             return None
         except requests.exceptions.RequestException as e:
-            print(f"  Request failed: {e}")
+            logger.error("Request failed: %s", e)
             return None
 
     def graphql_request(
@@ -164,29 +167,29 @@ class ShopifyAPIClient:
             # Handle rate limiting
             if response.status_code == 429:
                 retry_after = int(response.headers.get("Retry-After", 5))
-                print(f"  Rate limited, waiting {retry_after}s...")
+                logger.warning("Rate limited, waiting %ds...", retry_after)
                 time.sleep(retry_after)
                 return self.graphql_request(query, variables, timeout)
 
             # Check for HTTP errors
             if response.status_code >= 400:
-                print(f"  API Error {response.status_code}: {response.text[:200]}")
+                logger.error("API Error %d: %s", response.status_code, response.text[:200])
                 return None
 
             result = response.json()
 
             # Check for GraphQL errors
             if "errors" in result:
-                print(f"  GraphQL Errors: {result['errors']}")
+                logger.error("GraphQL Errors: %s", result['errors'])
                 return None
 
             return result.get("data")
 
         except requests.exceptions.Timeout:
-            print(f"  GraphQL request timeout")
+            logger.error("GraphQL request timeout")
             return None
         except requests.exceptions.RequestException as e:
-            print(f"  Request failed: {e}")
+            logger.error("Request failed: %s", e)
             return None
 
     def test_connection(self) -> bool:
@@ -199,6 +202,6 @@ class ShopifyAPIClient:
         result = self.rest_request("GET", "shop.json")
         if result and "shop" in result:
             shop_name = result["shop"].get("name", "Unknown")
-            print(f"  Connected to: {shop_name}")
+            logger.info("Connected to: %s", shop_name)
             return True
         return False
