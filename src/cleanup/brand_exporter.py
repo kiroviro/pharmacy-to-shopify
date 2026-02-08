@@ -16,12 +16,13 @@ import csv
 import io
 import os
 import shutil
-import sys
 from collections import Counter, defaultdict
 from typing import Dict, List, Set, Optional, Tuple
 
+from ..common.csv_utils import configure_csv
+
 # Configure CSV for large fields
-csv.field_size_limit(sys.maxsize)
+configure_csv()
 
 DEFAULT_MAX_SIZE_MB = 14  # 14MB to stay safely under Shopify's 15MB limit
 

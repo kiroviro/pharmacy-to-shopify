@@ -14,7 +14,6 @@ from .menus import ShopifyMenuCreator
 from .csv_exporter import (
     ShopifyCSVExporter,
     SHOPIFY_FIELDNAMES,
-    remove_source_references,
 )
 
 __all__ = [
@@ -27,5 +26,4 @@ __all__ = [
     # CSV Export
     'ShopifyCSVExporter',
     'SHOPIFY_FIELDNAMES',
-    'remove_source_references',
 ]

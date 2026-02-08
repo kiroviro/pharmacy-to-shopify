@@ -2,15 +2,15 @@
 Shopify CSV Exporter
 
 Exports products to Shopify-compatible CSV format (Official Template).
-Handles all 55 columns of the Shopify product import format.
+Handles all 56 columns of the Shopify product import format.
 """
 
 import csv
 import os
-import re
 from typing import List, Dict, Optional
 
 from ..models import ExtractedProduct, ProductImage
+from ..common.text_utils import remove_source_references
 from ..common.csv_utils import configure_csv
 
 # Configure CSV for large fields
@@ -39,36 +39,6 @@ SHOPIFY_FIELDNAMES = [
     'Google Shopping / Custom label 2', 'Google Shopping / Custom label 3',
     'Google Shopping / Custom label 4'
 ]
-
-
-def remove_source_references(text: str, source_domain: str = "benu.bg") -> str:
-    """
-    Remove all references to source domain from text.
-
-    Args:
-        text: Text that may contain source references
-        source_domain: Domain to remove (default: benu.bg)
-
-    Returns:
-        Cleaned text without source references
-    """
-    if not text:
-        return text
-
-    # Remove URLs containing the domain
-    text = re.sub(rf'https?://[^\s]*{re.escape(source_domain)}[^\s]*', '', text)
-
-    # Remove mentions of the domain (case insensitive)
-    text = re.sub(rf'\b{re.escape(source_domain)}\b', '', text, flags=re.IGNORECASE)
-
-    # Remove the domain name without TLD
-    domain_name = source_domain.split('.')[0]
-    text = re.sub(rf'\b{re.escape(domain_name)}\b', '', text, flags=re.IGNORECASE)
-
-    # Clean up extra whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
-
-    return text
 
 
 class ShopifyCSVExporter:

@@ -65,7 +65,7 @@ class BenuExtractor:
         """Extract all product data."""
         title = self._extract_title()
         brand = self._extract_brand(title)
-        categories = self._extract_categories()
+        categories = self._extract_categories(title)
         price_bgn, price_eur = self._extract_prices()
         sku = self._extract_sku()
 
@@ -209,10 +209,11 @@ class BenuExtractor:
         """Extract availability status (not used - inventory not tracked)."""
         return ""
 
-    def _extract_categories(self) -> List[str]:
+    def _extract_categories(self, product_title: str = "") -> List[str]:
         """Extract category breadcrumb."""
         categories = []
-        product_title = self._extract_title()
+        if not product_title:
+            product_title = self._extract_title()
 
         # Try JSON-LD BreadcrumbList
         scripts = self.soup.find_all("script", type="application/ld+json")

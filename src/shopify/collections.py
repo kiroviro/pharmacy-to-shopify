@@ -64,11 +64,19 @@ class ShopifyCollectionCreator:
             if not result:
                 break
 
-            for collection in result.get("smart_collections", []):
+            collections = result.get("smart_collections", [])
+            if not collections:
+                break
+
+            for collection in collections:
                 existing.add(collection.get("title", "").lower())
 
-            # Simple implementation - just get first page
-            endpoint = None
+            # Paginate using since_id when a full page is returned
+            if len(collections) == 250:
+                last_id = collections[-1]["id"]
+                endpoint = f"smart_collections.json?limit=250&since_id={last_id}"
+            else:
+                endpoint = None
 
         print(f"  Found {len(existing)} existing smart collections")
         return existing

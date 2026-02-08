@@ -119,6 +119,7 @@ def main():
         output_csv=output_csv,
         delay=args.delay,
         save_failed_html=args.save_failed_html,
+        source_domain=site,
     )
 
     # Run extraction

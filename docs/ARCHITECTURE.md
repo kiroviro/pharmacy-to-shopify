@@ -106,7 +106,7 @@ Shopify integration for export and API operations.
 
 | Module | Class | Purpose |
 |--------|-------|---------|
-| `csv_exporter.py` | `ShopifyCSVExporter` | Export to 55-column Shopify CSV |
+| `csv_exporter.py` | `ShopifyCSVExporter` | Export to 56-column Shopify CSV |
 | `api_client.py` | `ShopifyAPIClient` | REST/GraphQL client with rate limiting |
 | `collections.py` | `ShopifyCollectionCreator` | Create smart collections |
 | `menus.py` | `ShopifyMenuCreator` | Create navigation menus |
@@ -335,7 +335,7 @@ Four storefront filters are populated during extraction:
 
 ## Output Formats
 
-### Shopify CSV (55 columns)
+### Shopify CSV (56 columns)
 
 Standard Shopify product import format with 2 custom metafield columns:
 - One main row per product

@@ -12,7 +12,6 @@ Usage:
 
 import argparse
 import json
-import re
 import sys
 import os
 from dataclasses import asdict
@@ -24,25 +23,6 @@ from src.extraction import (
 )
 from src.shopify import ShopifyCSVExporter
 from src.models import ExtractedProduct
-
-
-def remove_source_references(text: str, site: str) -> str:
-    """Remove references to source site from text."""
-    if not text:
-        return text
-
-    # Remove URLs containing the site domain
-    text = re.sub(rf'https?://[^\s]*{re.escape(site)}[^\s]*', '', text)
-
-    # Remove mentions of the site (case insensitive)
-    site_name = site.replace(".bg", "")
-    text = re.sub(rf'\b{re.escape(site)}\b', '', text, flags=re.IGNORECASE)
-    text = re.sub(rf'\b{re.escape(site_name)}\b', '', text, flags=re.IGNORECASE)
-
-    # Clean up extra whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
-
-    return text
 
 
 def print_report(product: ExtractedProduct, validation: dict, product_type: str = "unknown", site: str = ""):
@@ -205,16 +185,10 @@ def main():
 
         print(f"\nResults saved to: {output_json}")
 
-        # Clean source references
-        product.title = remove_source_references(product.title, site)
-        product.description = remove_source_references(product.description, site)
-        product.seo_title = remove_source_references(product.seo_title, site)
-        product.seo_description = remove_source_references(product.seo_description, site)
-
-        # Save Shopify CSV
+        # Save Shopify CSV (source references cleaned by exporter)
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         csv_exporter = ShopifyCSVExporter(source_domain=site)
-        csv_exporter.export_single(product, output_csv, clean_source_refs=False)
+        csv_exporter.export_single(product, output_csv)
         print(f"Shopify CSV saved to: {output_csv}")
 
         # Verbose output

@@ -13,17 +13,16 @@ Features:
 import csv
 import json
 import os
-import sys
 import time
-from dataclasses import asdict
 from datetime import datetime
 from typing import List, Dict, Optional, Set
 
 from ..models import ExtractedProduct, ProductImage
-from ..shopify import SHOPIFY_FIELDNAMES, remove_source_references
+from ..shopify import ShopifyCSVExporter, SHOPIFY_FIELDNAMES
+from ..common.csv_utils import configure_csv
 
 # Configure CSV for large fields
-csv.field_size_limit(sys.maxsize)
+configure_csv()
 
 
 class BulkExtractor:
@@ -35,6 +34,7 @@ class BulkExtractor:
         output_dir: str = "output",
         delay: float = 1.0,
         save_failed_html: bool = False,
+        source_domain: str = "benu.bg",
     ):
         """
         Initialize the bulk extractor.
@@ -44,6 +44,7 @@ class BulkExtractor:
             output_dir: Directory for output files and state
             delay: Delay between requests in seconds
             save_failed_html: Whether to save HTML of failed pages
+            source_domain: Source domain for cleaning references from text
         """
         self.output_csv = output_csv
         self.output_dir = output_dir
@@ -65,7 +66,8 @@ class BulkExtractor:
         # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
 
-        # CSV fieldnames
+        # CSV exporter (single source of truth for row generation)
+        self._csv_exporter = ShopifyCSVExporter(source_domain=source_domain)
         self.fieldnames = SHOPIFY_FIELDNAMES
 
     def load_state(self) -> bool:
@@ -147,100 +149,17 @@ class BulkExtractor:
         """
         Convert product to CSV rows (1 main row + N-1 image rows).
 
+        Delegates to ShopifyCSVExporter for the single source of truth
+        on CSV column layout.
+
         Args:
             product: Product to convert
 
         Returns:
             List of row dictionaries
         """
-        rows = []
-
-        # Clean source references
-        product.title = remove_source_references(product.title)
-        product.description = remove_source_references(product.description)
-        product.seo_title = remove_source_references(product.seo_title)
-        product.seo_description = remove_source_references(product.seo_description)
-
-        # Prepare common fields
-        tags_str = ', '.join(product.tags)
-        published = 'TRUE' if product.published else 'FALSE'
-        requires_shipping = 'TRUE' if product.requires_shipping else 'FALSE'
-        continue_selling = 'deny' if product.inventory_policy == 'deny' else 'continue'
-
-        # Determine status based on product type (prescription = draft)
-        status = 'Draft' if product.availability == "Само с рецепта" else 'Active'
-
-        # First row: Product + first image
-        first_row = {
-            'Title': product.title,
-            'URL handle': product.handle,
-            'Description': product.description,
-            'Vendor': product.brand,
-            'Product category': '',
-            'Type': product.product_type,
-            'Tags': tags_str,
-            'Published on online store': published,
-            'Status': status,
-            'SKU': product.sku,
-            'Barcode': product.barcode,
-            'Option1 name': '',
-            'Option1 value': '',
-            'Option1 Linked To': '',
-            'Option2 name': '',
-            'Option2 value': '',
-            'Option2 Linked To': '',
-            'Option3 name': '',
-            'Option3 value': '',
-            'Option3 Linked To': '',
-            'Price': product.price,
-            'Compare-at price': product.original_price if product.original_price else '',
-            'Cost per item': '',
-            'Charge tax': 'TRUE',
-            'Tax code': '',
-            # TODO: Make inventory configurable via CLI argument
-            'Inventory tracker': 'shopify',
-            'Inventory quantity': 11,  # Hardcoded - see README Known Issues
-            'Continue selling when out of stock': continue_selling,
-            'Weight value (grams)': product.weight_grams if product.weight_grams > 0 else '',
-            'Weight unit for display': 'g' if product.weight_grams > 0 else '',
-            'Requires shipping': requires_shipping,
-            'Fulfillment service': 'manual',
-            'Product image URL': product.images[0].source_url if product.images else '',
-            'Image position': '1' if product.images else '',
-            'Image alt text': product.images[0].alt_text if product.images else '',
-            'Variant image URL': '',
-            'Gift card': 'FALSE',
-            'SEO title': product.seo_title,
-            'SEO description': product.seo_description,
-            'Color (product.metafields.shopify.color-pattern)': '',
-            'Форма (product.metafields.custom.application_form)': product.application_form,
-            'За кого (product.metafields.custom.target_audience)': product.target_audience,
-            'Google Shopping / Google product category': product.google_product_category,
-            'Google Shopping / Gender': 'Unisex',
-            'Google Shopping / Age group': product.google_age_group,
-            'Google Shopping / Manufacturer part number (MPN)': product.google_mpn,
-            'Google Shopping / Ad group name': '',
-            'Google Shopping / Ads labels': '',
-            'Google Shopping / Condition': 'new',
-            'Google Shopping / Custom product': 'FALSE',
-            'Google Shopping / Custom label 0': product.brand,
-            'Google Shopping / Custom label 1': product.category_path[0] if product.category_path else '',
-            'Google Shopping / Custom label 2': '',
-            'Google Shopping / Custom label 3': '',
-            'Google Shopping / Custom label 4': '',
-        }
-        rows.append(first_row)
-
-        # Additional rows for images 2+
-        for i, img in enumerate(product.images[1:], start=2):
-            image_row = {key: '' for key in self.fieldnames}
-            image_row['URL handle'] = product.handle
-            image_row['Product image URL'] = img.source_url
-            image_row['Image position'] = str(i)
-            image_row['Image alt text'] = img.alt_text
-            rows.append(image_row)
-
-        return rows
+        self._csv_exporter.clean_product(product)
+        return self._csv_exporter.product_to_rows(product)
 
     def extract_all(
         self,
@@ -376,7 +295,7 @@ class BulkExtractor:
 
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(response.text)
-        except:
+        except Exception:
             pass
 
     def _print_summary(self, total_attempted: int):
