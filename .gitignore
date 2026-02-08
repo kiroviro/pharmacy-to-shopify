@@ -31,14 +31,12 @@ data/*/raw/*.csv
 data/*/raw/*.json
 data/*/raw/*.txt
 data/*/processed/*.csv
-output/*/*.csv
-output/*/*.json
-output/*.json
-output/*.txt
+
+# Output files (generated)
+output/
 
 # Keep directory structure
 !data/*/.gitkeep
-!output/*/.gitkeep
 
 # Reports (generated)
 reports/*/*.txt
