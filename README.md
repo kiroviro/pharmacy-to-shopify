@@ -27,12 +27,12 @@ This is not about copyright infringement. It is about enabling a vendor's own cu
 
 ```
 Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
-(sitemap)          (structured data)      (55-column)      (Admin > Products)
+(sitemap)          (structured data)      (56-column)      (Admin > Products)
 ```
 
 1. **Discover** -- fetch all product URLs from the vendor's sitemap
 2. **Extract** -- parse each product page for title, price, description, images, categories
-3. **Export** -- generate Shopify-compatible CSV (55-column template with custom metafields)
+3. **Export** -- generate Shopify-compatible CSV (56-column template with custom metafields)
 4. **Import** -- upload CSV to Shopify Admin for direct product creation
 
 ---
@@ -70,14 +70,14 @@ python3 export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --
 - **Content sections** -- product details, composition, usage instructions, contraindications
 - **Brand matching** -- 450+ known pharmacy brands
 - **Image URL resolution** -- rewrites vendor `uploads/` paths to CDN `product_view_default/` for higher quality images that work for all products, with HEAD-request validation and automatic fallback
-- **95%+ compliance** with Shopify product specification
+- **High compliance** with Shopify product specification (validated via `src/extraction/validator.py`)
 
 ### Shopify Integration
-- **55-column CSV format** -- Shopify product import template with 2 custom metafields for storefront filters
+- **56-column CSV format** -- Shopify product import template with 2 custom metafields for storefront filters
 - **Original image URLs** -- Shopify fetches and caches images from source during import
 - **Sidebar filters** -- Brand (Vendor), Product Type (L1 category), Application Form, and Target Audience as storefront filters with Bulgarian labels
 - **Smart collections** -- breadcrumb categories exported as tags for automatic collection rules
-- **Dual currency** -- BGN and EUR prices for Bulgaria's Euro transition
+- **Dual currency** -- BGN (primary) and EUR prices exported to CSV for Bulgaria's Euro transition
 - **Clean data** -- source site references automatically stripped from text fields
 
 ### Workflow Tools
@@ -138,7 +138,7 @@ webcrawler-shopify/
 │   │   └── benu_discoverer.py     # Sitemap-based URL discovery
 │   │
 │   ├── shopify/                   # Shopify integration
-│   │   ├── csv_exporter.py        # 55-column CSV export
+│   │   ├── csv_exporter.py        # 56-column CSV export
 │   │   ├── api_client.py          # Shopify Admin API client
 │   │   ├── collections.py         # Smart collection creation
 │   │   └── menus.py               # Navigation menu creation
@@ -349,11 +349,12 @@ Create and manage Google Ads Performance Max campaigns via the API to drive traf
 
 ### What the Campaign Script Creates
 
-- **Campaign budget** -- daily budget (default $20, configurable via `--budget`)
+- **Campaign budget** -- daily budget (default €20, configurable via `--budget`)
 - **Performance Max campaign** -- linked to Merchant Center product feed, using Maximize Conversion Value bidding
 - **Asset group** -- with `viapharma.us` as the landing page
-- **Text assets** -- 5 headlines, 2 long headlines, 4 descriptions, business name
+- **Text assets** -- 5 headlines, 2 long headlines, 4 descriptions in Bulgarian, business name
 - **Listing group filter** -- includes all products from the Merchant Center feed
+- **Target market** -- Bulgaria (Bulgarian language ads)
 
 The campaign is created in **PAUSED** state. Review it in the Google Ads UI, add image assets (logo, marketing images), and enable when ready.
 

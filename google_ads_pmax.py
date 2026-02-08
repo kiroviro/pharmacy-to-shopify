@@ -146,25 +146,25 @@ def create_text_assets(client, customer_id: str, asset_group_resource: str):
     asset_service = client.get_service("AssetService")
     asset_group_asset_service = client.get_service("AssetGroupAssetService")
 
-    # Define text assets
+    # Define text assets (Bulgarian market - prices in BGN, free shipping over 68 лв / ~€35)
     headlines = [
-        "ViaPharma - Online Pharmacy",
-        "Vitamins & Supplements",
-        "Bulgarian Pharmacy in USA",
-        "Free Shipping Over $50",
-        "9000+ Health Products",
+        "ViaPharma - Онлайн Аптека",
+        "Витамини и Добавки",
+        "Вашата онлайн аптека",
+        "Безплатна доставка над 68лв",
+        "10000+ Здравни Продукти",
     ]
 
     long_headlines = [
-        "Your Trusted Bulgarian Online Pharmacy in the USA",
-        "Vitamins, Supplements & Cosmetics Delivered to Your Door",
+        "Вашата доверена онлайн аптека в България",
+        "Витамини, добавки и козметика с доставка до вратата",
     ]
 
     descriptions = [
-        "Shop vitamins, supplements, cosmetics & health products. Fast delivery across the USA.",
-        "Trusted Bulgarian pharmacy with 9000+ products. Free shipping on orders over $50.",
-        "Quality health products for the whole family. Medicines, vitamins & cosmetics.",
-        "Your online pharmacy for Bulgarian health & beauty products in America.",
+        "Пазарувайте витамини, добавки, козметика и здравни продукти. Бърза доставка в България.",
+        "Доверена онлайн аптека с 10000+ продукта. Безплатна доставка над 68 лв.",
+        "Качествени здравни продукти за цялото семейство. Лекарства, витамини и козметика.",
+        "Вашата онлайн аптека за здраве и красота с европейско качество.",
     ]
 
     business_name = "ViaPharma"
