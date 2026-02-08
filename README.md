@@ -1,25 +1,38 @@
 # Pharmacy Product Catalogue Tool
 
-Extracts product catalogues from pharmacy vendor websites and generates Shopify-compatible CSV files for import.
+Extracts product catalogues from pharmacy vendor websites, generates Shopify-compatible CSV files, and automates the entire store setup -- collections, navigation, filters, translations, and Google Ads campaigns.
 
-**See it live:** [viapharma.us](https://viapharma.us) -- a Shopify store built entirely from data extracted by this tool.
+**See it live:** [viapharma.us](https://viapharma.us) -- a fully operational Shopify store with 11,000+ products, built entirely with this pipeline.
 
 ---
 
 ## Why This Project Exists
 
-Small pharmacies are under pressure to go digital. They need online product catalogues, but:
+Small pharmacies in Bulgaria face a structural disadvantage. Their wholesale vendors -- like BENU (Phoenix Pharma) -- sell directly to consumers online with full product catalogues. But they don't share product data with the small pharmacies they supply. There's no API, no data feed, no export.
 
-- They have **no IT support** -- most are single-owner businesses
-- Their wholesale vendors sell products online themselves, but **don't share product data** with the small pharmacies they supply
-- There is **no API, no data export, no catalogue feed** available to these small business customers
-- Building a product catalogue from scratch -- with descriptions, images, categories, and pricing for thousands of products -- is not feasible manually
+The result: a single-owner pharmacy that wants to go digital has to build a catalogue of thousands of products from scratch -- titles, descriptions, images, categories, pricing, pharmaceutical metadata -- all in Bulgarian. That's not feasible without an IT team.
 
-This tool bridges that gap. It extracts product data from vendor websites and transforms it into Shopify-ready CSV files that a small pharmacy can import directly into their online store.
+This tool closes that gap. It extracts product data from vendor websites, transforms it into Shopify-ready format, and automates the entire store setup -- collections, navigation, filters, translations, and even Google Ads campaigns. The live result is [viapharma.us](https://viapharma.us), a fully operational Shopify store with 11,000+ products, built entirely with this pipeline.
 
-This is not about copyright infringement. It is about enabling a vendor's own customers to access product information they already sell through that vendor. The data is publicly available on the vendor's website -- this tool simply restructures it for a different use case.
+### More than a web scraper
 
-**Built entirely with [Claude Code](https://docs.anthropic.com/en/docs/claude-code)** -- AI as a bridge builder for small businesses without developers.
+The gap between "scraping product pages" and "running a live store" is enormous. This project covers that entire gap:
+
+| Stage | Typical scraper | This project |
+|-------|----------------|--------------|
+| **Data extraction** | Dump raw HTML | Multi-source structured extraction with fallback chains, validation, 95%+ Shopify compliance |
+| **Data quality** | Raw output | Tag normalization, brand matching (450+), promotional pattern stripping, category inference |
+| **Store setup** | Manual | Automated collections, menus, sidebar filters, Bulgarian translations, theme customization |
+| **Marketing** | Nothing | Google Ads Performance Max campaign creation linked to product feed |
+| **Localization** | Nothing | Full Bulgarian language support -- filter labels, sort options, theme strings, transliteration |
+
+### On data and ethics
+
+This tool restructures publicly available product information so that a vendor's own wholesale customers can present the same products they already purchase and resell. No proprietary data is accessed -- everything extracted is visible on the public-facing vendor website. The goal is equity: giving small pharmacies the same digital presence their suppliers already have.
+
+### Built with AI
+
+**Built entirely with [Claude Code](https://docs.anthropic.com/en/docs/claude-code)** -- from the first line of code to the live store. This project demonstrates that a small business owner, working with AI tools, can build production-quality software that solves a real business problem -- without a traditional engineering team. Claude Code also serves as an ongoing operational tool for store management: theme customization, filter configuration, collection creation, and more.
 
 ---
 
