@@ -312,6 +312,14 @@ client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
 - Added category search input to `/collections` page (`main-list-collections.liquid`)
 - Uploaded 4 trust badge SVG icons and wired into collection + product multicolumn sections (Оригинални лекарства, Поддръжка след покупка, Бърза и сигурна доставка, Достъпно здравеопазване)
 - Uploaded 3 collection promo/banner images (2 inline promo cards + 1 discount banner)
+- Compact header: reduced padding from 22px to 4px, logo from 175px to 100px, created `assets/custom-header-compact.css` with aggressive mobile overrides (85px logo, 3rem search bar, minimal gaps)
+- Switched header menu from `main-menu` (flat links) to `categories-menu` (full category tree with 6 categories and 82 subcategories)
+- Shortened long menu item names via GraphQL `menuUpdate`: "Медицински изделия и консумативи" → "Медицински изделия", "Здравословно хранене чайове и билки" → "Здравословно хранене"
+- Compact collection banner: set `banner_height` to small, reduced padding to 10px, added CSS override `min-height: auto !important` for all banner sizes, reduced product grid top padding from 130px to 20px
+- Removed author name from blog posts (`templates/article.json`: removed `author` block)
+- Disabled "От нашия блог" featured blog section on article pages (`templates/article.json`)
+- Hidden author name on homepage blog section (`templates/index.json`: `show_author: false` in featured-blog section)
+- Translated breadcrumb "Home" → "Начало" across all sections: `main-article.liquid`, `main-blog.liquid`, `main-collection-banner.liquid`, `main-list-collections.liquid`, `main-product.liquid`
 
 ---
 

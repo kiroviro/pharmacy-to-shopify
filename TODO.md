@@ -1,106 +1,74 @@
-# TODO: Storefront Images
+# TODO
 
-## Homepage Theme Images (DONE)
+## Portfolio & Repo Hygiene
 
-Uploaded as shop images in Shopify Admin > Content > Files, referenced in Theme Customizer.
+These items are about making the repo presentable as a public portfolio piece on GitHub. They don't change runtime behavior but they're what hiring managers and senior engineers look at first.
 
-| # | Section | Status |
-|---|---------|--------|
-| 1 | Hero banner | Done |
-| 2 | Promo: Витамини | Done |
-| 3 | Promo: Козметика | Done |
-| 4 | Collage: Грижа за лице | Done |
-| 5 | Collage: Майка и дете | Done |
-| 6 | Collage: Медицински изделия | Done |
-
-## Collection Card Images (DONE)
-
-Uploaded via Shopify Admin > Products > Collections > select collection > edit image.
-
-| # | Collection | Status |
-|---|-----------|--------|
-| 7 | Лечение и здраве | Done |
-| 8 | Козметика | Done |
-| 9 | Майка и дете | Done |
-| 10 | Медицински изделия | Done |
-| 11 | Спорт | Done |
-| 12 | Здравословно хранене | Done |
-
-## Collection Page Images (DONE)
-
-| # | Image | Section | Status |
-|---|-------|---------|--------|
-| 13 | Promo Card 1 (Горещи оферти) | `promo_yaghg4` in product-grid | Done -- `Promo_card_1.png` |
-| 14 | Promo Card 2 (ВИЖ ПОВЕЧЕ) | `promo_zj3gnd` in product-grid | Done -- `Promo_card_11.png` |
-| 15 | Discount Banner (Спестете до 50%) | `collection_discount_banner` | Done -- `Discount_banner.png` |
-
-## Trust Badge Icons (DONE)
-
-Created as SVG line icons matching theme palette (#1DA1D4 / #0A3244 / #EBF6FB). Uploaded via GraphQL staged uploads and wired into `multicolumn_xFpxpe` (collection) and `multicolumn_TPpXaJ` (product) sections.
-
-| # | Badge | File | Status |
-|---|-------|------|--------|
-| 16 | Оригинални лекарства | `icon-original-medicines.svg` | Done |
-| 17 | Поддръжка след покупка | `icon-support.svg` | Done |
-| 18 | Бърза и сигурна доставка | `icon-fast-delivery.svg` | Done |
-| 19 | Достъпно здравеопазване | `icon-affordable-healthcare.svg` | Done |
-
-## Remaining
-
-| # | Image | Location | Status |
-|---|-------|----------|--------|
-| 20-29 | Brand logos (10) | Homepage brand slider/grid | Pending |
-| 30-32 | Testimonial avatars (3) | Collection page: Мария К., Георги П., Елена Д. | Pending |
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| 1 | **Add LICENSE file** — MIT or Apache 2.0. Without a license the repo is legally "all rights reserved" and cannot be forked, evaluated, or referenced properly. This is the single most checked thing on any public repo. | S | |
+| 2 | **Commit untracked files** — `tests/`, `pyproject.toml`, `requirements-dev.txt`, `src/common/log_config.py` are all untracked. The 140-test suite is invisible to anyone cloning the repo. | S | |
+| 3 | **Add GitHub Actions CI** — `.github/workflows/ci.yml` running `pytest` and `ruff check` on push. Even a 15-line workflow file signals engineering discipline. | S | |
+| 4 | **Add a Makefile** — `make test`, `make lint`, `make install`. Standard developer convenience. Shows you think about onboarding. | S | |
+| 5 | **Move CLI scripts into `scripts/`** — 13 `.py` files in the project root (`discover_urls.py`, `bulk_extract.py`, `export_by_brand.py`, etc.) make the repo look cluttered at first glance. Move to `scripts/` or behind a single CLI entry point. | M | |
+| 6 | **Add `.env.example` and `config/google-ads.yaml.example`** — credentials are properly gitignored, but there's no template showing what keys are needed. Standard practice for onboarding. | S | |
+| 7 | **Trim README, move deep content to `docs/`** — README is 428 lines. The first 30 seconds matter. Keep the hook, quick start, and architecture overview in README. Move theme customization details, Google Ads setup, workflow examples, and SKU/barcode deep-dives into `docs/`. | M | |
+| 8 | **Add a screenshot or architecture diagram** — a Mermaid diagram or a screenshot of the live store in the README header gives instant visual context. | S | |
+| 9 | **Remove `TODO.md` from repo or rename to `ROADMAP.md`** — once these items are addressed, a public repo shouldn't ship with a raw internal task list. A "Roadmap" section in docs is fine. | S | |
 
 ---
 
-# TODO: Code Quality & Engineering
+## Code Quality
 
-## P1 — Foundational (blocks everything else)
+### P1 — Bugs and incorrect behavior
 
-| # | Item | Effort | Status |
-|---|------|--------|--------|
-| 1 | **Add pytest test suite** — start with pure functions (`remove_source_references`, `transliterate`, `generate_handle`, `_extract_application_form`, `_extract_target_audience`, `_parse_weight`, price regex). Then integration tests for `ShopifyCSVExporter` and `BenuExtractor` with fixture HTML. Target ~80% coverage on `src/`. | L | Pending |
-| 2 | **Replace `print()` with `logging` module** — add `import logging` in all `src/` modules, keep `print()` only for user-facing CLI output (progress, summaries). Add `--verbose`/`--quiet` flags mapping to log levels. | M | Pending |
-| 3 | **Add `pyproject.toml` with packaging** — project metadata, pinned dependencies, `[project.scripts]` entry points for CLI commands. Add `requirements.lock` via `pip-compile` for reproducible builds. | M | Pending |
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| 10 | **Fix hardcoded `inventory_quantity = 11`** — `csv_exporter.py:126` ignores `product.inventory_quantity` entirely. Use the model field or accept it as a constructor parameter on `ShopifyCSVExporter`. | S | |
+| 11 | **Fix image alt text position mismatch** — after image deduplication, alt text still says "Снимка 1 от 3" when only 2 images survive. Positions and alt text should be recalculated post-dedup. | S | |
+| 12 | **Add timeouts to OAuth HTTP calls** — `shopify_oauth.py` has two `requests.post`/`requests.get` calls without `timeout=`. One hung call blocks the process forever. | S | |
 
-## P2 — Production reliability (causes real bugs)
+### P2 — Reliability
 
-| # | Item | Effort | Status |
-|---|------|--------|--------|
-| 4 | **Fix hardcoded inventory=11** in `csv_exporter.py:126` — use `product.inventory_quantity` or make configurable via `ShopifyCSVExporter` constructor. | S | Pending |
-| 5 | **Move EUR→BGN rate to config** — `benu_extractor.py:200` hardcodes `1.95583`. Move to `config/seo_settings.yaml` or dedicated currency config. | S | Pending |
-| 6 | **Add retry logic for transient API errors** — `api_client.py` returns `None` silently on 5xx/timeout. Add 2-3 retries with exponential backoff (use `tenacity` or `urllib3.util.Retry`). | M | Pending |
-| 7 | **Add context manager to `ShopifyAPIClient`** — `requests.Session` at `api_client.py:55` is never closed. Add `__enter__`/`__exit__` and use `with` pattern in scripts. | S | Pending |
-| 8 | **Add timeouts to all HTTP calls** — missing on: `shopify_delete_products.py:208` (file upload), `shopify_oauth.py:102,140` (token exchange/test). Also consider making image HEAD validation optional via `--skip-image-check` flag. | S | Pending |
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| 13 | **Add retry logic for Shopify API 5xx errors** — `api_client.py` returns `None` silently on server errors. Add 2-3 retries with exponential backoff. `urllib3.util.Retry` or `tenacity` are both fine. | M | |
+| 14 | **Close the `requests.Session`** — `api_client.py:58` creates a `requests.Session()` that's never closed. Add `__enter__`/`__exit__` so scripts can use `with ShopifyAPIClient(...) as client:`. | S | |
+| 15 | **Clean up temp file from bulk delete** — `shopify_delete_products.py` creates `shopify_bulk_delete.jsonl` and never removes it. Use `tempfile.NamedTemporaryFile` or delete on completion. | S | |
 
-## P3 — Code quality (slows you down over time)
+### P3 — Code hygiene
 
-| # | Item | Effort | Status |
-|---|------|--------|--------|
-| 9 | **Extract duplicated CSV reading to shared utils** — `_load_vendors_from_csv` duplicated in `collections.py`, `menus.py`, `tag_cleaner.py`. Same for tag counting. Move to `src/common/csv_utils.py`. | S | Pending |
-| 10 | **Deduplicate Google Ads config loading** — `google_ads_pmax.py:25-38` and `google_ads_create_account.py:21-34` have identical `load_config()`. Extract to shared module. | S | Pending |
-| 11 | **Break up large functions** — `BulkExtractor.extract_all()` (118 lines), `BrandExporter.export()` (119 lines), `shopify_delete_products.py:main()` (128 lines). Extract loop bodies and sub-steps into named methods. | M | Pending |
-| 12 | **Apply tag normalization during extraction or document gap** — `config/tag_normalization.yaml` defines canonical casing but `BenuExtractor` copies categories to tags with no normalization. Only applied by the separate `cleanup_tags.py` step. | S | Pending |
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| 16 | **Finish replacing `print()` with `logging`** — `log_config.py` exists and some modules use `logging`, but `bulk_extractor.py`, `tag_cleaner.py`, `brand_exporter.py`, `collections.py`, and `menus.py` still use ~94 `print()` calls for operational output. Keep `print()` only for user-facing CLI summaries. | M | |
+| 17 | **Add `mypy` in strict mode** — type hints are already used throughout `src/` but nothing enforces them. Add `[tool.mypy]` to `pyproject.toml` and fix incrementally. | M | |
+| 18 | **Complete `pyproject.toml`** — missing `authors`, `license`, `readme`, and `dependencies` (currently only in `requirements.txt`). Add `[project.scripts]` entry points so the tool is pip-installable. | S | |
+| 19 | **Deduplicate Google Ads `load_config()`** — `google_ads_pmax.py` and `google_ads_create_account.py` both define their own `load_config()` with near-identical logic (differ only in required fields list and error output). Extract to a shared helper. | S | |
 
-## P4 — Engineering hygiene (shows maturity)
+---
 
-| # | Item | Effort | Status |
-|---|------|--------|--------|
-| 13 | **Add GitHub Actions CI** — `.github/workflows/ci.yml` running `pytest`, `ruff check`, `mypy` on push. Add `pre-commit` config. | S | Pending |
-| 14 | **Add ruff + mypy configuration** — `ruff.toml` for linting/formatting, `mypy.ini` in strict mode on `src/`. Fix errors incrementally. | M | Pending |
-| 15 | **Validate price/sku in model `__post_init__`** — `product.py:107-112` only validates `title` and `url`. Products with `price=""` and `sku=""` pass silently. Either validate or give explicit defaults. | S | Pending |
-| 16 | **Make `clean_product()` non-mutating** — `csv_exporter.py:64-78` modifies the product in-place. Use `dataclasses.replace()` or document the mutation clearly. | S | Pending |
-| 17 | **Make Shopify API version configurable** — `api_client.py:35` pins `2024-01`. Move to config or constructor parameter. | S | Pending |
+## Deferred / Won't Do
 
-## P5 — Polish
+Items from the previous TODO that were reviewed and removed, with reasoning:
 
-| # | Item | Effort | Status |
-|---|------|--------|--------|
-| 18 | **Remove or integrate unused parsers** — `src/extraction/parsers/` (1,050 lines) imported but never used by `BenuExtractor`. | S | Pending |
-| 19 | **Clean up temp files** — `shopify_delete_products.py` creates `shopify_bulk_delete.jsonl` but never deletes it. | S | Pending |
-| 20 | **Fix OAuth handler shared state** — `shopify_oauth.py` uses class variables for `authorization_code`/`state_received`, would break with concurrent flows. | S | Pending |
-| 21 | **Fix image position sync after deduplication** — alt text says "Снимка 1 от 3" when only 2 images survive dedup. | S | Pending |
-| 22 | **Guard `_extract_categories` default path** — default `product_title=""` triggers redundant `_extract_title()` if called without argument from new code. | S | Pending |
+| Previous Item | Verdict | Why |
+|---------------|---------|-----|
+| **"Add pytest test suite"** | Already done | 140 tests exist across 18 files, all passing in 0.23s. |
+| **"Add `pyproject.toml`"** (as P1 blocker) | Already done | File exists with pytest + ruff config. Remaining gap is just metadata completeness (item #18 above). |
+| **"Add ruff configuration"** | Already done | Configured in `pyproject.toml` with E/F/W/I rules, line-length 120, target py39. |
+| **"Extract duplicated `_load_vendors_from_csv`"** | Already fixed or inaccurate | Function exists only in `collections.py`. `tag_cleaner.py` uses `load_vendor_defaults()` from config_loader. No duplication found. |
+| **"Move EUR→BGN rate 1.95583 to config"** | Won't do | This is the legally fixed conversion rate set by the EU Council when Bulgaria adopted the ERM II. It's not a market rate that changes — it's a constant by law, like `pi`. Extracting it to YAML config implies it might change, which is misleading. A code comment explaining this would be sufficient. |
+| **"parsers/ (1,050 lines) imported but never used"** | Inaccurate | Parsers have comprehensive test coverage (`test_structured_data.py`, `test_gtm_data.py`, `test_html_parser.py`). They're standalone parsing modules. `BenuExtractor` reimplements extraction inline, but the parsers aren't dead code — they're reusable components for future site extractors. |
+| **"Break up BulkExtractor.extract_all() (118 lines)"** | Low value | 118 lines for a batch orchestration method with progress tracking, resume logic, and error handling is not unreasonable. Splitting it would scatter the workflow across methods with no reuse benefit. |
+| **"Apply tag normalization during extraction"** | Won't do | The separate `cleanup_tags.py` step is intentional — it keeps extraction pure (extract what's there) and cleanup composable (run independently, idempotent). Coupling them would make the pipeline harder to debug. |
+| **"Make `clean_product()` non-mutating"** | Low value | The mutation happens once during CSV export on a product that's about to be serialized. Creating a copy via `dataclasses.replace()` for a write-once path adds allocation with no behavioral benefit. |
+| **"Validate price/sku in model `__post_init__`"** | Won't do | Empty price and SKU are valid extraction outcomes (product page may not have them). The model correctly represents incomplete data. Validation belongs in `SpecificationValidator`, which already flags these as warnings. |
+| **"Make Shopify API version configurable"** | Low value | The API version is a compatibility contract, not a user preference. Pinning it in code is correct — changing it requires testing against breaking changes, not a config edit. |
+| **"Fix OAuth handler shared state"** | Low value | `shopify_oauth.py` is a local dev-only CLI tool. It will never handle concurrent flows. Class variables are fine here. |
+| **"Guard `_extract_categories` default path"** | Low value | Defensive coding against hypothetical future misuse. The function is only called from `extract()` where `product_title` is always set. |
+| **"Add `pre-commit` config"** | Optional | CI catches the same issues. Pre-commit is nice but not a gap — it's preference. |
+| **Storefront images (brand logos, testimonial avatars)** | Removed | Shopify Admin operational tasks, not code TODOs. Doesn't belong in a code repository's task list. |
 
-Effort: **S** = small (< 1h), **M** = medium (1-4h), **L** = large (4h+)
+---
+
+Effort: **S** = small (< 1 hour), **M** = medium (1-4 hours)
