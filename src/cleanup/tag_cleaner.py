@@ -156,9 +156,6 @@ class TagCleaner:
         cleaned_tags = []
         l1_added = False
 
-        # Check if L1 category exists before cleaning
-        had_l1 = self._has_l1_category(tags)
-
         for tag in tags:
             # Skip empty tags
             if not tag.strip():

@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-from ..common.config_loader import load_categories
+from ..common.config_loader import load_categories, load_categories_3level
 from ..common.csv_utils import configure_csv
 from ..common.transliteration import generate_handle
 from .api_client import ShopifyAPIClient
@@ -80,119 +80,6 @@ class ShopifyMenuCreator:
 
         return menus
 
-    def get_collection_id_by_handle(self, handle: str) -> Optional[str]:
-        """Get collection ID by its handle."""
-        query = """
-        query getCollection($handle: String!) {
-            collectionByHandle(handle: $handle) {
-                id
-            }
-        }
-        """
-
-        result = self.client.graphql_request(query, {"handle": handle})
-        if result and result.get("collectionByHandle"):
-            return result["collectionByHandle"]["id"]
-        return None
-
-    def create_menu(self, title: str, handle: str) -> Optional[str]:
-        """Create a new menu and return its ID."""
-        if self.dry_run:
-            print(f"  [DRY RUN] Would create menu: {title} ({handle})")
-            return f"gid://shopify/Menu/dry-run-{handle}"
-
-        mutation = """
-        mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
-            menuCreate(title: $title, handle: $handle, items: $items) {
-                menu {
-                    id
-                    handle
-                    title
-                }
-                userErrors {
-                    field
-                    message
-                }
-            }
-        }
-        """
-
-        variables = {
-            "title": title,
-            "handle": handle,
-            "items": []
-        }
-
-        result = self.client.graphql_request(mutation, variables)
-
-        if result and result.get("menuCreate", {}).get("menu"):
-            menu = result["menuCreate"]["menu"]
-            logger.info("Created menu: %s (ID: %s)", menu['title'], menu['id'])
-            return menu["id"]
-
-        errors = result.get("menuCreate", {}).get("userErrors", []) if result else []
-        if errors:
-            logger.error("Failed to create menu: %s", errors)
-
-        return None
-
-    def add_menu_item(
-        self,
-        menu_id: str,
-        title: str,
-        url: str = None,
-        resource_id: str = None,
-        parent_item_id: str = None
-    ) -> Optional[str]:
-        """Add an item to a menu."""
-        if self.dry_run:
-            indent = "    " if parent_item_id else "  "
-            target = url or resource_id or "(no link)"
-            print(f"{indent}[DRY RUN] Would add: {title} -> {target}")
-            return f"gid://shopify/MenuItem/dry-run-{generate_handle(title)}"
-
-        # Build the item input
-        item_input = {"title": title}
-
-        if resource_id:
-            item_input["resourceId"] = resource_id
-        elif url:
-            item_input["url"] = url
-
-        mutation = """
-        mutation menuItemCreate($menuId: ID!, $item: MenuItemCreateInput!) {
-            menuItemCreate(menuId: $menuId, menuItem: $item) {
-                menuItem {
-                    id
-                    title
-                }
-                userErrors {
-                    field
-                    message
-                }
-            }
-        }
-        """
-
-        variables = {
-            "menuId": menu_id,
-            "item": item_input
-        }
-
-        result = self.client.graphql_request(mutation, variables)
-
-        if result and result.get("menuItemCreate", {}).get("menuItem"):
-            item = result["menuItemCreate"]["menuItem"]
-            indent = "    " if parent_item_id else "  "
-            logger.info("%sAdded: %s", indent, item['title'])
-            return item["id"]
-
-        errors = result.get("menuItemCreate", {}).get("userErrors", []) if result else []
-        if errors:
-            logger.error("Failed to add menu item: %s", errors)
-
-        return None
-
     def build_collection_url(self, handle: str) -> str:
         """Build collection URL from handle."""
         return f"/collections/{handle}"
@@ -201,15 +88,18 @@ class ShopifyMenuCreator:
         """Analyze tags from CSV and return tag counts."""
         tag_counts = Counter()
 
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row.get('Title', '').strip():
-                    continue
-                tags_str = row.get('Tags', '')
-                if tags_str:
-                    tags = [t.strip() for t in tags_str.split(',') if t.strip()]
-                    tag_counts.update(tags)
+        try:
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if not row.get('Title', '').strip():
+                        continue
+                    tags_str = row.get('Tags', '')
+                    if tags_str:
+                        tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+                        tag_counts.update(tags)
+        except (OSError, csv.Error) as e:
+            logger.error("Failed to read CSV %s: %s", csv_path, e)
 
         return {tag: count for tag, count in tag_counts.items() if count >= min_products}
 
@@ -217,14 +107,17 @@ class ShopifyMenuCreator:
         """Analyze vendors from CSV and return vendor counts."""
         vendor_counts = Counter()
 
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row.get('Title', '').strip():
-                    continue
-                vendor = row.get('Vendor', '').strip()
-                if vendor:
-                    vendor_counts[vendor] += 1
+        try:
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if not row.get('Title', '').strip():
+                        continue
+                    vendor = row.get('Vendor', '').strip()
+                    if vendor:
+                        vendor_counts[vendor] += 1
+        except (OSError, csv.Error) as e:
+            logger.error("Failed to read CSV %s: %s", csv_path, e)
 
         return {v: c for v, c in vendor_counts.items() if c >= min_products}
 
@@ -308,6 +201,120 @@ class ShopifyMenuCreator:
             logger.info("Main menu creation complete!")
         else:
             logger.error("Failed to create main menu")
+
+    def create_main_menu_3level(
+        self,
+        csv_path: str,
+        menu_handle: str = "categories-menu",
+        min_products: int = 3
+    ):
+        """
+        Create the main navigation menu with 3-level category hierarchy.
+
+        Uses categories_3level config: L1 → L2 groups → L3 items.
+        For L1 categories not in categories_3level, falls back to flat L2 list.
+
+        Args:
+            csv_path: Path to products CSV (to verify collections exist)
+            menu_handle: Handle for the menu
+            min_products: Minimum products for a category to be included
+        """
+        print(f"\n{'='*60}")
+        print("Creating 3-Level Categories Navigation Menu")
+        print(f"{'='*60}")
+
+        tag_counts = self.analyze_tags_from_csv(csv_path, min_products)
+        available_tags = set(tag_counts.keys())
+
+        logger.info("Found %d tags with %d+ products", len(available_tags), min_products)
+
+        existing_menus = self.get_existing_menus()
+        if menu_handle in existing_menus:
+            logger.warning("Menu '%s' already exists. Skipping creation.", menu_handle)
+            return
+
+        # Load both 2-level and 3-level configs
+        categories_3level = load_categories_3level()
+
+        logger.info("Building 3-level menu structure...")
+
+        menu_items = []
+        for l1_category, l2_subcategories in self.menu_hierarchy.items():
+            if l1_category not in available_tags:
+                logger.debug("Skipping %s (not in data)", l1_category)
+                continue
+
+            l1_handle = generate_handle(l1_category)
+            l1_url = self.build_collection_url(l1_handle)
+
+            l2_items = []
+
+            if l1_category in categories_3level:
+                # Use 3-level structure: L2 groups with L3 children
+                l2_groups = categories_3level[l1_category]
+                for l2_group, l3_list in l2_groups.items():
+                    if l2_group not in available_tags:
+                        continue
+                    l2_handle = generate_handle(l2_group)
+                    l2_url = self.build_collection_url(l2_handle)
+
+                    l3_items = []
+                    if l3_list:
+                        for l3_category in l3_list:
+                            if l3_category not in available_tags:
+                                continue
+                            l3_handle = generate_handle(l3_category)
+                            l3_url = self.build_collection_url(l3_handle)
+                            l3_items.append({
+                                "title": l3_category,
+                                "url": l3_url,
+                                "type": "HTTP"
+                            })
+
+                    l2_item = {
+                        "title": l2_group,
+                        "url": l2_url,
+                        "type": "HTTP"
+                    }
+                    if l3_items:
+                        l2_item["items"] = l3_items
+                    l2_items.append(l2_item)
+            else:
+                # Fallback: flat L2 list (no L3)
+                for l2_category in l2_subcategories:
+                    if l2_category not in available_tags:
+                        continue
+                    l2_handle = generate_handle(l2_category)
+                    l2_url = self.build_collection_url(l2_handle)
+                    l2_items.append({
+                        "title": l2_category,
+                        "url": l2_url,
+                        "type": "HTTP"
+                    })
+
+            logger.info(
+                "%s (%d products) with %d subcategories (3-level: %s)",
+                l1_category, tag_counts.get(l1_category, 0),
+                len(l2_items), l1_category in categories_3level
+            )
+
+            menu_items.append({
+                "title": l1_category,
+                "url": l1_url,
+                "type": "HTTP",
+                "items": l2_items
+            })
+
+        menu_id = self.create_menu_with_items(
+            title="Categories",
+            handle=menu_handle,
+            items=menu_items
+        )
+
+        if menu_id:
+            logger.info("3-level main menu creation complete!")
+        else:
+            logger.error("Failed to create 3-level main menu")
 
     def create_menu_with_items(self, title: str, handle: str, items: List[Dict]) -> Optional[str]:
         """Create a menu with items in a single API call."""

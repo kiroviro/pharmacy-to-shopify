@@ -6,12 +6,15 @@ Handles all 56 columns of the Shopify product import format.
 """
 
 import csv
+import logging
 import os
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from ..common.csv_utils import configure_csv
 from ..common.text_utils import remove_source_references
 from ..models import ExtractedProduct, ProductImage
+
+logger = logging.getLogger(__name__)
 
 # Configure CSV for large fields
 configure_csv()
@@ -123,7 +126,7 @@ class ShopifyCSVExporter:
             'Charge tax': 'TRUE',
             'Tax code': '',
             'Inventory tracker': 'shopify',
-            'Inventory quantity': 11,
+            'Inventory quantity': product.inventory_quantity or 11,
             'Continue selling when out of stock': continue_selling,
             'Weight value (grams)': product.weight_grams if product.weight_grams > 0 else '',
             'Weight unit for display': 'g' if product.weight_grams > 0 else '',
@@ -253,6 +256,23 @@ class ShopifyCSVExporter:
 
         return row_count
 
+    def _load_existing_handles(self, csv_path: str) -> Set[str]:
+        """Load existing product handles from CSV for dedup."""
+        handles = set()
+        if not os.path.exists(csv_path):
+            return handles
+        try:
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    handle = row.get('URL handle', '').strip()
+                    title = row.get('Title', '').strip()
+                    if handle and title:
+                        handles.add(handle)
+        except Exception as e:
+            logger.warning("Could not read CSV for dedup: %s", e)
+        return handles
+
     def append_product(
         self,
         product: ExtractedProduct,
@@ -261,6 +281,7 @@ class ShopifyCSVExporter:
     ):
         """
         Append a product to existing CSV (creates if doesn't exist).
+        Skips products whose handle already exists in the CSV.
 
         Args:
             product: Product to append
@@ -271,6 +292,13 @@ class ShopifyCSVExporter:
 
         if clean_source_refs:
             self.clean_product(product)
+
+        # Check for duplicate handle
+        if file_exists:
+            existing_handles = self._load_existing_handles(output_path)
+            if product.handle in existing_handles:
+                logger.info("Skipped duplicate: %s", product.handle)
+                return
 
         mode = 'a' if file_exists else 'w'
 

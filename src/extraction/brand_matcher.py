@@ -98,7 +98,6 @@ class BrandMatcher:
         if not title:
             return ""
 
-        title_lower = title.lower()
         words = title.split()
 
         # Try multi-word matches first (3 words, then 2, then 1)

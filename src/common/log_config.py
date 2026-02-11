@@ -31,7 +31,5 @@ def setup_logging(verbose: bool = False, quiet: bool = False) -> None:
     logger.setLevel(level)
 
     # Avoid duplicate handlers if called multiple times
-    if not logger.handlers:
-        logger.addHandler(handler)
-    else:
-        logger.handlers[0] = handler
+    logger.handlers.clear()
+    logger.addHandler(handler)

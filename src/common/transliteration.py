@@ -4,6 +4,8 @@ Bulgarian Transliteration Utilities
 Converts Bulgarian Cyrillic text to Latin characters for URL handles.
 """
 
+import re
+
 # Bulgarian Cyrillic to Latin transliteration map
 TRANSLIT_MAP = {
     # Lowercase
@@ -84,8 +86,7 @@ def generate_handle(title: str, prefix: str = '') -> str:
     handle = ''.join(result)
 
     # Clean up multiple consecutive hyphens
-    while '--' in handle:
-        handle = handle.replace('--', '-')
+    handle = re.sub(r'-+', '-', handle)
 
     # Remove leading/trailing hyphens
     return handle.strip('-')

@@ -124,6 +124,7 @@ def create_asset_group(
     client,
     customer_id: str,
     campaign_resource: str,
+    store_url: str = "https://viapharma.us",
 ) -> str:
     """Create an asset group for the PMax campaign."""
     asset_group_service = client.get_service("AssetGroupService")
@@ -135,8 +136,8 @@ def create_asset_group(
     asset_group.status = client.enums.AssetGroupStatusEnum.PAUSED
 
     # Final URL — your main landing page
-    asset_group.final_urls.append("https://viapharma.us")
-    asset_group.final_mobile_urls.append("https://viapharma.us")
+    asset_group.final_urls.append(store_url)
+    asset_group.final_mobile_urls.append(store_url)
 
     response = asset_group_service.mutate_asset_groups(
         customer_id=customer_id, operations=[operation]
@@ -289,6 +290,7 @@ def main():
     config = load_config(args.config)
     customer_id = str(config["customer_id"]).replace("-", "")
     merchant_center_id = int(config["merchant_center_id"])
+    store_url = config.get("store_url", "https://viapharma.us")
     budget_micros = int(args.budget * 1_000_000)  # Convert USD to micros
 
     print(f"Customer ID:      {customer_id}")
@@ -316,7 +318,7 @@ def main():
         # Step 3: Create asset group
         logger.info("Step 3/5: Creating asset group...")
         asset_group_resource = create_asset_group(
-            client, customer_id, campaign_resource
+            client, customer_id, campaign_resource, store_url=store_url
         )
 
         # Step 4: Create and link text assets

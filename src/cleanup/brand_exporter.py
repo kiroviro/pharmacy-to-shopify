@@ -125,15 +125,12 @@ class BrandExporter:
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
 
-            current_handle = None
             current_brand = None
 
             for row in reader:
-                handle = row.get('URL handle', '').strip()
                 title = row.get('Title', '').strip()
 
                 if title:  # Product row
-                    current_handle = handle
                     current_brand = row.get('Vendor', '').strip() or '(No Brand)'
 
                 if current_brand in selected_brands:

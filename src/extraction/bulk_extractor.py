@@ -213,8 +213,6 @@ class BulkExtractor:
                 writer.writeheader()
 
             for i, url in enumerate(urls_to_process, 1):
-                elapsed = (datetime.now() - self.start_time).total_seconds()
-
                 # Show progress relative to total input URLs
                 overall_progress = already_processed + i
                 logger.info("[%d/%d] %s...", overall_progress, total_input_urls, url[:60])

@@ -80,6 +80,28 @@ def load_categories() -> Dict[str, List[str]]:
     return config.get('categories', {})
 
 
+def load_categories_3level() -> Dict[str, Any]:
+    """
+    Load 3-level category configuration.
+
+    Returns:
+        Dictionary mapping L1 categories to dicts of L2 groups,
+        where each L2 maps to a list of L3 items (or empty list).
+
+    Example:
+        {
+            'Лечение и здраве': {
+                'Грип и настинка': ['Болки в гърлото', 'Кашлица'],
+                'Кожни болести': [],
+                ...
+            },
+            ...
+        }
+    """
+    config = load_config('categories.yaml')
+    return config.get('categories_3level', {})
+
+
 def load_tag_normalization() -> Dict[str, str]:
     """
     Load tag normalization rules.

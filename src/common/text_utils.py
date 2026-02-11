@@ -5,9 +5,10 @@ Helper functions for text processing and cleanup.
 """
 
 import re
+from typing import Optional
 
 
-def remove_source_references(text: str, source_domain: str) -> str:
+def remove_source_references(text: Optional[str], source_domain: str) -> Optional[str]:
     """
     Remove all references to a source domain from text.
 

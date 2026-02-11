@@ -84,18 +84,20 @@ class ShopifyCollectionCreator:
         logger.info("Found %d existing smart collections", len(existing))
         return existing
 
-    def create_smart_collection(self, title: str, tag: str) -> bool:
+    def _create_collection(self, title: str, column: str, condition: str, handle_prefix: str = "") -> bool:
         """
-        Create a smart collection with tag-based rule.
+        Create a smart collection with a single rule.
 
         Args:
             title: Collection title
-            tag: Tag to match
+            column: Rule column ("tag" or "vendor")
+            condition: Rule condition value
+            handle_prefix: Optional prefix for the handle (e.g., "brand-")
 
         Returns:
             True if created successfully
         """
-        handle = generate_handle(title)
+        handle = generate_handle(title, prefix=handle_prefix)
 
         data = {
             "smart_collection": {
@@ -103,9 +105,9 @@ class ShopifyCollectionCreator:
                 "handle": handle,
                 "rules": [
                     {
-                        "column": "tag",
+                        "column": column,
                         "relation": "equals",
-                        "condition": tag
+                        "condition": condition
                     }
                 ],
                 "disjunctive": False,
@@ -114,7 +116,7 @@ class ShopifyCollectionCreator:
         }
 
         if self.dry_run:
-            print(f"  [DRY RUN] Would create: {title} (tag: {tag})")
+            print(f"  [DRY RUN] Would create: {title} ({column}: {condition})")
             return True
 
         result = self.client.rest_request("POST", "smart_collections.json", data)
@@ -127,85 +129,59 @@ class ShopifyCollectionCreator:
             logger.error("Failed to create: %s", title)
             return False
 
+    def create_smart_collection(self, title: str, tag: str) -> bool:
+        """Create a smart collection with tag-based rule."""
+        return self._create_collection(title, "tag", tag)
+
     def create_vendor_collection(self, vendor: str) -> bool:
-        """
-        Create a smart collection based on vendor (brand).
-
-        Args:
-            vendor: Vendor name to match
-
-        Returns:
-            True if created successfully
-        """
-        title = vendor
-        handle = generate_handle(vendor, prefix="brand-")
-
-        data = {
-            "smart_collection": {
-                "title": title,
-                "handle": handle,
-                "rules": [
-                    {
-                        "column": "vendor",
-                        "relation": "equals",
-                        "condition": vendor
-                    }
-                ],
-                "disjunctive": False,
-                "published": True,
-            }
-        }
-
-        if self.dry_run:
-            print(f"  [DRY RUN] Would create brand collection: {title} (vendor: {vendor})")
-            return True
-
-        result = self.client.rest_request("POST", "smart_collections.json", data)
-
-        if result and "smart_collection" in result:
-            collection_id = result["smart_collection"]["id"]
-            logger.info("Created brand collection: %s (ID: %s)", title, collection_id)
-            return True
-        else:
-            logger.error("Failed to create brand collection: %s", title)
-            return False
+        """Create a smart collection based on vendor (brand)."""
+        return self._create_collection(vendor, "vendor", vendor, handle_prefix="brand-")
 
     def _load_vendors_from_csv(self, csv_path: str) -> Set[str]:
         """Load all unique vendor names from CSV (lowercase)."""
         vendors = set()
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                vendor = row.get("Vendor", "").strip()
-                if vendor:
-                    vendors.add(vendor.lower())
+        try:
+            with open(csv_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    vendor = row.get("Vendor", "").strip()
+                    if vendor:
+                        vendors.add(vendor.lower())
+        except (OSError, csv.Error) as e:
+            logger.error("Failed to read CSV %s: %s", csv_path, e)
         return vendors
 
     def _count_vendors(self, csv_path: str) -> Counter:
         """Count products per vendor."""
         vendor_counter = Counter()
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row.get("Title", "").strip():
-                    continue
-                vendor = row.get("Vendor", "").strip()
-                if vendor:
-                    vendor_counter[vendor] += 1
+        try:
+            with open(csv_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if not row.get("Title", "").strip():
+                        continue
+                    vendor = row.get("Vendor", "").strip()
+                    if vendor:
+                        vendor_counter[vendor] += 1
+        except (OSError, csv.Error) as e:
+            logger.error("Failed to read CSV %s: %s", csv_path, e)
         return vendor_counter
 
     def _count_tags(self, csv_path: str) -> Counter:
         """Count products per tag."""
         tags_counter = Counter()
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row.get("Title", "").strip():
-                    continue
-                tags_str = row.get("Tags", "")
-                if tags_str:
-                    tags = [t.strip() for t in tags_str.split(",") if t.strip()]
-                    tags_counter.update(tags)
+        try:
+            with open(csv_path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if not row.get("Title", "").strip():
+                        continue
+                    tags_str = row.get("Tags", "")
+                    if tags_str:
+                        tags = [t.strip() for t in tags_str.split(",") if t.strip()]
+                        tags_counter.update(tags)
+        except (OSError, csv.Error) as e:
+            logger.error("Failed to read CSV %s: %s", csv_path, e)
         return tags_counter
 
     def create_collections_from_csv(

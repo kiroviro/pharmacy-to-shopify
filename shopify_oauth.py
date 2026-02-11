@@ -103,7 +103,7 @@ def exchange_code_for_token(shop: str, client_id: str, client_secret: str, code:
         "code": code,
     }
 
-    response = requests.post(url, json=data)
+    response = requests.post(url, json=data, timeout=30)
 
     if response.status_code == 200:
         return response.json()
@@ -141,7 +141,7 @@ def test_token(shop: str, access_token: str) -> bool:
         "Content-Type": "application/json",
     }
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
 
     if response.status_code == 200:
         shop_data = response.json().get("shop", {})
