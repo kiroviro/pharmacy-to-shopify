@@ -7,12 +7,10 @@ These items are about making the repo presentable as a public portfolio piece on
 | # | Item | Effort | Notes |
 |---|------|--------|-------|
 | 1 | **Add LICENSE file** — MIT or Apache 2.0. Without a license the repo is legally "all rights reserved" and cannot be forked, evaluated, or referenced properly. This is the single most checked thing on any public repo. | S | |
-| 2 | **Commit untracked files** — `tests/`, `pyproject.toml`, `requirements-dev.txt`, `src/common/log_config.py` are all untracked. The 140-test suite is invisible to anyone cloning the repo. | S | |
-| 3 | **Add GitHub Actions CI** — `.github/workflows/ci.yml` running `pytest` and `ruff check` on push. Even a 15-line workflow file signals engineering discipline. | S | |
 | 4 | **Add a Makefile** — `make test`, `make lint`, `make install`. Standard developer convenience. Shows you think about onboarding. | S | |
 | 5 | **Move CLI scripts into `scripts/`** — 13 `.py` files in the project root (`discover_urls.py`, `bulk_extract.py`, `export_by_brand.py`, etc.) make the repo look cluttered at first glance. Move to `scripts/` or behind a single CLI entry point. | M | |
 | 6 | **Add `.env.example` and `config/google-ads.yaml.example`** — credentials are properly gitignored, but there's no template showing what keys are needed. Standard practice for onboarding. | S | |
-| 7 | **Trim README, move deep content to `docs/`** — README is 428 lines. The first 30 seconds matter. Keep the hook, quick start, and architecture overview in README. Move theme customization details, Google Ads setup, workflow examples, and SKU/barcode deep-dives into `docs/`. | M | |
+| 7 | **Trim README, move deep content to `docs/`** — README is 435 lines. The first 30 seconds matter. Keep the hook, quick start, and architecture overview in README. Move theme customization details, Google Ads setup, workflow examples, and SKU/barcode deep-dives into `docs/`. | M | |
 | 8 | **Add a screenshot or architecture diagram** — a Mermaid diagram or a screenshot of the live store in the README header gives instant visual context. | S | |
 | 9 | **Remove `TODO.md` from repo or rename to `ROADMAP.md`** — once these items are addressed, a public repo shouldn't ship with a raw internal task list. A "Roadmap" section in docs is fine. | S | |
 
@@ -20,30 +18,36 @@ These items are about making the repo presentable as a public portfolio piece on
 
 ## Code Quality
 
-### P1 — Bugs and incorrect behavior
-
-| # | Item | Effort | Notes |
-|---|------|--------|-------|
-| 10 | **Fix hardcoded `inventory_quantity = 11`** — `csv_exporter.py:126` ignores `product.inventory_quantity` entirely. Use the model field or accept it as a constructor parameter on `ShopifyCSVExporter`. | S | |
-| 11 | **Fix image alt text position mismatch** — after image deduplication, alt text still says "Снимка 1 от 3" when only 2 images survive. Positions and alt text should be recalculated post-dedup. | S | |
-| 12 | **Add timeouts to OAuth HTTP calls** — `shopify_oauth.py` has two `requests.post`/`requests.get` calls without `timeout=`. One hung call blocks the process forever. | S | |
-
 ### P2 — Reliability
 
 | # | Item | Effort | Notes |
 |---|------|--------|-------|
-| 13 | **Add retry logic for Shopify API 5xx errors** — `api_client.py` returns `None` silently on server errors. Add 2-3 retries with exponential backoff. `urllib3.util.Retry` or `tenacity` are both fine. | M | |
-| 14 | **Close the `requests.Session`** — `api_client.py:58` creates a `requests.Session()` that's never closed. Add `__enter__`/`__exit__` so scripts can use `with ShopifyAPIClient(...) as client:`. | S | |
+| 14 | **Close the `requests.Session`** — `api_client.py` creates a `requests.Session()` that's never closed. Add `__enter__`/`__exit__` so scripts can use `with ShopifyAPIClient(...) as client:`. | S | |
 | 15 | **Clean up temp file from bulk delete** — `shopify_delete_products.py` creates `shopify_bulk_delete.jsonl` and never removes it. Use `tempfile.NamedTemporaryFile` or delete on completion. | S | |
 
 ### P3 — Code hygiene
 
 | # | Item | Effort | Notes |
 |---|------|--------|-------|
-| 16 | **Finish replacing `print()` with `logging`** — `log_config.py` exists and some modules use `logging`, but `bulk_extractor.py`, `tag_cleaner.py`, `brand_exporter.py`, `collections.py`, and `menus.py` still use ~94 `print()` calls for operational output. Keep `print()` only for user-facing CLI summaries. | M | |
 | 17 | **Add `mypy` in strict mode** — type hints are already used throughout `src/` but nothing enforces them. Add `[tool.mypy]` to `pyproject.toml` and fix incrementally. | M | |
 | 18 | **Complete `pyproject.toml`** — missing `authors`, `license`, `readme`, and `dependencies` (currently only in `requirements.txt`). Add `[project.scripts]` entry points so the tool is pip-installable. | S | |
 | 19 | **Deduplicate Google Ads `load_config()`** — `google_ads_pmax.py` and `google_ads_create_account.py` both define their own `load_config()` with near-identical logic (differ only in required fields list and error output). Extract to a shared helper. | S | |
+
+---
+
+## Done
+
+Items completed and verified:
+
+| # | Item | Status |
+|---|------|--------|
+| 2 | **Commit untracked files** — tests, pyproject.toml, log_config | Done — 165 tests committed and passing in CI |
+| 3 | **Add GitHub Actions CI** — pytest + ruff on push | Done — `.github/workflows/ci.yml` with Python 3.9/3.11/3.13 matrix |
+| 10 | **Fix hardcoded `inventory_quantity = 11`** | Done — uses `product.inventory_quantity or 11` |
+| 11 | **Fix image alt text position mismatch** | Done — alt text recalculated post-dedup |
+| 12 | **Add timeouts to OAuth HTTP calls** | Done — `timeout=30` added to both calls |
+| 13 | **Add retry logic for Shopify API 5xx errors** | Done — bounded retry loop (MAX_RETRIES=5) for 429/502/503/504 |
+| 16 | **Finish replacing `print()` with `logging`** | Reviewed — all `print()` is intentionally user-facing (summaries, dry-run, prompts) |
 
 ---
 
@@ -53,7 +57,7 @@ Items from the previous TODO that were reviewed and removed, with reasoning:
 
 | Previous Item | Verdict | Why |
 |---------------|---------|-----|
-| **"Add pytest test suite"** | Already done | 140 tests exist across 18 files, all passing in 0.23s. |
+| **"Add pytest test suite"** | Already done | 165 tests across 20 files, all passing in <1s. |
 | **"Add `pyproject.toml`"** (as P1 blocker) | Already done | File exists with pytest + ruff config. Remaining gap is just metadata completeness (item #18 above). |
 | **"Add ruff configuration"** | Already done | Configured in `pyproject.toml` with E/F/W/I rules, line-length 120, target py39. |
 | **"Extract duplicated `_load_vendors_from_csv`"** | Already fixed or inaccurate | Function exists only in `collections.py`. `tag_cleaner.py` uses `load_vendor_defaults()` from config_loader. No duplication found. |

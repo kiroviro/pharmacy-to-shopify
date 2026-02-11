@@ -318,52 +318,6 @@ class HTMLContentParser:
 
         return ""
 
-    def extract_brand_from_table(self) -> str:
-        """
-        Extract brand from "Повече информация" table.
-
-        Returns:
-            Brand name or empty string
-        """
-        table = self.soup.find('table', class_='additional-attributes')
-        if not table:
-            return ""
-
-        for row in table.find_all('tr'):
-            cells = row.find_all(['th', 'td'])
-            if len(cells) >= 2:
-                label = self._clean_text(cells[0].get_text()).lower()
-                if 'марка' in label or 'brand' in label or 'производител' in label:
-                    return self._clean_text(cells[1].get_text())
-
-        return ""
-
-    def extract_availability_from_html(self) -> str:
-        """
-        Extract availability status from HTML elements.
-
-        Returns:
-            Availability status or empty string
-        """
-        # Check for stock status div
-        stock_elem = self.soup.select_one('div.stock, .availability, [itemprop="availability"]')
-        if stock_elem:
-            text = self._clean_text(stock_elem.get_text())
-            if text:
-                return text
-
-        # Check page text for common phrases
-        page_text = self.soup.get_text()
-
-        if 'В наличност' in page_text:
-            return 'В наличност'
-        elif 'Няма в наличност' in page_text:
-            return 'Няма в наличност'
-        elif 'Ограничена наличност' in page_text:
-            return 'Ограничена наличност'
-
-        return ""
-
     def is_prescription_product(self) -> bool:
         """
         Check if the product is prescription-only.

@@ -161,38 +161,6 @@ class StructuredDataParser:
 
         return ""
 
-    def extract_active_ingredient(self, data: Dict[str, Any]) -> str:
-        """
-        Extract active ingredient/composition from structured data.
-
-        Args:
-            data: Parsed JSON-LD data
-
-        Returns:
-            Active ingredient text or empty string
-        """
-        if not data:
-            return ""
-
-        return self._clean_text(data.get("activeIngredient", ""))
-
-    def extract_clinical_pharmacology(self, data: Dict[str, Any]) -> str:
-        """
-        Extract clinical pharmacology text from structured data.
-
-        This field typically contains details, usage, and warnings.
-
-        Args:
-            data: Parsed JSON-LD data
-
-        Returns:
-            Clinical pharmacology text or empty string
-        """
-        if not data:
-            return ""
-
-        return self._clean_text(data.get("clinicalPharmacology", ""))
-
     def has_data(self, data: Dict[str, Any]) -> bool:
         """
         Check if structured data contains useful product information.

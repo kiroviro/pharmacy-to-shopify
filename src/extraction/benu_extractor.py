@@ -200,6 +200,7 @@ class BenuExtractor:
                 price_eur = f"{float(str(price).replace(',', '.')):.2f}"
                 # Convert to BGN if not found
                 if not price_bgn:
+                    # 1.95583 is the legally fixed EUR/BGN rate (EU Council, ERM II)
                     price_bgn = f"{float(price_eur) * 1.95583:.2f}"
 
         return price_bgn, price_eur
