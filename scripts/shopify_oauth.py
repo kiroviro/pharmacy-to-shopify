@@ -22,13 +22,16 @@ from pathlib import Path
 
 import requests
 
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from src.common.log_config import setup_logging
 
 logger = logging.getLogger(__name__)
 
 
 # Token storage file
-TOKEN_FILE = Path(__file__).parent / ".shopify_token.json"
+TOKEN_FILE = Path(__file__).parent.parent / ".shopify_token.json"
 
 
 class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):

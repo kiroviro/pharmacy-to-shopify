@@ -12,44 +12,20 @@ then optionally updates config/google-ads.yaml with the new customer_id.
 
 import argparse
 import logging
+import os
 import sys
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import yaml
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
 
+from src.common.google_ads_config import get_google_ads_client, load_google_ads_config
 from src.common.log_config import setup_logging
 
 logger = logging.getLogger(__name__)
-
-
-def load_config(config_path: str = "config/google-ads.yaml") -> dict:
-    """Load Google Ads config from YAML file."""
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    required = ["developer_token", "client_id", "client_secret",
-                 "refresh_token", "login_customer_id"]
-    for key in required:
-        val = config.get(key, "")
-        if not val or "INSERT_" in str(val):
-            logger.error("Please fill in '%s' in %s", key, config_path)
-            sys.exit(1)
-
-    return config
-
-
-def get_client(config: dict) -> GoogleAdsClient:
-    """Create a GoogleAdsClient from config."""
-    client_config = {
-        "developer_token": config["developer_token"],
-        "client_id": config["client_id"],
-        "client_secret": config["client_secret"],
-        "refresh_token": config["refresh_token"],
-        "login_customer_id": str(config["login_customer_id"]),
-        "use_proto_plus": True,
-    }
-    return GoogleAdsClient.load_from_dict(client_config)
 
 
 def create_customer_account(
@@ -156,7 +132,11 @@ def main():
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    config = load_config(args.config)
+    config = load_google_ads_config(
+        args.config,
+        required_fields=["developer_token", "client_id", "client_secret",
+                         "refresh_token", "login_customer_id"],
+    )
     manager_id = str(config["login_customer_id"]).replace("-", "")
 
     print(f"Manager (MCC) ID: {manager_id}")
@@ -169,7 +149,7 @@ def main():
         print("Dry run - config is valid. No changes made.")
         return
 
-    client = get_client(config)
+    client = get_google_ads_client(config)
 
     try:
         new_customer_id = create_customer_account(

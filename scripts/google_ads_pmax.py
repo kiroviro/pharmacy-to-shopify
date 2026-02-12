@@ -14,48 +14,20 @@ This script creates:
 
 import argparse
 import logging
+import os
 import sys
 import uuid
 from datetime import datetime, timedelta
 
-import yaml
-from google.ads.googleads.client import GoogleAdsClient
+# Add project root to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from google.ads.googleads.errors import GoogleAdsException
 
+from src.common.google_ads_config import get_google_ads_client, load_google_ads_config
 from src.common.log_config import setup_logging
 
 logger = logging.getLogger(__name__)
-
-
-def load_config(config_path: str = "config/google-ads.yaml") -> dict:
-    """Load Google Ads config from YAML file."""
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    required = ["developer_token", "client_id", "client_secret", "refresh_token",
-                 "customer_id", "merchant_center_id"]
-    for key in required:
-        val = config.get(key, "")
-        if not val or "INSERT_" in str(val):
-            logger.error("Please fill in '%s' in %s", key, config_path)
-            sys.exit(1)
-
-    return config
-
-
-def get_client(config: dict) -> GoogleAdsClient:
-    """Create a GoogleAdsClient from config."""
-    client_config = {
-        "developer_token": config["developer_token"],
-        "client_id": config["client_id"],
-        "client_secret": config["client_secret"],
-        "refresh_token": config["refresh_token"],
-        "use_proto_plus": True,
-    }
-    if config.get("login_customer_id"):
-        client_config["login_customer_id"] = str(config["login_customer_id"])
-
-    return GoogleAdsClient.load_from_dict(client_config)
 
 
 def create_campaign_budget(client, customer_id: str, budget_amount_micros: int) -> str:
@@ -287,7 +259,11 @@ def main():
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    config = load_config(args.config)
+    config = load_google_ads_config(
+        args.config,
+        required_fields=["developer_token", "client_id", "client_secret", "refresh_token",
+                         "customer_id", "merchant_center_id"],
+    )
     customer_id = str(config["customer_id"]).replace("-", "")
     merchant_center_id = int(config["merchant_center_id"])
     store_url = config.get("store_url", "https://viapharma.us")
@@ -302,7 +278,7 @@ def main():
         print("Dry run - config is valid. No changes made.")
         return
 
-    client = get_client(config)
+    client = get_google_ads_client(config)
 
     try:
         # Step 1: Create budget

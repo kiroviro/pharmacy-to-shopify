@@ -60,3 +60,6 @@ htmlcov/
 credentials*.json
 .shopify_token.json
 config/google-ads.yaml
+
+# Theme exports
+theme_export*

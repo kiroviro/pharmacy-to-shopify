@@ -1,0 +1,39 @@
+# Google Ads API Configuration
+#
+# How to get each value:
+#
+# developer_token:
+#   Google Ads -> Tools & Settings -> API Center
+#   Requires a Manager (MCC) account. Apply for Basic access.
+#
+# client_id / client_secret:
+#   Google Cloud Console -> APIs & Services -> Credentials
+#   Create an OAuth 2.0 Client ID (type: Desktop app)
+#
+# refresh_token:
+#   Run: python3 scripts/google_ads_auth.py
+#   This opens a browser for OAuth2 and prints the token.
+#
+# customer_id:
+#   Your Google Ads advertiser account ID (no dashes).
+#   Create one with: python3 scripts/google_ads_create_account.py
+#
+# login_customer_id:
+#   Your Manager (MCC) account ID (no dashes).
+#   Required if using a manager account to access client accounts.
+#
+# merchant_center_id:
+#   Your Google Merchant Center account ID.
+#   Find it at merchants.google.com (top-right corner).
+#
+# store_url:
+#   Your Shopify store URL (used as landing page in PMax campaigns).
+
+developer_token: "INSERT_DEVELOPER_TOKEN_HERE"
+client_id: "INSERT_CLIENT_ID_HERE"
+client_secret: "INSERT_CLIENT_SECRET_HERE"
+refresh_token: "INSERT_REFRESH_TOKEN_HERE"
+customer_id: "INSERT_CUSTOMER_ID_HERE"
+login_customer_id: "INSERT_LOGIN_CUSTOMER_ID_HERE"
+merchant_center_id: "INSERT_MERCHANT_CENTER_ID_HERE"
+store_url: "https://your-store.myshopify.com"

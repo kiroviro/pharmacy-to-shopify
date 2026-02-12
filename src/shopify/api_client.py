@@ -68,6 +68,15 @@ class ShopifyAPIClient:
         self.last_request_time = 0.0
         self.min_request_interval = 0.5  # 2 req/sec
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.session.close()
+
+    def close(self):
+        self.session.close()
+
     def _rate_limit(self):
         """Implement rate limiting (2 requests/second max)."""
         now = time.time()

@@ -29,7 +29,7 @@ import sys
 from typing import Optional
 
 # Add project root to path for imports
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.common.log_config import setup_logging
 from src.shopify import ShopifyAPIClient

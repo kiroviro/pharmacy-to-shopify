@@ -9,10 +9,16 @@ Usage:
 """
 
 import logging
+import os
+import sys
+
+# Add project root and scripts dir to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
 
 import yaml
-
 from google_ads_auth_flow import get_refresh_token
+
 from src.common.log_config import setup_logging
 
 logger = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ A modular product extraction and Shopify migration tool for pharmacy websites. D
 
 ```
 webcrawler-shopify/
-├── CLI Scripts (thin wrappers)
+├── scripts/                       # CLI scripts (thin wrappers)
 │   ├── extract_single.py          # Single product extraction with validation
 │   ├── discover_urls.py           # URL discovery from sitemaps
 │   ├── bulk_extract.py            # Bulk extraction with resume
@@ -22,7 +22,11 @@ webcrawler-shopify/
 │   ├── create_shopify_menus.py
 │   ├── configure_shopify_filters.py
 │   ├── shopify_delete_products.py
-│   └── shopify_oauth.py
+│   ├── shopify_oauth.py
+│   ├── google_ads_auth.py
+│   ├── google_ads_auth_flow.py
+│   ├── google_ads_create_account.py
+│   └── google_ads_pmax.py
 │
 ├── src/                           # Business logic modules
 │   ├── models/                    # Data models
@@ -131,6 +135,9 @@ Shared utilities used across modules.
 | `config_loader.py` | Load YAML configuration files |
 | `transliteration.py` | Bulgarian to Latin conversion (URL handles) |
 | `csv_utils.py` | CSV reading/writing utilities |
+| `text_utils.py` | Text cleanup and formatting helpers |
+| `log_config.py` | Structured logging setup (`--verbose`/`--quiet`) |
+| `google_ads_config.py` | Shared Google Ads YAML config loader |
 
 ---
 
