@@ -5,6 +5,8 @@ Common functions for reading and writing CSV files with proper configuration.
 Handles large field sizes and encoding issues.
 """
 
+from __future__ import annotations
+
 import csv
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional
