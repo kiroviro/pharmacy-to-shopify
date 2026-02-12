@@ -124,6 +124,7 @@ All dependencies are in `requirements.txt`.
 
 ## Documentation
 
+- **[Architecture](docs/ARCHITECTURE.md)** -- module structure, data flow, extraction strategy
 - **[Features](docs/features.md)** -- extraction capabilities, Shopify integration, workflow tools
 - **[Configuration](docs/configuration.md)** -- adding new vendor sites, category/tag config
 - **[Workflow Examples](docs/workflow-examples.md)** -- full extraction, store setup, theme customization

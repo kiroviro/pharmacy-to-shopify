@@ -165,21 +165,6 @@ Shared utilities used across modules.
 
 ---
 
-## Configuration
-
-All configuration in `config/` directory (YAML format).
-
-| File | Purpose |
-|------|---------|
-| `known_brands.yaml` | 450+ brand names for matching |
-| `categories.yaml` | L1/L2 category hierarchy |
-| `tag_normalization.yaml` | Tag casing rules |
-| `promotional_patterns.yaml` | Patterns to filter out |
-| `vendor_defaults.yaml` | Default tags per vendor |
-| `seo_settings.yaml` | SEO title/description limits, store name, Google Shopping category map |
-
----
-
 ## Multi-Site Architecture
 
 The project supports multiple source sites with isolated data:
@@ -194,22 +179,7 @@ data/
     └── processed/
 ```
 
-### Adding a New Site
-
-1. **Create site directory**: `data/{site}/raw/`, `data/{site}/processed/`
-2. **Create extractor**: `src/extraction/{site}_extractor.py`
-3. **Create discoverer**: `src/discovery/{site}_discoverer.py`
-4. **Implement interface**:
-   ```python
-   class NewSiteExtractor:
-       def __init__(self, url: str): ...
-       def fetch(self) -> None: ...
-       def extract(self) -> ExtractedProduct: ...
-   ```
-5. **Register in `__init__.py`**:
-   - Add to `SITE_EXTRACTORS` in `src/extraction/__init__.py`
-   - Add to `SITE_DISCOVERERS` in `src/discovery/__init__.py`
-6. **Reuse existing modules**: parsers, validators, exporters
+See [Configuration](configuration.md) for how to add a new vendor site.
 
 ### Shared vs Site-Specific
 
@@ -220,29 +190,6 @@ data/
 | `TagCleaner` | Brand list |
 | `BrandExporter` | Category mapping |
 | Parsers (if applicable) | HTML selectors |
-
----
-
-## CLI Scripts
-
-All CLI scripts are wrappers that:
-- Parse command-line arguments
-- Import business logic from `src/`
-- Handle input/output paths
-- Display progress and results
-
-| Script | Module Used | Purpose |
-|--------|-------------|---------|
-| `extract_single.py` | `Extractor` (auto-detected) | Single product with validation |
-| `discover_urls.py` | `Discoverer` (by --site) | Find all product URLs |
-| `bulk_extract.py` | `BulkExtractor` (auto-detected) | Extract products in batch |
-| `cleanup_tags.py` | `TagCleaner` | Normalize and clean tags |
-| `export_by_brand.py` | `BrandExporter` | Export by brand with splitting |
-| `create_shopify_collections.py` | `ShopifyCollectionCreator` | Create collections |
-| `create_shopify_menus.py` | `ShopifyMenuCreator` | Create menus |
-| `configure_shopify_filters.py` | `ShopifyAPIClient` | Configure sidebar filters + translations |
-| `shopify_delete_products.py` | `ShopifyAPIClient` | Bulk delete all products via GraphQL Bulk Operations |
-| `shopify_oauth.py` | `ShopifyAPIClient` | OAuth token helper |
 
 ---
 
@@ -395,9 +342,8 @@ The API client can read and modify theme assets, enabling programmatic storefron
 
 ## Future Improvements
 
-1. **Unit Tests**: Add pytest tests for parsers and validators
-2. **API Upload**: Direct product upload via Shopify Admin API
-3. **Image Upload**: Upload images to Shopify CDN
-4. **Scheduling**: Automated periodic extraction
-5. **Delta Updates**: Only extract changed products
-6. **Vendor Integration**: Automated promotion sync and order mapping using extracted SKUs
+1. **API Upload**: Direct product upload via Shopify Admin API
+2. **Image Upload**: Upload images to Shopify CDN
+3. **Scheduling**: Automated periodic extraction
+4. **Delta Updates**: Only extract changed products
+5. **Vendor Integration**: Automated promotion sync and order mapping using extracted SKUs

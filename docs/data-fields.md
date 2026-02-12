@@ -26,5 +26,3 @@ Products without a barcode in their "Допълнителна информаци
 - **Hardcoded inventory quantity** -- currently set to `11` for all products. Should be configurable via CLI argument.
 - **Products without images** -- skipped during extraction to avoid Shopify import errors.
 - **Image URL encoding** -- special characters in filenames are URL-encoded to prevent import failures.
-
-See also `TODO.md` for the project roadmap.

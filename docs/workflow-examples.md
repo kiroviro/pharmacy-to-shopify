@@ -80,28 +80,6 @@ client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
 })
 ```
 
-**Changes made via this workflow:**
-- Removed "Доставката се изчислява при плащане" from product pages -- storefront now shows only "С включени данъци."
-- Enabled product comparison by adding the `compare-product` section to `templates/product.json` with fields: product header, vendor, type, description
-- Moved product filters from left sidebar to right sidebar (`component-facets.css`: `flex-direction: row-reverse`, `padding-right` -> `padding-left`)
-- Hid brand collections from `/collections` page (`main-list-collections.liquid`: `unless collection.handle contains 'brand-'`)
-- Hid brand collections from search category dropdown (`header-search.liquid`: same filter)
-- Disabled "Всички Категории" search filter button (`show_search_filter: false` in `settings_data.json`)
-- Created dedicated brands page template (`sections/brands-list.liquid` + `templates/page.brands.json`) -- fixed `paginate` error on sorted array
-- Removed "Марки" from main navigation menu -- brands accessible via sidebar filter and dedicated `/pages/brands` page
-- Removed "Всички Категории" drawer button from header (`header-group.json`)
-- Added category search input to `/collections` page (`main-list-collections.liquid`)
-- Uploaded 4 trust badge SVG icons and wired into collection + product multicolumn sections (Оригинални лекарства, Поддръжка след покупка, Бърза и сигурна доставка, Достъпно здравеопазване)
-- Uploaded 3 collection promo/banner images (2 inline promo cards + 1 discount banner)
-- Compact header: reduced padding from 22px to 4px, logo from 175px to 100px, created `assets/custom-header-compact.css` with aggressive mobile overrides (85px logo, 3rem search bar, minimal gaps)
-- Switched header menu from `main-menu` (flat links) to `categories-menu` (full category tree with 6 categories and 82 subcategories)
-- Shortened long menu item names via GraphQL `menuUpdate`: "Медицински изделия и консумативи" -> "Медицински изделия", "Здравословно хранене чайове и билки" -> "Здравословно хранене"
-- Compact collection banner: set `banner_height` to small, reduced padding to 10px, added CSS override `min-height: auto !important` for all banner sizes, reduced product grid top padding from 130px to 20px
-- Removed author name from blog posts (`templates/article.json`: removed `author` block)
-- Disabled "От нашия блог" featured blog section on article pages (`templates/article.json`)
-- Hidden author name on homepage blog section (`templates/index.json`: `show_author: false` in featured-blog section)
-- Translated breadcrumb "Home" -> "Начало" across all sections: `main-article.liquid`, `main-blog.liquid`, `main-collection-banner.liquid`, `main-list-collections.liquid`, `main-product.liquid`
-
 ## Managing Your Shopify Store with Claude Code
 
 Once your products are imported, you can use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) to manage your Shopify store directly -- updating products, creating collections, adjusting navigation, customizing theme translations, and more. This project includes Shopify API integration (`src/shopify/api_client.py`) that Claude Code can use as a foundation.
