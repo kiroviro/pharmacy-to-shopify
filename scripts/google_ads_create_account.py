@@ -132,11 +132,15 @@ def main():
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    config = load_google_ads_config(
-        args.config,
-        required_fields=["developer_token", "client_id", "client_secret",
-                         "refresh_token", "login_customer_id"],
-    )
+    try:
+        config = load_google_ads_config(
+            args.config,
+            required_fields=["developer_token", "client_id", "client_secret",
+                             "refresh_token", "login_customer_id"],
+        )
+    except ValueError as e:
+        logger.error("%s", e)
+        sys.exit(1)
     manager_id = str(config["login_customer_id"]).replace("-", "")
 
     print(f"Manager (MCC) ID: {manager_id}")

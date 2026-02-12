@@ -12,8 +12,8 @@ Features:
 - Combined CSV output for Shopify import
 
 Usage:
-    python3 bulk_extract.py --urls data/benu.bg/raw/urls.txt
-    python3 bulk_extract.py --urls data/benu.bg/raw/urls.txt --limit 100
+    python3 bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt
+    python3 bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --limit 100
     python3 bulk_extract.py --urls urls.txt --output products.csv --resume
 """
 

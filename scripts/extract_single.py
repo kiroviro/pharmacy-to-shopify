@@ -6,8 +6,8 @@ Extracts a single product with detailed validation report.
 Site is auto-detected from URL.
 
 Usage:
-    python3 extract_single.py --url https://benu.bg/product-url
-    python3 extract_single.py --url https://benu.bg/product-url --verbose
+    python3 extract_single.py --url https://pharmacy.example.com/product-url
+    python3 extract_single.py --url https://pharmacy.example.com/product-url --verbose
 """
 
 import argparse

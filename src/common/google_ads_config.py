@@ -1,7 +1,6 @@
 """Shared Google Ads configuration loading and client creation."""
 
 import logging
-import sys
 
 import yaml
 from google.ads.googleads.client import GoogleAdsClient
@@ -18,6 +17,9 @@ def load_google_ads_config(config_path: str = "config/google-ads.yaml", required
 
     Returns:
         Validated config dictionary.
+
+    Raises:
+        ValueError: If a required field is missing or contains a placeholder.
     """
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -28,8 +30,7 @@ def load_google_ads_config(config_path: str = "config/google-ads.yaml", required
     for key in required_fields:
         val = config.get(key, "")
         if not val or "INSERT_" in str(val):
-            logger.error("Please fill in '%s' in %s", key, config_path)
-            sys.exit(1)
+            raise ValueError(f"Please fill in '{key}' in {config_path}")
 
     return config
 

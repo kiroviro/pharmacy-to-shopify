@@ -8,7 +8,7 @@ Extracts product catalogues from pharmacy vendor websites, generates Shopify-com
 
 ## Why This Project Exists
 
-Small pharmacies in Bulgaria face a structural disadvantage. Their wholesale vendors -- like BENU (Phoenix Pharma) -- sell directly to consumers online with full product catalogues. But they don't share product data with the small pharmacies they supply. There's no API, no data feed, no export.
+Small pharmacies face a structural disadvantage. Their wholesale vendors - sell directly to consumers online with full product catalogues. But they don't share product data with the small pharmacies they supply. There's no API, no data feed, no export.
 
 The result: a single-owner pharmacy that wants to go digital has to build a catalogue of thousands of products from scratch -- titles, descriptions, images, categories, pricing, pharmaceutical metadata -- all in Bulgarian. That's not feasible without an IT team.
 
@@ -56,19 +56,19 @@ Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
 # Setup
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install .
 
-# 1. Discover product URLs from benu.bg sitemap
-python3 scripts/discover_urls.py --site benu.bg
+# 1. Discover product URLs from pharmacy site sitemap
+python3 scripts/discover_urls.py --site pharmacy.example.com
 
 # 2. Extract a single product (test)
-python3 scripts/extract_single.py --url "https://benu.bg/ferveks-za-v-zrastni-saseta-pri-prostuda-i-grip-h12" --verbose
+python3 scripts/extract_single.py --url "https://pharmacy.example.com/sample-product" --verbose
 
 # 3. Bulk extract all products
-python3 scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --continue-on-error --resume
+python3 scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --continue-on-error --resume
 
 # 4. Export for Shopify (auto-splits into 14MB files)
-python3 scripts/export_by_brand.py --all-brands --input data/benu.bg/raw/products.csv --output output/benu.bg/products.csv
+python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.com/raw/products.csv --output output/pharmacy.example.com/products.csv
 
 # 5. Import to Shopify: Admin > Products > Import > Upload CSV
 ```
@@ -97,7 +97,7 @@ webcrawler-shopify/
 │
 ├── src/
 │   ├── models/                      # Data models (ExtractedProduct, ProductImage, ProductVariant)
-│   ├── extraction/                  # Product extraction (BenuExtractor, validator, brand matching)
+│   ├── extraction/                  # Product extraction (PharmacyExtractor, validator, brand matching)
 │   ├── discovery/                   # URL discovery (sitemap-based)
 │   ├── shopify/                     # Shopify integration (CSV export, API client, collections, menus)
 │   ├── cleanup/                     # Post-processing (tag normalization, brand export)
@@ -116,9 +116,9 @@ webcrawler-shopify/
 
 - Python 3.9+
 - beautifulsoup4, requests, lxml, pyyaml
-- google-ads, google-auth-oauthlib (for Google Ads integration)
+- google-ads, google-auth-oauthlib (optional, for Google Ads integration: `pip install ".[google-ads]"`)
 
-All dependencies are in `requirements.txt`.
+All dependencies are declared in `pyproject.toml`.
 
 ---
 

@@ -1,9 +1,9 @@
 # =============================================================================
-# CATEGORY CONFIGURATION - BENU.BG
+# CATEGORY CONFIGURATION
 # =============================================================================
 #
-# This file defines the L1 (main) and L2 (sub) categories matching benu.bg tags.
-# Updated to match actual product tags from benu.bg extraction.
+# This file defines the L1 (main) and L2 (sub) categories matching pharmacy site tags.
+# Updated to match actual product tags from pharmacy site extraction.
 #
 # HOW TO USE:
 # -----------
@@ -176,7 +176,7 @@ categories_3level:
 # =============================================================================
 # NOTES
 # =============================================================================
-# - Categories updated on 2026-01-25 based on benu.bg extraction
+# - Categories updated on 2026-01-25 based on pharmacy site extraction
 # - Product counts in comments are approximate
 # - Some products may have multiple tags (appear in multiple categories)
 # - "красота и лична хигиена" tag overlaps with "Козметика" (same products)

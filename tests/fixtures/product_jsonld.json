@@ -13,7 +13,7 @@
         "priceCurrency": "EUR",
         "availability": "https://schema.org/InStock"
     },
-    "image": ["https://benu.bg/uploads/images/products/test/product1.jpg"],
+    "image": ["https://pharmacy.example.com/uploads/images/products/test/product1.jpg"],
     "activeIngredient": "Витамин C 500mg",
     "clinicalPharmacology": "Витамин C допринася за нормалната функция на имунната система."
 }

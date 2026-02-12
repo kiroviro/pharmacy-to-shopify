@@ -20,12 +20,8 @@ from typing import Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
-from ..common.csv_utils import configure_csv
 from ..models import ExtractedProduct
 from ..shopify import SHOPIFY_FIELDNAMES, ShopifyCSVExporter
-
-# Configure CSV for large fields
-configure_csv()
 
 
 class BulkExtractor:
@@ -37,7 +33,7 @@ class BulkExtractor:
         output_dir: str = "output",
         delay: float = 1.0,
         save_failed_html: bool = False,
-        source_domain: str = "benu.bg",
+        source_domain: str = "pharmacy.example.com",
     ):
         """
         Initialize the bulk extractor.
@@ -176,7 +172,7 @@ class BulkExtractor:
 
         Args:
             urls: List of product URLs to extract
-            extractor_class: Class to use for extraction (e.g., BenuExtractor)
+            extractor_class: Class to use for extraction (e.g., PharmacyExtractor)
             limit: Maximum number of products to extract (0 = no limit)
             resume: Whether to resume from previous state
             continue_on_error: Whether to continue if extraction fails

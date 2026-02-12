@@ -14,7 +14,7 @@ def remove_source_references(text: Optional[str], source_domain: str) -> Optiona
 
     Args:
         text: Text that may contain source references
-        source_domain: Domain to remove (e.g., "benu.bg")
+        source_domain: Domain to remove (e.g., "pharmacy.example.com")
 
     Returns:
         Cleaned text without source references

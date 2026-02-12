@@ -5,8 +5,8 @@ URL Discovery Script
 Discovers all product URLs from pharmacy sites using sitemaps.
 
 Usage:
-    python3 discover_urls.py --site benu.bg --output data/benu.bg/raw/urls.txt
-    python3 discover_urls.py --site benu.bg --limit 100
+    python3 discover_urls.py --site pharmacy.example.com --output data/pharmacy.example.com/raw/urls.txt
+    python3 discover_urls.py --site pharmacy.example.com --limit 100
 """
 
 import argparse

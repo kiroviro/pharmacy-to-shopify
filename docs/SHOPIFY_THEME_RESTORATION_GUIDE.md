@@ -32,7 +32,7 @@ These files don't exist in the stock theme and must be re-uploaded to `assets/`:
   - Referenced by: `sections/header.liquid` line 1, `sections/announcement-bar.liquid` line 1
 
 - [ ] **Upload `component-sidebar-mega-menu.css`** (8,241 B)
-  - BENU-style sidebar mega menu styles
+  - Custom sidebar mega menu styles
   - 260px wide sidebar panel, dark background, flyout max 740px
   - Multi-column subcategory grid (3 cols default, 4 on >= 1400px)
   - Referenced by: `snippets/header-sidebar-mega-menu.liquid`

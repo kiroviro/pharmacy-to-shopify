@@ -23,11 +23,13 @@ dependencies = [
     "requests>=2.31.0",
     "lxml>=4.9.0",
     "pyyaml>=6.0",
-    "google-ads>=29.0.0",
-    "google-auth-oauthlib>=1.2.0",
 ]
 
 [project.optional-dependencies]
+google-ads = [
+    "google-ads>=29.0.0",
+    "google-auth-oauthlib>=1.2.0",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",

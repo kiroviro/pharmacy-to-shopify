@@ -22,11 +22,6 @@ from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
-from ..common.csv_utils import configure_csv
-
-# Configure CSV for large fields
-configure_csv()
-
 DEFAULT_MAX_SIZE_MB = 14  # 14MB to stay safely under Shopify's 15MB limit
 
 

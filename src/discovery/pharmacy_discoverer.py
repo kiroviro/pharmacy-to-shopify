@@ -1,5 +1,5 @@
 """
-URL Discovery for benu.bg
+URL Discovery for pharmacy site
 
 Discovers all product URLs from the sitemap.
 """
@@ -13,14 +13,14 @@ import requests
 logger = logging.getLogger(__name__)
 
 
-class BenuURLDiscoverer:
+class PharmacyURLDiscoverer:
     """Discovers product URLs from a pharmacy site using its sitemap."""
 
     def __init__(
         self,
         verbose: bool = False,
-        base_url: str = "https://benu.bg",
-        sitemap_url: str = "https://benu.bg/sitemap.products.xml",
+        base_url: str = "https://pharmacy.example.com",
+        sitemap_url: str = "https://pharmacy.example.com/sitemap.products.xml",
     ):
         self.verbose = verbose
         self.BASE_URL = base_url
@@ -31,6 +31,15 @@ class BenuURLDiscoverer:
             "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
         })
         self.product_urls: Set[str] = set()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.session.close()
+
+    def close(self):
+        self.session.close()
 
     def log(self, message: str):
         """Log message at debug level."""

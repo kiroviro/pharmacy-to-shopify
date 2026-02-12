@@ -1,19 +1,19 @@
 # Workflow Examples
 
-## Full Extraction (benu.bg)
+## Full Extraction
 
 ```bash
 # 1. Discover all product URLs (~9,800 URLs in ~2 seconds)
-python3 scripts/discover_urls.py --site benu.bg
+python3 scripts/discover_urls.py --site pharmacy.example.com
 
 # 2. Bulk extract all products (with resume support)
-python3 scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --resume --continue-on-error
+python3 scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --resume --continue-on-error
 
 # 3. Clean up tags
-python3 scripts/cleanup_tags.py --input data/benu.bg/raw/products.csv --output data/benu.bg/processed/products_cleaned.csv
+python3 scripts/cleanup_tags.py --input data/pharmacy.example.com/raw/products.csv --output data/pharmacy.example.com/processed/products_cleaned.csv
 
 # 4. Export for Shopify (auto-splits files at 14MB)
-python3 scripts/export_by_brand.py --all-brands --input data/benu.bg/processed/products_cleaned.csv --output output/benu.bg/products.csv
+python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.com/processed/products_cleaned.csv --output output/pharmacy.example.com/products.csv
 
 # 5. Import each CSV file to Shopify Admin > Products > Import
 ```
@@ -22,23 +22,23 @@ python3 scripts/export_by_brand.py --all-brands --input data/benu.bg/processed/p
 
 ```bash
 # List all brands and product counts
-python3 scripts/export_by_brand.py --list --input data/benu.bg/raw/products.csv
+python3 scripts/export_by_brand.py --list --input data/pharmacy.example.com/raw/products.csv
 
 # Export a single brand for testing
-python3 scripts/export_by_brand.py --brands "Nivea" --input data/benu.bg/raw/products.csv --output output/benu.bg/nivea.csv
+python3 scripts/export_by_brand.py --brands "Nivea" --input data/pharmacy.example.com/raw/products.csv --output output/pharmacy.example.com/nivea.csv
 
 # Export top 5 brands by product count
-python3 scripts/export_by_brand.py --top 5 --input data/benu.bg/raw/products.csv --output output/benu.bg/top5.csv
+python3 scripts/export_by_brand.py --top 5 --input data/pharmacy.example.com/raw/products.csv --output output/pharmacy.example.com/top5.csv
 ```
 
 ## Shopify Store Setup
 
 ```bash
 # Create smart collections from categories
-python3 scripts/create_shopify_collections.py --csv data/benu.bg/processed/products_cleaned.csv --shop YOUR_STORE --token YOUR_TOKEN --skip-brands
+python3 scripts/create_shopify_collections.py --csv data/pharmacy.example.com/processed/products_cleaned.csv --shop YOUR_STORE --token YOUR_TOKEN --skip-brands
 
 # Create navigation menus
-python3 scripts/create_shopify_menus.py --shop YOUR_STORE --token YOUR_TOKEN --csv data/benu.bg/processed/products_cleaned.csv
+python3 scripts/create_shopify_menus.py --shop YOUR_STORE --token YOUR_TOKEN --csv data/pharmacy.example.com/processed/products_cleaned.csv
 
 # Configure sidebar filters (metafield definitions + Bulgarian translations)
 python3 scripts/configure_shopify_filters.py --shop YOUR_STORE --token YOUR_TOKEN

@@ -13,12 +13,8 @@ from typing import Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
-from ..common.csv_utils import configure_csv
 from ..common.transliteration import generate_handle
 from .api_client import ShopifyAPIClient
-
-# Configure CSV for large fields
-configure_csv()
 
 
 class ShopifyCollectionCreator:
@@ -125,9 +121,9 @@ class ShopifyCollectionCreator:
             collection_id = result["smart_collection"]["id"]
             logger.info("Created: %s (ID: %s)", title, collection_id)
             return True
-        else:
-            logger.error("Failed to create: %s", title)
-            return False
+
+        logger.error("Failed to create: %s", title)
+        return False
 
     def create_smart_collection(self, title: str, tag: str) -> bool:
         """Create a smart collection with tag-based rule."""

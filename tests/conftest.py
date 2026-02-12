@@ -39,7 +39,7 @@ def minimal_product():
     """Create a minimal product with only required fields."""
     return ExtractedProduct(
         title="Test Product 500mg",
-        url="https://benu.bg/test-product-500mg",
+        url="https://pharmacy.example.com/test-product-500mg",
         brand="TestBrand",
         sku="TST-001",
         price="12.50",
@@ -51,7 +51,7 @@ def full_product():
     """Create a fully populated product with all fields."""
     return ExtractedProduct(
         title="TestBrand Витамин C 500mg таблетки",
-        url="https://benu.bg/testbrand-vitamin-c-500mg",
+        url="https://pharmacy.example.com/testbrand-vitamin-c-500mg",
         brand="TestBrand",
         sku="TST-002",
         price="12.50",
@@ -68,8 +68,8 @@ def full_product():
         more_info="Баркод: 3800123456789\nТегло: 250g",
         description="<h3>Описание</h3><p>Витамин С е есенциален.</p>",
         images=[
-            ProductImage(source_url="https://benu.bg/img1.jpg", position=1, alt_text="Image 1"),
-            ProductImage(source_url="https://benu.bg/img2.jpg", position=2, alt_text="Image 2"),
+            ProductImage(source_url="https://pharmacy.example.com/img1.jpg", position=1, alt_text="Image 1"),
+            ProductImage(source_url="https://pharmacy.example.com/img2.jpg", position=2, alt_text="Image 2"),
         ],
         handle="testbrand-vitamin-c-500mg",
         product_type="Витамини и добавки",

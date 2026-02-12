@@ -110,8 +110,8 @@ def exchange_code_for_token(shop: str, client_id: str, client_secret: str, code:
 
     if response.status_code == 200:
         return response.json()
-    else:
-        raise Exception(f"Token exchange failed: {response.status_code} - {response.text}")
+
+    raise Exception(f"Token exchange failed: {response.status_code} - {response.text}")
 
 
 def save_token(shop: str, token_data: dict):
@@ -138,7 +138,7 @@ def load_token() -> dict:
 
 def test_token(shop: str, access_token: str) -> bool:
     """Test if token works by fetching shop info."""
-    url = f"https://{shop}.myshopify.com/admin/api/2024-01/shop.json"
+    url = f"https://{shop}.myshopify.com/admin/api/2025-01/shop.json"
     headers = {
         "X-Shopify-Access-Token": access_token,
         "Content-Type": "application/json",
@@ -303,7 +303,7 @@ def main():
         print("SUCCESS! You can now run the collection creator:")
         print("=" * 60)
         print("\npython3 create_shopify_collections.py \\")
-        print("  --csv data/benu.bg/raw/products.csv \\")
+        print("  --csv data/products.csv \\")
         print(f"  --shop {args.shop} \\")
         print(f"  --token {access_token[:15]}... \\")
         print("  --dry-run")

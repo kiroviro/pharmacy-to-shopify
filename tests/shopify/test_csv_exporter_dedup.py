@@ -11,14 +11,14 @@ from src.shopify.csv_exporter import ShopifyCSVExporter
 
 @pytest.fixture
 def exporter():
-    return ShopifyCSVExporter(source_domain="benu.bg")
+    return ShopifyCSVExporter(source_domain="pharmacy.example.com")
 
 
 @pytest.fixture
 def product_a():
     return ExtractedProduct(
         title="Product A",
-        url="https://benu.bg/product-a",
+        url="https://pharmacy.example.com/product-a",
         brand="Brand",
         sku="A-001",
         price="10.00",
@@ -31,7 +31,7 @@ def product_a():
 def product_b():
     return ExtractedProduct(
         title="Product B",
-        url="https://benu.bg/product-b",
+        url="https://pharmacy.example.com/product-b",
         brand="Brand",
         sku="B-001",
         price="20.00",

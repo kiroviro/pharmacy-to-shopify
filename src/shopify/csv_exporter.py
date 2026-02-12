@@ -10,14 +10,10 @@ import logging
 import os
 from typing import Dict, List, Set
 
-from ..common.csv_utils import configure_csv
 from ..common.text_utils import remove_source_references
 from ..models import ExtractedProduct, ProductImage
 
 logger = logging.getLogger(__name__)
-
-# Configure CSV for large fields
-configure_csv()
 
 # Official Shopify CSV columns (exact template format)
 SHOPIFY_FIELDNAMES = [
@@ -54,7 +50,7 @@ class ShopifyCSVExporter:
         exporter.export_multiple(products, "output/products.csv")
     """
 
-    def __init__(self, source_domain: str = "benu.bg"):
+    def __init__(self, source_domain: str = "pharmacy.example.com"):
         """
         Initialize the exporter.
 
@@ -93,7 +89,7 @@ class ShopifyCSVExporter:
         tags_str = ', '.join(product.tags)
         published = 'TRUE' if product.published else 'FALSE'
         requires_shipping = 'TRUE' if product.requires_shipping else 'FALSE'
-        continue_selling = 'deny' if product.inventory_policy == 'deny' else 'continue'
+        continue_selling = product.inventory_policy
 
         # Determine status based on product type (prescription = draft)
         status = 'Draft' if product.availability == "Само с рецепта" else 'Active'
@@ -120,8 +116,8 @@ class ShopifyCSVExporter:
             'Option3 value': '',
             'Option3 Linked To': '',
             'Price': product.price,
-            'Price EUR': product.price_eur if product.price_eur else '',
-            'Compare-at price': product.original_price if product.original_price else '',
+            'Price EUR': product.price_eur or '',
+            'Compare-at price': product.original_price or '',
             'Cost per item': '',
             'Charge tax': 'TRUE',
             'Tax code': '',
@@ -310,5 +306,3 @@ class ShopifyCSVExporter:
 
             for row in self.product_to_rows(product):
                 writer.writerow(row)
-
-

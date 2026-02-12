@@ -1,7 +1,7 @@
 """
-BENU.bg Product Extractor
+Pharmacy Product Extractor
 
-Extracts product data from benu.bg Bulgarian pharmacy website.
+Extracts product data from pharmacy website.
 """
 
 import json
@@ -21,12 +21,13 @@ from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
 
 
-class BenuExtractor:
+class PharmacyExtractor:
     """Extracts product data from a pharmacy site."""
 
-    def __init__(self, url: str, site_domain: str = "benu.bg"):
+    def __init__(self, url: str, site_domain: str = "pharmacy.example.com", validate_images: bool = False):
         self.url = url
         self.SITE_DOMAIN = site_domain
+        self.validate_images = validate_images
         self.html = None
         self.soup = None
         self.json_ld = None
@@ -55,12 +56,12 @@ class BenuExtractor:
                 data = json.loads(script.string)
                 if isinstance(data, dict) and data.get("@type") == "Product":
                     self.json_ld = data
-                    break
-                elif isinstance(data, list):
+                    return
+                if isinstance(data, list):
                     for item in data:
                         if isinstance(item, dict) and item.get("@type") == "Product":
                             self.json_ld = item
-                            break
+                            return
             except (json.JSONDecodeError, TypeError):
                 continue
 
@@ -87,13 +88,13 @@ class BenuExtractor:
             "more_info": more_info,
         }
 
-        # Build tags from categories (for Shopify smart collections)
-        tags = list(categories)  # Copy categories as tags
+        tags = list(categories)
 
         images = self._extract_images()
         self._optimize_image_alt_texts(images, brand, title)
 
         barcode = self._extract_barcode(more_info)
+        highlights = self._extract_highlights()
 
         return ExtractedProduct(
             title=title,
@@ -107,13 +108,13 @@ class BenuExtractor:
             original_price=self._extract_original_price(),
             availability=self._extract_availability(),
             category_path=categories,
-            highlights=self._extract_highlights(),
+            highlights=highlights,
             details=details,
             composition=composition,
             usage=usage,
             contraindications=contraindications,
             more_info=more_info,
-            description=self._build_description(brand, sections),
+            description=self._build_description(brand, highlights, sections),
             images=images,
             tags=tags,
             product_type=categories[0] if categories else "",
@@ -150,7 +151,6 @@ class BenuExtractor:
 
     def _extract_brand(self, title: str) -> str:
         """Extract brand name."""
-        # Try JSON-LD
         if self.json_ld:
             brand_data = self.json_ld.get("brand")
             if isinstance(brand_data, dict):
@@ -160,12 +160,7 @@ class BenuExtractor:
             if brand:
                 return brand.strip()
 
-        # Try brand matcher on title
-        matched = self.brand_matcher.match_from_title(title)
-        if matched:
-            return matched
-
-        return ""
+        return self.brand_matcher.match_from_title(title)
 
     def _extract_sku(self) -> str:
         """Extract SKU/product code."""
@@ -205,12 +200,14 @@ class BenuExtractor:
 
         return price_bgn, price_eur
 
-    def _extract_original_price(self) -> str:
-        """Original price not used - we extract regular price, ignoring promotions."""
+    # Site does not expose original/compare-at price or availability status.
+    # Stubbed for ExtractedProduct interface; override in future site extractors.
+    @staticmethod
+    def _extract_original_price() -> str:
         return ""
 
-    def _extract_availability(self) -> str:
-        """Extract availability status (not used - inventory not tracked)."""
+    @staticmethod
+    def _extract_availability() -> str:
         return ""
 
     def _extract_categories(self, product_title: str = "") -> List[str]:
@@ -225,21 +222,19 @@ class BenuExtractor:
             try:
                 data = json.loads(script.string)
                 # Handle both direct object and array format
-                if isinstance(data, list):
+                breadcrumb_data = None
+                if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
+                    breadcrumb_data = data
+                elif isinstance(data, list):
                     for item in data:
                         if isinstance(item, dict) and item.get("@type") == "BreadcrumbList":
-                            data = item
+                            breadcrumb_data = item
                             break
-                    else:
-                        continue
 
-                if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
-                    items = data.get("itemListElement", [])
-                    for item in items:
+                if breadcrumb_data:
+                    for item in breadcrumb_data.get("itemListElement", []):
                         name = item.get("name") or item.get("item", {}).get("name", "")
-                        # Skip "Начало" (Home) and the product name itself
                         if name and name.lower() != "начало" and name != product_title:
-                            # Also skip if it looks like the product title (partial match)
                             if len(name) < 50 or product_title not in name:
                                 categories.append(name)
                     if categories:
@@ -256,10 +251,9 @@ class BenuExtractor:
 
         return categories
 
-    def _extract_highlights(self) -> List[str]:
-        """Extract product highlights (optional for benu.bg)."""
-        # benu.bg doesn't have a highlights section - return empty
-        # Content is in ОПИСАНИЕ, СЪСТАВ, НАЧИН НА УПОТРЕБА, ПРОТИВОПОКАЗАНИЯ
+    @staticmethod
+    def _extract_highlights() -> List[str]:
+        # Site has no highlights section; content is in tab sections instead.
         return []
 
     def _extract_tab_content(self, section_name: str) -> str:
@@ -268,7 +262,7 @@ class BenuExtractor:
         page_lower = page_text.lower()
         section_lower = section_name.lower()
 
-        # Section headers on benu.bg product pages
+        # Section headers on pharmacy product pages
         section_markers = [
             "какво представлява",       # details
             "активни съставки",         # composition
@@ -318,18 +312,6 @@ class BenuExtractor:
 
         return content[:1500]
 
-    def _clean_html_content(self, element) -> str:
-        """Clean HTML content preserving structure."""
-        # Remove script and style tags
-        for tag in element.find_all(["script", "style"]):
-            tag.decompose()
-
-        # Get text with some formatting
-        text = element.get_text(separator="\n", strip=True)
-        # Clean up multiple newlines
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        return text.strip()
-
     def _extract_images(self) -> List[ProductImage]:
         """Extract product images."""
         images = []
@@ -340,12 +322,14 @@ class BenuExtractor:
             if not url:
                 return False
             url_lower = url.lower()
-            # Exclude icons, logos, placeholders, cached versions, and non-product images
-            exclude_patterns = ['.svg', 'icon', 'logo', 'heart', 'cart', 'arrow', 'close', 'search', 'default.jpg', 'default.png', '/media/cache/product_in_category_list', '/media/cache/brands_nav_slider']
-            for pattern in exclude_patterns:
-                if pattern in url_lower:
-                    return False
-            # Must be in product images path or be a webp/jpg/png
+            exclude_patterns = [
+                '.svg', 'icon', 'logo', 'heart', 'cart', 'arrow', 'close',
+                'search', 'default.jpg', 'default.png',
+                '/media/cache/product_in_category_list',
+                '/media/cache/brands_nav_slider',
+            ]
+            if any(pattern in url_lower for pattern in exclude_patterns):
+                return False
             return '/images/products/' in url or url_lower.endswith(('.webp', '.jpg', '.jpeg', '.png', '.gif'))
 
         def normalize_url(url: str) -> str:
@@ -405,7 +389,7 @@ class BenuExtractor:
                             ))
 
         # Try gallery images
-        gallery_imgs = self.soup.select(".benu-gallery img, .product-gallery img, .gallery img, .product-image img")
+        gallery_imgs = self.soup.select(".site-gallery img, .product-gallery img, .gallery img, .product-image img")
         for img in gallery_imgs:
             src = img.get("src") or img.get("data-src") or img.get("data-lazy")
             if src:
@@ -423,27 +407,27 @@ class BenuExtractor:
                             alt_text=img.get("alt", self._extract_title())
                         ))
 
-        # Validate image URLs with HEAD requests; fallback to product_view_default if broken
-        for img in images:
-            try:
-                resp = requests.head(img.source_url, timeout=10, allow_redirects=True)
-                if resp.status_code != 200:
-                    # Try product_view_default fallback
-                    fallback_url = re.sub(
-                        r'/uploads/',
-                        '/media/cache/product_view_default/',
-                        img.source_url
-                    )
-                    if fallback_url != img.source_url:
-                        try:
-                            resp2 = requests.head(fallback_url, timeout=10, allow_redirects=True)
-                            if resp2.status_code == 200:
-                                logger.debug("Image fallback: %s -> product_view_default", img.source_url)
-                                img.source_url = fallback_url
-                        except requests.RequestException:
-                            pass
-            except requests.RequestException:
-                pass
+        # Optionally validate image URLs with HEAD requests; fallback to product_view_default if broken
+        if self.validate_images:
+            for img in images:
+                try:
+                    resp = requests.head(img.source_url, timeout=10, allow_redirects=True)
+                    if resp.status_code != 200:
+                        fallback_url = re.sub(
+                            r'/uploads/',
+                            '/media/cache/product_view_default/',
+                            img.source_url
+                        )
+                        if fallback_url != img.source_url:
+                            try:
+                                resp2 = requests.head(fallback_url, timeout=10, allow_redirects=True)
+                                if resp2.status_code == 200:
+                                    logger.debug("Image fallback: %s -> product_view_default", img.source_url)
+                                    img.source_url = fallback_url
+                            except requests.RequestException:
+                                pass
+                except requests.RequestException:
+                    pass
 
         return images
 
@@ -477,31 +461,31 @@ class BenuExtractor:
             (r'(\d+(?:[.,]\d+)?)\s*(?:g|гр)', 1),   # g stays g
             (r'(\d+(?:[.,]\d+)?)\s*(?:ml|мл)', 1),  # ml ≈ g for liquids
             (r'(\d+(?:[.,]\d+)?)\s*(?:l|л)', 1000), # l to g
-            (r'(\d+(?:[.,]\d+)?)\s*mg', 0.001),    # mg to g
+            (r'(\d+(?:[.,]\d+)?)\s*mg', 0.001),     # mg to g (min 1g)
         ]
 
         for pattern, multiplier in patterns:
             match = re.search(pattern, text)
             if match:
                 value = float(match.group(1).replace(",", "."))
-                return int(value * multiplier)
+                grams = value * multiplier
+                return max(1, round(grams)) if grams > 0 else 0
 
         return 0
 
-    def _build_description(self, brand: str, sections: dict) -> str:
+    def _build_description(self, brand: str, highlights: List[str], sections: dict) -> str:
         """Build full HTML description from all sections.
 
         Args:
             brand: Product brand name
+            highlights: Product highlight bullet points
             sections: Dict with keys: details, composition, usage, contraindications, more_info
         """
         parts = []
 
-        # Brand display
         if brand:
             parts.append(f"<p><strong>Марка:</strong> {brand}</p>")
 
-        highlights = self._extract_highlights()
         if highlights:
             parts.append("<ul>")
             for h in highlights:
@@ -530,7 +514,7 @@ class BenuExtractor:
         """Generate URL-friendly handle from source URL slug.
 
         Uses URL slug instead of title to prevent duplicates when
-        benu.bg has multiple pages with the same product title.
+        the site has multiple pages with the same product title.
         """
         # Extract slug from source URL (e.g., /product-name-123 -> product-name-123)
         parsed = urlparse(self.url)

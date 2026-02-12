@@ -24,10 +24,6 @@ from ..common.config_loader import (
     load_tag_normalization,
     load_vendor_defaults,
 )
-from ..common.csv_utils import configure_csv
-
-# Configure CSV for large fields
-configure_csv()
 
 
 class TagCleaner:
@@ -99,25 +95,13 @@ class TagCleaner:
     def _is_promotional(self, tag: str) -> bool:
         """Check if tag is promotional/temporal."""
         tag_lower = tag.lower()
-        for pattern in self.promotional_patterns:
-            if pattern in tag_lower:
-                return True
-        return False
+        return any(pattern in tag_lower for pattern in self.promotional_patterns)
 
     def _is_brand_tag(self, tag: str, vendor: str) -> bool:
         """Check if tag is the brand name (matches vendor)."""
         tag_lower = tag.lower().strip()
         vendor_lower = vendor.lower().strip()
-
-        # Direct match
-        if tag_lower == vendor_lower:
-            return True
-
-        # Check against all known vendors (tag might be a brand not matching this product's vendor)
-        if tag_lower in self.vendor_names:
-            return True
-
-        return False
+        return tag_lower == vendor_lower or tag_lower in self.vendor_names
 
     def _get_l1_category(self, tags: List[str]) -> str:
         """Determine L1 category from existing tags."""
@@ -136,10 +120,7 @@ class TagCleaner:
 
     def _has_l1_category(self, tags: List[str]) -> bool:
         """Check if tags include an L1 category."""
-        for tag in tags:
-            if tag.lower().strip() in self.l1_category_names:
-                return True
-        return False
+        return any(tag.lower().strip() in self.l1_category_names for tag in tags)
 
     def _clean_tags(self, tags_str: str, vendor: str) -> Tuple[str, bool]:
         """
@@ -206,8 +187,8 @@ class TagCleaner:
 
         # Create output directory if needed
         output_dir = os.path.dirname(self.output_path)
-        if output_dir and not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
 
         rows_processed = 0
 
@@ -309,8 +290,8 @@ class TagCleaner:
 
         # Create report directory if needed
         report_dir = os.path.dirname(self.report_path)
-        if report_dir and not os.path.exists(report_dir):
-            os.makedirs(report_dir)
+        if report_dir:
+            os.makedirs(report_dir, exist_ok=True)
 
         with open(self.report_path, 'w', encoding='utf-8') as f:
             f.write("TAG CLEANUP REPORT\n")

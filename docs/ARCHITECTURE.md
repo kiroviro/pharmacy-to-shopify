@@ -4,7 +4,7 @@
 
 A modular product extraction and Shopify migration tool for pharmacy websites. Designed to be extensible for multiple vendor sites.
 
-**Currently supported:** benu.bg (Phoenix Pharma / BENU Bulgaria)
+**Currently supported:** pharmacy.example.com
 
 ---
 
@@ -72,7 +72,7 @@ Core extraction logic for product data.
 
 | Module | Class | Purpose |
 |--------|-------|---------|
-| `benu_extractor.py` | `BenuExtractor` | Extractor for benu.bg |
+| `pharmacy_extractor.py` | `PharmacyExtractor` | Extractor for pharmacy.example.com |
 | `validator.py` | `SpecificationValidator` | Validates extraction completeness |
 | `bulk_extractor.py` | `BulkExtractor` | Batch processing with progress tracking |
 | `brand_matcher.py` | `BrandMatcher` | Brand detection from YAML config |
@@ -81,7 +81,7 @@ Core extraction logic for product data.
 
 **Helper functions:**
 - `get_extractor_for_url(url)` - Returns appropriate extractor class for URL
-- `get_site_from_url(url)` - Returns site identifier (e.g., "benu.bg")
+- `get_site_from_url(url)` - Returns site identifier (e.g., "pharmacy.example.com")
 
 **Parsers:**
 
@@ -98,7 +98,7 @@ URL discovery from site sitemaps.
 
 | Module | Class | Purpose |
 |--------|-------|---------|
-| `benu_discoverer.py` | `BenuURLDiscoverer` | Sitemap-based URL discovery for benu.bg |
+| `pharmacy_discoverer.py` | `PharmacyURLDiscoverer` | Sitemap-based URL discovery for pharmacy.example.com |
 
 **Helper functions:**
 - `get_discoverer_for_site(site)` - Returns appropriate discoverer class
@@ -171,7 +171,7 @@ The project supports multiple source sites with isolated data:
 
 ```
 data/
-├── benu.bg/               # Currently supported
+├── pharmacy.example.com/  # Currently supported
 │   ├── raw/
 │   └── processed/
 └── {new-site}/            # Future sites
@@ -223,14 +223,14 @@ The extractor uses multiple data sources with fallback priority:
 | Images | JSON-LD (rewritten to CDN) | Gallery selectors | - | HEAD validation |
 | Content | Accordion tabs | JSON-LD fields | Leaflet sections | HTML panels |
 
-### benu.bg Image URL Resolution
+### Image URL Resolution
 
-benu.bg serves product images at two URL patterns:
+The pharmacy site serves product images at two URL patterns:
 
 | Pattern | Example |
 |---------|---------|
-| Raw upload | `https://benu.bg/uploads/images/products/{id}/{file}` |
-| CDN cache | `https://benu.bg/media/cache/product_view_default/images/products/{id}/{file}` |
+| Raw upload | `https://pharmacy.example.com/uploads/images/products/{id}/{file}` |
+| CDN cache | `https://pharmacy.example.com/media/cache/product_view_default/images/products/{id}/{file}` |
 
 The `uploads/` path returns 404 for ~3.4% of products, while `product_view_default/` works for all products and returns higher-quality images (1.6-3.2x larger files).
 
@@ -253,7 +253,7 @@ SKUs serve as the internal key for vendor integration:
 
 The vendor's SKU is also written to `google_mpn` for Google Shopping feeds.
 
-### benu.bg Content Sections
+### Content Sections
 
 Content is extracted using a generic section marker-based approach:
 - Finds section headers in page text

@@ -35,7 +35,7 @@ class ShopifyAPIClient:
         result = client.graphql_request(query, variables)
     """
 
-    API_VERSION = "2024-01"
+    API_VERSION = "2025-01"
     MAX_RETRIES = 5
     RETRYABLE_STATUS_CODES = {429, 502, 503, 504}
 

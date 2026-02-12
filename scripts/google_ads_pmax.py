@@ -259,11 +259,15 @@ def main():
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    config = load_google_ads_config(
-        args.config,
-        required_fields=["developer_token", "client_id", "client_secret", "refresh_token",
-                         "customer_id", "merchant_center_id"],
-    )
+    try:
+        config = load_google_ads_config(
+            args.config,
+            required_fields=["developer_token", "client_id", "client_secret", "refresh_token",
+                             "customer_id", "merchant_center_id"],
+        )
+    except ValueError as e:
+        logger.error("%s", e)
+        sys.exit(1)
     customer_id = str(config["customer_id"]).replace("-", "")
     merchant_center_id = int(config["merchant_center_id"])
     store_url = config.get("store_url", "https://viapharma.us")

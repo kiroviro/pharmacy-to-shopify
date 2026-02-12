@@ -1,5 +1,5 @@
 # SEO Settings for ViaPharma store
-# Used by benu_extractor.py for generating SEO titles, descriptions, and Google Shopping fields
+# Used by pharmacy_extractor.py for generating SEO titles, descriptions, and Google Shopping fields
 
 store_name: "ViaPharma"
 title_max_length: 70

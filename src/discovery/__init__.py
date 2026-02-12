@@ -2,14 +2,14 @@
 URL Discovery modules for pharmacy sites.
 
 Modules:
-    benu_discoverer - BenuURLDiscoverer for benu.bg
+    pharmacy_discoverer - PharmacyURLDiscoverer for pharmacy.example.com
 """
 
-from .benu_discoverer import BenuURLDiscoverer
+from .pharmacy_discoverer import PharmacyURLDiscoverer
 
 # Site to discoverer mapping
 SITE_DISCOVERERS = {
-    'benu.bg': BenuURLDiscoverer,
+    'pharmacy.example.com': PharmacyURLDiscoverer,
 }
 
 
@@ -18,7 +18,7 @@ def get_discoverer_for_site(site: str):
     Get the appropriate URL discoverer class for a site.
 
     Args:
-        site: Site identifier (e.g., "benu.bg")
+        site: Site identifier (e.g., "pharmacy.example.com")
 
     Returns:
         Discoverer class
@@ -45,7 +45,7 @@ def get_supported_sites() -> list:
 
 
 __all__ = [
-    'BenuURLDiscoverer',
+    'PharmacyURLDiscoverer',
     'get_discoverer_for_site',
     'get_supported_sites',
     'SITE_DISCOVERERS',

@@ -11,7 +11,7 @@ from src.shopify.csv_exporter import SHOPIFY_FIELDNAMES, ShopifyCSVExporter
 
 @pytest.fixture
 def exporter():
-    return ShopifyCSVExporter(source_domain="benu.bg")
+    return ShopifyCSVExporter(source_domain="pharmacy.example.com")
 
 
 class TestShopifyFieldnames:

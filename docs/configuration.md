@@ -23,7 +23,7 @@ The CLI scripts auto-detect the site from URLs, so no changes are needed there.
 
 All category and tag settings are in YAML files under `config/`:
 
-- **`categories.yaml`** -- L1/L2 category hierarchy (83 subcategories for benu.bg)
+- **`categories.yaml`** -- L1/L2 category hierarchy (83 subcategories)
 - **`tag_normalization.yaml`** -- canonical brand name casing (e.g., "AboPharma")
 - **`promotional_patterns.yaml`** -- patterns to strip from tags (e.g., "Black Friday")
 - **`vendor_defaults.yaml`** -- default tags for specific vendors

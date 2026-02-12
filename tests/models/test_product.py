@@ -20,7 +20,7 @@ class TestProductImage:
 class TestExtractedProduct:
     def test_create_minimal(self, minimal_product):
         assert minimal_product.title == "Test Product 500mg"
-        assert minimal_product.url == "https://benu.bg/test-product-500mg"
+        assert minimal_product.url == "https://pharmacy.example.com/test-product-500mg"
         assert minimal_product.brand == "TestBrand"
 
     def test_default_values(self, minimal_product):

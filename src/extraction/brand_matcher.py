@@ -66,12 +66,14 @@ class BrandMatcher:
             Matched brand name (canonical capitalization) or empty string
         """
         # Priority 1: Structured data (most reliable)
-        if structured_brand and structured_brand.strip():
-            return structured_brand.strip()
+        stripped = structured_brand.strip() if structured_brand else ""
+        if stripped:
+            return stripped
 
         # Priority 2: GTM data
-        if gtm_brand and gtm_brand.strip():
-            return gtm_brand.strip()
+        stripped = gtm_brand.strip() if gtm_brand else ""
+        if stripped:
+            return stripped
 
         # Priority 3: Title prefix matching
         return self.match_from_title(title)
@@ -142,39 +144,3 @@ class BrandMatcher:
     def brand_count(self) -> int:
         """Return the number of known brands."""
         return len(self.known_brands)
-
-
-# Module-level singleton for convenience
-_default_matcher: Optional[BrandMatcher] = None
-
-
-def get_brand_matcher() -> BrandMatcher:
-    """
-    Get the default BrandMatcher instance (singleton).
-
-    Returns:
-        BrandMatcher instance with brands loaded from config
-    """
-    global _default_matcher
-    if _default_matcher is None:
-        _default_matcher = BrandMatcher()
-    return _default_matcher
-
-
-def match_brand(
-    title: str,
-    structured_brand: str = "",
-    gtm_brand: str = ""
-) -> str:
-    """
-    Convenience function to match a brand using the default matcher.
-
-    Args:
-        title: Product title
-        structured_brand: Brand from JSON-LD structured data
-        gtm_brand: Brand from GTM dl4Objects
-
-    Returns:
-        Matched brand name or empty string
-    """
-    return get_brand_matcher().match(title, structured_brand, gtm_brand)

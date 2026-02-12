@@ -2,18 +2,17 @@
 Product extraction modules for pharmacy sites.
 
 Modules:
-    benu_extractor - BenuExtractor for benu.bg
+    pharmacy_extractor - PharmacyExtractor for pharmacy.example.com
     validator - SpecificationValidator for data validation
     brand_matcher - Match product titles to known brand names
     bulk_extractor - Bulk extraction with progress tracking
-    utils - Helper functions (remove_source_references)
     parsers - Specialized parsers for different data sources
 """
 
 from urllib.parse import urlparse
 
-from .benu_extractor import BenuExtractor
-from .brand_matcher import BrandMatcher, get_brand_matcher, match_brand
+from ..common.text_utils import remove_source_references
+from .brand_matcher import BrandMatcher
 from .bulk_extractor import BulkExtractor
 from .parsers import (
     GTMDataParser,
@@ -21,12 +20,12 @@ from .parsers import (
     LeafletParser,
     StructuredDataParser,
 )
-from .utils import remove_source_references
+from .pharmacy_extractor import PharmacyExtractor
 from .validator import SpecificationValidator
 
 # Registry of supported site extractors
 SITE_EXTRACTORS = {
-    'benu.bg': BenuExtractor,
+    'pharmacy.example.com': PharmacyExtractor,
 }
 
 
@@ -38,7 +37,7 @@ def get_extractor_for_url(url: str):
         url: Product URL
 
     Returns:
-        Extractor class (e.g., BenuExtractor)
+        Extractor class (e.g., PharmacyExtractor)
 
     Raises:
         ValueError: If site is not supported
@@ -61,7 +60,7 @@ def get_site_from_url(url: str) -> str:
         url: Any URL from the site
 
     Returns:
-        Site identifier (e.g., "benu.bg")
+        Site identifier (e.g., "pharmacy.example.com")
     """
     domain = urlparse(url).netloc.lower()
 
@@ -74,7 +73,7 @@ def get_site_from_url(url: str) -> str:
 
 __all__ = [
     # Site-specific extractors
-    'BenuExtractor',
+    'PharmacyExtractor',
     # Helper functions
     'get_extractor_for_url',
     'get_site_from_url',
@@ -82,8 +81,6 @@ __all__ = [
     'SpecificationValidator',
     # Brand matching
     'BrandMatcher',
-    'get_brand_matcher',
-    'match_brand',
     # Bulk extraction
     'BulkExtractor',
     # Utilities

@@ -18,17 +18,6 @@ class ProductImage:
 
 
 @dataclass
-class ProductVariant:
-    """Product variant data."""
-    sku: str
-    price: str
-    compare_at_price: str = ""
-    inventory_quantity: int = 0
-    option1: str = ""
-    option2: str = ""
-
-
-@dataclass
 class ExtractedProduct:
     """
     Complete product data per specification.
@@ -71,9 +60,6 @@ class ExtractedProduct:
 
     # Images (from initialImages array)
     images: List[ProductImage] = field(default_factory=list)
-
-    # Variants (for products with options)
-    variants: List[ProductVariant] = field(default_factory=list)
 
     # Shopify fields
     handle: str = ""            # URL slug (transliterated from title)

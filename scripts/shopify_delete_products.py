@@ -16,6 +16,8 @@ Usage:
     python3 shopify_delete_products.py --shop STORE --token TOKEN
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import logging
@@ -213,10 +215,10 @@ def upload_jsonl(target: dict, jsonl_path: str) -> bool:
 
     if response.status_code in (200, 201):
         return True
-    else:
-        logger.error("Upload failed: HTTP %d", response.status_code)
-        logger.error("Response: %s", response.text[:500])
-        return False
+
+    logger.error("Upload failed: HTTP %d", response.status_code)
+    logger.error("Response: %s", response.text[:500])
+    return False
 
 
 def run_bulk_delete(client: ShopifyAPIClient, staged_upload_path: str) -> str | None:

@@ -13,12 +13,8 @@ from typing import Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 from ..common.config_loader import load_categories, load_categories_3level
-from ..common.csv_utils import configure_csv
 from ..common.transliteration import generate_handle
 from .api_client import ShopifyAPIClient
-
-# Configure CSV for large fields
-configure_csv()
 
 
 class ShopifyMenuCreator:
@@ -83,6 +79,15 @@ class ShopifyMenuCreator:
     def build_collection_url(self, handle: str) -> str:
         """Build collection URL from handle."""
         return f"/collections/{handle}"
+
+    def _build_menu_item(self, title: str, handle_prefix: str = "") -> Dict:
+        """Build a menu item dict for a category or brand."""
+        handle = generate_handle(title, prefix=handle_prefix)
+        return {
+            "title": title,
+            "url": self.build_collection_url(handle),
+            "type": "HTTP",
+        }
 
     def analyze_tags_from_csv(self, csv_path: str, min_products: int = 3) -> Dict[str, int]:
         """Analyze tags from CSV and return tag counts."""
@@ -164,31 +169,19 @@ class ShopifyMenuCreator:
                 logger.debug("Skipping %s (not in data)", l1_category)
                 continue
 
-            l1_handle = generate_handle(l1_category)
-            l1_url = self.build_collection_url(l1_handle)
-
             # Build L2 items
-            l2_items = []
-            for l2_category in l2_subcategories:
-                if l2_category not in available_tags:
-                    continue
-                l2_handle = generate_handle(l2_category)
-                l2_url = self.build_collection_url(l2_handle)
-                l2_items.append({
-                    "title": l2_category,
-                    "url": l2_url,
-                    "type": "HTTP"
-                })
+            l2_items = [
+                self._build_menu_item(l2_category)
+                for l2_category in l2_subcategories
+                if l2_category in available_tags
+            ]
 
             logger.info("%s (%d products) with %d subcategories", l1_category, tag_counts.get(l1_category, 0), len(l2_items))
 
             # Add L1 with nested L2 items
-            menu_items.append({
-                "title": l1_category,
-                "url": l1_url,
-                "type": "HTTP",
-                "items": l2_items
-            })
+            l1_item = self._build_menu_item(l1_category)
+            l1_item["items"] = l2_items
+            menu_items.append(l1_item)
 
         # Create menu with all items
         menu_id = self.create_menu_with_items(
@@ -244,9 +237,6 @@ class ShopifyMenuCreator:
                 logger.debug("Skipping %s (not in data)", l1_category)
                 continue
 
-            l1_handle = generate_handle(l1_category)
-            l1_url = self.build_collection_url(l1_handle)
-
             l2_items = []
 
             if l1_category in categories_3level:
@@ -255,42 +245,24 @@ class ShopifyMenuCreator:
                 for l2_group, l3_list in l2_groups.items():
                     if l2_group not in available_tags:
                         continue
-                    l2_handle = generate_handle(l2_group)
-                    l2_url = self.build_collection_url(l2_handle)
 
-                    l3_items = []
-                    if l3_list:
-                        for l3_category in l3_list:
-                            if l3_category not in available_tags:
-                                continue
-                            l3_handle = generate_handle(l3_category)
-                            l3_url = self.build_collection_url(l3_handle)
-                            l3_items.append({
-                                "title": l3_category,
-                                "url": l3_url,
-                                "type": "HTTP"
-                            })
+                    l3_items = [
+                        self._build_menu_item(l3_category)
+                        for l3_category in (l3_list or [])
+                        if l3_category in available_tags
+                    ]
 
-                    l2_item = {
-                        "title": l2_group,
-                        "url": l2_url,
-                        "type": "HTTP"
-                    }
+                    l2_item = self._build_menu_item(l2_group)
                     if l3_items:
                         l2_item["items"] = l3_items
                     l2_items.append(l2_item)
             else:
                 # Fallback: flat L2 list (no L3)
-                for l2_category in l2_subcategories:
-                    if l2_category not in available_tags:
-                        continue
-                    l2_handle = generate_handle(l2_category)
-                    l2_url = self.build_collection_url(l2_handle)
-                    l2_items.append({
-                        "title": l2_category,
-                        "url": l2_url,
-                        "type": "HTTP"
-                    })
+                l2_items = [
+                    self._build_menu_item(l2_category)
+                    for l2_category in l2_subcategories
+                    if l2_category in available_tags
+                ]
 
             logger.info(
                 "%s (%d products) with %d subcategories (3-level: %s)",
@@ -298,12 +270,9 @@ class ShopifyMenuCreator:
                 len(l2_items), l1_category in categories_3level
             )
 
-            menu_items.append({
-                "title": l1_category,
-                "url": l1_url,
-                "type": "HTTP",
-                "items": l2_items
-            })
+            l1_item = self._build_menu_item(l1_category)
+            l1_item["items"] = l2_items
+            menu_items.append(l1_item)
 
         menu_id = self.create_menu_with_items(
             title="Categories",
@@ -396,15 +365,9 @@ class ShopifyMenuCreator:
         logger.info("Building menu items...")
         menu_items = []
         for vendor, count in top_brands:
-            # Brand collections use "brand-{handle}" pattern
-            handle = generate_handle(vendor, prefix="brand-")
-            url = self.build_collection_url(handle)
-            logger.info("%s (%d products) -> %s", vendor, count, url)
-            menu_items.append({
-                "title": vendor,
-                "url": url,
-                "type": "HTTP"
-            })
+            item = self._build_menu_item(vendor, handle_prefix="brand-")
+            logger.info("%s (%d products) -> %s", vendor, count, item["url"])
+            menu_items.append(item)
 
         # Create menu with all items
         menu_id = self.create_menu_with_items(
