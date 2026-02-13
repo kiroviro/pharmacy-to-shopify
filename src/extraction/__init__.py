@@ -6,7 +6,6 @@ Modules:
     validator - SpecificationValidator for data validation
     brand_matcher - Match product titles to known brand names
     bulk_extractor - Bulk extraction with progress tracking
-    parsers - Specialized parsers for different data sources
 """
 
 from urllib.parse import urlparse
@@ -14,12 +13,6 @@ from urllib.parse import urlparse
 from ..common.text_utils import remove_source_references
 from .brand_matcher import BrandMatcher
 from .bulk_extractor import BulkExtractor
-from .parsers import (
-    GTMDataParser,
-    HTMLContentParser,
-    LeafletParser,
-    StructuredDataParser,
-)
 from .pharmacy_extractor import PharmacyExtractor
 from .validator import SpecificationValidator
 
@@ -85,9 +78,4 @@ __all__ = [
     'BulkExtractor',
     # Utilities
     'remove_source_references',
-    # Parsers
-    'StructuredDataParser',
-    'GTMDataParser',
-    'HTMLContentParser',
-    'LeafletParser',
 ]

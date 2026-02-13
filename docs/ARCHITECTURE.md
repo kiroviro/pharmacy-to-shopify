@@ -55,7 +55,6 @@ Pure data classes with no business logic.
 |-------|---------|
 | `ExtractedProduct` | Complete product data (title, prices, images, content sections) |
 | `ProductImage` | Image with URL, position, alt text |
-| `ProductVariant` | SKU, price, inventory (for future variant support) |
 
 **ExtractedProduct key fields:**
 - `price` - Price in BGN (лв.)
@@ -76,21 +75,10 @@ Core extraction logic for product data.
 | `validator.py` | `SpecificationValidator` | Validates extraction completeness |
 | `bulk_extractor.py` | `BulkExtractor` | Batch processing with progress tracking |
 | `brand_matcher.py` | `BrandMatcher` | Brand detection from YAML config |
-| `utils.py` | - | Helper functions (text cleanup, source reference removal) |
-| `parsers/` | Various | Specialized data parsers |
 
 **Helper functions:**
 - `get_extractor_for_url(url)` - Returns appropriate extractor class for URL
 - `get_site_from_url(url)` - Returns site identifier (e.g., "pharmacy.example.com")
-
-**Parsers:**
-
-| Parser | Purpose |
-|--------|---------|
-| `StructuredDataParser` | JSON-LD schema.org data |
-| `GTMDataParser` | Google Tag Manager dl4Objects |
-| `HTMLContentParser` | HTML element extraction |
-| `LeafletParser` | Pharmaceutical leaflet sections |
 
 ### `src/discovery/`
 

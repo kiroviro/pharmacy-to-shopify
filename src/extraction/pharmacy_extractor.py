@@ -24,6 +24,9 @@ from .brand_matcher import BrandMatcher
 class PharmacyExtractor:
     """Extracts product data from a pharmacy site."""
 
+    _shared_brand_matcher = None
+    _shared_seo_settings = None
+
     def __init__(self, url: str, site_domain: str = "pharmacy.example.com", validate_images: bool = False):
         self.url = url
         self.SITE_DOMAIN = site_domain
@@ -31,9 +34,16 @@ class PharmacyExtractor:
         self.html = None
         self.soup = None
         self.json_ld = None
-        self.brand_matcher = BrandMatcher()
+        self._cached_title = None
         self.product_type = "otc"
-        self._seo_settings = load_seo_settings()
+
+        if PharmacyExtractor._shared_brand_matcher is None:
+            PharmacyExtractor._shared_brand_matcher = BrandMatcher()
+        self.brand_matcher = PharmacyExtractor._shared_brand_matcher
+
+        if PharmacyExtractor._shared_seo_settings is None:
+            PharmacyExtractor._shared_seo_settings = load_seo_settings()
+        self._seo_settings = PharmacyExtractor._shared_seo_settings
 
     def fetch(self) -> None:
         """Fetch the product page HTML."""
@@ -74,11 +84,12 @@ class PharmacyExtractor:
         sku = self._extract_sku()
 
         # Extract content sections once, reuse for description + SEO
-        details = self._extract_tab_content("Какво представлява")
-        composition = self._extract_tab_content("Активни съставки")
-        usage = self._extract_tab_content("Дозировка и начин на употреба")
-        contraindications = self._extract_tab_content("Противопоказания")
-        more_info = self._extract_tab_content("Допълнителна информация")
+        page_text = self.soup.get_text(separator="\n")
+        details = self._extract_tab_content("Какво представлява", page_text)
+        composition = self._extract_tab_content("Активни съставки", page_text)
+        usage = self._extract_tab_content("Дозировка и начин на употреба", page_text)
+        contraindications = self._extract_tab_content("Противопоказания", page_text)
+        more_info = self._extract_tab_content("Допълнителна информация", page_text)
 
         sections = {
             "details": details,
@@ -137,17 +148,23 @@ class PharmacyExtractor:
         return match.group(1) if match else ""
 
     def _extract_title(self) -> str:
-        """Extract product title."""
+        """Extract product title (cached after first call)."""
+        if self._cached_title is not None:
+            return self._cached_title
+
         # Try JSON-LD first
         if self.json_ld and self.json_ld.get("name"):
-            return self.json_ld["name"].strip()
+            self._cached_title = self.json_ld["name"].strip()
+            return self._cached_title
 
         # Fallback to H1
         h1 = self.soup.find("h1")
         if h1:
-            return h1.get_text(strip=True)
+            self._cached_title = h1.get_text(strip=True)
+            return self._cached_title
 
-        return ""
+        self._cached_title = ""
+        return self._cached_title
 
     def _extract_brand(self, title: str) -> str:
         """Extract brand name."""
@@ -256,9 +273,8 @@ class PharmacyExtractor:
         # Site has no highlights section; content is in tab sections instead.
         return []
 
-    def _extract_tab_content(self, section_name: str) -> str:
+    def _extract_tab_content(self, section_name: str, page_text: str) -> str:
         """Extract content for a specific section by finding text between headings."""
-        page_text = self.soup.get_text(separator="\n")
         page_lower = page_text.lower()
         section_lower = section_name.lower()
 

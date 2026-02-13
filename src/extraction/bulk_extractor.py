@@ -253,7 +253,7 @@ class BulkExtractor:
 
                     # Save failed HTML for debugging
                     if self.save_failed_html:
-                        self._save_failed_html(url)
+                        self._save_failed_html(url, getattr(extractor, 'html', None))
 
                     if not continue_on_error:
                         logger.error("Stopping due to error (use --continue-on-error to ignore)")
@@ -275,11 +275,16 @@ class BulkExtractor:
         # Summary
         self._print_summary(total_urls)
 
-    def _save_failed_html(self, url: str):
-        """Save HTML of failed page for debugging."""
+    def _save_failed_html(self, url: str, html: str = None):
+        """Save HTML of failed page for debugging.
+
+        Args:
+            url: Product URL (used for filename generation)
+            html: Already-fetched HTML content. If None, skips saving.
+        """
+        if not html:
+            return
         try:
-            import requests
-            response = requests.get(url, timeout=30)
             html_dir = os.path.join(self.output_dir, "failed_html")
             os.makedirs(html_dir, exist_ok=True)
 
@@ -288,7 +293,7 @@ class BulkExtractor:
             filepath = os.path.join(html_dir, filename)
 
             with open(filepath, "w", encoding="utf-8") as f:
-                f.write(response.text)
+                f.write(html)
         except Exception:
             pass
 

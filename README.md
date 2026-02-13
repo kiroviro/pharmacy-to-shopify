@@ -96,7 +96,7 @@ webcrawler-shopify/
 │   └── google_ads_create_account.py # Google Ads account creation
 │
 ├── src/
-│   ├── models/                      # Data models (ExtractedProduct, ProductImage, ProductVariant)
+│   ├── models/                      # Data models (ExtractedProduct, ProductImage)
 │   ├── extraction/                  # Product extraction (PharmacyExtractor, validator, brand matching)
 │   ├── discovery/                   # URL discovery (sitemap-based)
 │   ├── shopify/                     # Shopify integration (CSV export, API client, collections, menus)
