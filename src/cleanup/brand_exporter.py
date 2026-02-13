@@ -12,13 +12,14 @@ Features:
 - Support include/exclude brand lists
 """
 
+from __future__ import annotations
+
 import csv
 import io
 import logging
 import os
 import shutil
 from collections import Counter, defaultdict
-from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -105,8 +106,8 @@ class BrandExporter:
         return "\n".join(lines)
 
     def _get_products_by_brand(
-        self, selected_brands: Set[str]
-    ) -> Tuple[Dict[str, List[dict]], list]:
+        self, selected_brands: set[str]
+    ) -> tuple[dict[str, list[dict]], list]:
         """
         Load products grouped by brand.
 
@@ -133,7 +134,7 @@ class BrandExporter:
 
         return products_by_brand, fieldnames
 
-    def _estimate_brand_size(self, brand_rows: List[dict], fieldnames: list) -> int:
+    def _estimate_brand_size(self, brand_rows: list[dict], fieldnames: list) -> int:
         """Estimate CSV size for a brand's rows (without header)."""
         output = io.StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -150,10 +151,10 @@ class BrandExporter:
 
     def _split_brands_into_chunks(
         self,
-        products_by_brand: Dict[str, List[dict]],
+        products_by_brand: dict[str, list[dict]],
         fieldnames: list,
         max_size_bytes: int,
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         """
         Split brands into chunks that fit within max_size_bytes.
 
@@ -210,11 +211,11 @@ class BrandExporter:
 
     def _write_chunk_csv(
         self,
-        chunk_brands: List[str],
-        products_by_brand: Dict[str, List[dict]],
+        chunk_brands: list[str],
+        products_by_brand: dict[str, list[dict]],
         fieldnames: list,
         output_path: str,
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """
         Write a chunk of brands to CSV file.
 
@@ -239,13 +240,13 @@ class BrandExporter:
 
     def export(
         self,
-        brands_to_include: Optional[Set[str]] = None,
-        brands_to_exclude: Optional[Set[str]] = None,
-        top_n: Optional[int] = None,
+        brands_to_include: set[str] | None = None,
+        brands_to_exclude: set[str] | None = None,
+        top_n: int | None = None,
         output_csv: str = "output/export.csv",
         copy_images: bool = True,
         all_brands: bool = False,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Export products from selected brands, splitting into multiple files if needed.
 
@@ -360,10 +361,10 @@ class BrandExporter:
 
     def _print_summary(
         self,
-        selected_brands: Set[str],
+        selected_brands: set[str],
         total_products: int,
-        chunks: List[List[str]],
-        file_stats: List[dict],
+        chunks: list[list[str]],
+        file_stats: list[dict],
         copy_images: bool,
         images_copied: int,
     ):

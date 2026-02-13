@@ -4,7 +4,7 @@ Specification Validator
 Validates extracted product data against specification requirements.
 """
 
-from typing import Dict
+from __future__ import annotations
 
 from ..models import ExtractedProduct
 
@@ -15,7 +15,7 @@ class SpecificationValidator:
     def __init__(self, product: ExtractedProduct):
         self.product = product
 
-    def validate(self) -> Dict:
+    def validate(self) -> dict:
         """Run all validations."""
         results = {
             "overall_valid": True,

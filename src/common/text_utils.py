@@ -4,11 +4,12 @@ Text Utilities
 Helper functions for text processing and cleanup.
 """
 
+from __future__ import annotations
+
 import re
-from typing import Optional
 
 
-def remove_source_references(text: Optional[str], source_domain: str) -> Optional[str]:
+def remove_source_references(text: str | None, source_domain: str) -> str | None:
     """
     Remove all references to a source domain from text.
 

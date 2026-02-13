@@ -9,7 +9,7 @@ Matches product titles to known brand names using multiple strategies:
 The known brands list is loaded from config/known_brands.yaml.
 """
 
-from typing import Optional, Set
+from __future__ import annotations
 
 from ..common.config_loader import get_brands_lowercase_map, load_known_brands
 
@@ -28,7 +28,7 @@ class BrandMatcher:
         # Returns: "Nivea"
     """
 
-    def __init__(self, brands: Optional[Set[str]] = None):
+    def __init__(self, brands: set[str] | None = None):
         """
         Initialize the brand matcher.
 

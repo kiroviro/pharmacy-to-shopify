@@ -5,8 +5,10 @@ Loads YAML configuration files for categories, tag normalization,
 vendor defaults, promotional patterns, and known brands.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import yaml
@@ -33,7 +35,7 @@ def _get_config_dir() -> Path:
     )
 
 
-def load_config(filename: str) -> Dict[str, Any]:
+def load_config(filename: str) -> dict[str, Any]:
     """
     Load a YAML configuration file.
 
@@ -62,7 +64,7 @@ def load_config(filename: str) -> Dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def load_categories() -> Dict[str, List[str]]:
+def load_categories() -> dict[str, list[str]]:
     """
     Load category configuration.
 
@@ -80,7 +82,7 @@ def load_categories() -> Dict[str, List[str]]:
     return config.get('categories', {})
 
 
-def load_categories_3level() -> Dict[str, Any]:
+def load_categories_3level() -> dict[str, Any]:
     """
     Load 3-level category configuration.
 
@@ -102,7 +104,7 @@ def load_categories_3level() -> Dict[str, Any]:
     return config.get('categories_3level', {})
 
 
-def load_tag_normalization() -> Dict[str, str]:
+def load_tag_normalization() -> dict[str, str]:
     """
     Load tag normalization rules.
 
@@ -120,7 +122,7 @@ def load_tag_normalization() -> Dict[str, str]:
     return config.get('normalization', {})
 
 
-def load_vendor_defaults() -> Dict[str, List[str]]:
+def load_vendor_defaults() -> dict[str, list[str]]:
     """
     Load vendor default tags.
 
@@ -137,7 +139,7 @@ def load_vendor_defaults() -> Dict[str, List[str]]:
     return config.get('vendor_defaults', {})
 
 
-def load_promotional_patterns() -> List[str]:
+def load_promotional_patterns() -> list[str]:
     """
     Load promotional patterns to remove.
 
@@ -151,7 +153,7 @@ def load_promotional_patterns() -> List[str]:
     return config.get('promotional_patterns', [])
 
 
-def build_subcategory_to_l1_map(categories: Optional[Dict[str, List[str]]] = None) -> Dict[str, str]:
+def build_subcategory_to_l1_map(categories: dict[str, list[str]] | None = None) -> dict[str, str]:
     """
     Build a mapping from L2 subcategories to their L1 parent category.
 
@@ -179,7 +181,7 @@ def build_subcategory_to_l1_map(categories: Optional[Dict[str, List[str]]] = Non
     return subcategory_to_l1
 
 
-def get_l1_category_names(categories: Optional[Dict[str, List[str]]] = None) -> set:
+def get_l1_category_names(categories: dict[str, list[str]] | None = None) -> set:
     """
     Get set of L1 category names (lowercase).
 
@@ -210,7 +212,7 @@ def load_known_brands() -> set:
     return set(brands)
 
 
-def load_seo_settings() -> Dict[str, Any]:
+def load_seo_settings() -> dict[str, Any]:
     """
     Load SEO settings configuration.
 
@@ -221,7 +223,7 @@ def load_seo_settings() -> Dict[str, Any]:
     return load_config('seo_settings.yaml')
 
 
-def get_brands_lowercase_map(brands: Optional[set] = None) -> Dict[str, str]:
+def get_brands_lowercase_map(brands: set | None = None) -> dict[str, str]:
     """
     Get mapping from lowercase brand name to canonical form.
 

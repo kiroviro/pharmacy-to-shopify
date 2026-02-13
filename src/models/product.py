@@ -5,8 +5,9 @@ Pure data classes for representing extracted product information.
 No business logic - only data structure definitions.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass
@@ -47,10 +48,10 @@ class ExtractedProduct:
     price_eur: str = ""     # Price in EUR (€) - for Euro transition
     original_price: str = ""
     availability: str = ""
-    category_path: List[str] = field(default_factory=list)
+    category_path: list[str] = field(default_factory=list)
 
     # Content sections (from product tabs)
-    highlights: List[str] = field(default_factory=list)  # Short bullet points
+    highlights: list[str] = field(default_factory=list)  # Short bullet points
     details: str = ""           # "Описание" / "Какво представлява"
     composition: str = ""       # "Състав" / "Активни съставки"
     usage: str = ""             # "Начин на употреба" / "Дозировка"
@@ -59,12 +60,12 @@ class ExtractedProduct:
     description: str = ""       # Combined HTML description for Shopify
 
     # Images (from initialImages array)
-    images: List[ProductImage] = field(default_factory=list)
+    images: list[ProductImage] = field(default_factory=list)
 
     # Shopify fields
     handle: str = ""            # URL slug (transliterated from title)
     product_type: str = ""      # Shopify product type
-    tags: List[str] = field(default_factory=list)  # Category tags
+    tags: list[str] = field(default_factory=list)  # Category tags
     application_form: str = ""  # Product form (таблетки, капсули, крем, etc.)
     target_audience: str = ""   # Target audience (Възрастни, Деца, Бебета)
 
@@ -88,7 +89,7 @@ class ExtractedProduct:
     requires_shipping: bool = True
 
     # Extraction metadata (tracks which source provided each field)
-    extraction_method: Dict[str, str] = field(default_factory=dict)
+    extraction_method: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate required fields after initialization."""

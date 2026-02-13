@@ -10,13 +10,16 @@ Features:
 - Combined CSV output for Shopify import
 """
 
+from __future__ import annotations
+
 import csv
 import json
 import logging
 import os
 import time
 from datetime import datetime
-from typing import Dict, List, Set
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +58,8 @@ class BulkExtractor:
         self.failed_file = os.path.join(output_dir, "failed_urls.txt")
 
         # State
-        self.processed_urls: Set[str] = set()
-        self.failed_urls: List[Dict] = []
+        self.processed_urls: set[str] = set()
+        self.failed_urls: list[dict] = []
         self.total_extracted = 0
         self.total_image_rows = 0
         self.total_images = 0
@@ -117,7 +120,7 @@ class BulkExtractor:
             for failure in self.failed_urls:
                 f.write(f"{failure['url']}\t{failure['error']}\n")
 
-    def recalculate_csv_stats(self) -> Dict:
+    def recalculate_csv_stats(self) -> dict:
         """Recalculate stats from existing CSV file."""
         if not os.path.exists(self.output_csv):
             return {"products": 0, "image_rows": 0, "total_rows": 0}
@@ -143,7 +146,7 @@ class BulkExtractor:
             "total_rows": products + image_rows
         }
 
-    def product_to_csv_rows(self, product: ExtractedProduct) -> List[Dict]:
+    def product_to_csv_rows(self, product: ExtractedProduct) -> list[dict]:
         """
         Convert product to CSV rows (1 main row + N-1 image rows).
 
@@ -161,7 +164,7 @@ class BulkExtractor:
 
     def extract_all(
         self,
-        urls: List[str],
+        urls: list[str],
         extractor_class,
         limit: int = 0,
         resume: bool = False,
@@ -201,6 +204,9 @@ class BulkExtractor:
         csv_exists = os.path.exists(self.output_csv)
         write_mode = 'a' if (resume and csv_exists) else 'w'
 
+        # Shared session for TCP connection reuse across products
+        session = requests.Session()
+
         with open(self.output_csv, write_mode, newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.fieldnames)
 
@@ -213,8 +219,9 @@ class BulkExtractor:
                 overall_progress = already_processed + i
                 logger.info("[%d/%d] %s...", overall_progress, total_input_urls, url[:60])
 
+                extractor = None
                 try:
-                    extractor = extractor_class(url)
+                    extractor = extractor_class(url, session=session)
                     extractor.fetch()
                     product = extractor.extract()
 
@@ -238,10 +245,11 @@ class BulkExtractor:
 
                         logger.info("OK: %s... (%d images)", product.title[:50], num_images)
                     else:
-                        raise Exception("No product extracted")
+                        raise ValueError("No product extracted")
 
-                except Exception as e:
-                    error_msg = str(e)[:100]
+                except (requests.RequestException, ValueError, KeyError,
+                        TypeError, AttributeError, json.JSONDecodeError) as e:
+                    error_msg = f"{type(e).__name__}: {str(e)[:100]}"
                     logger.error("Error: %s", error_msg)
 
                     self.failed_urls.append({
@@ -252,8 +260,8 @@ class BulkExtractor:
                     self.processed_urls.add(url)
 
                     # Save failed HTML for debugging
-                    if self.save_failed_html:
-                        self._save_failed_html(url, getattr(extractor, 'html', None))
+                    if self.save_failed_html and extractor is not None:
+                        self._save_failed_html(url, extractor.html)
 
                     if not continue_on_error:
                         logger.error("Stopping due to error (use --continue-on-error to ignore)")
@@ -267,6 +275,8 @@ class BulkExtractor:
                 # Rate limiting
                 if i < total_urls:
                     time.sleep(self.delay)
+
+        session.close()
 
         # Final save
         self.save_state()

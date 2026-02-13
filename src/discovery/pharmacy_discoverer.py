@@ -4,9 +4,10 @@ URL Discovery for pharmacy site
 Discovers all product URLs from the sitemap.
 """
 
+from __future__ import annotations
+
 import logging
 import xml.etree.ElementTree as ET
-from typing import Optional, Set
 
 import requests
 
@@ -30,7 +31,7 @@ class PharmacyURLDiscoverer:
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
             "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
         })
-        self.product_urls: Set[str] = set()
+        self.product_urls: set[str] = set()
 
     def __enter__(self):
         return self
@@ -45,7 +46,7 @@ class PharmacyURLDiscoverer:
         """Log message at debug level."""
         logger.debug(message)
 
-    def discover_from_sitemap(self) -> Set[str]:
+    def discover_from_sitemap(self) -> set[str]:
         """Fetch all product URLs from the sitemap."""
         logger.info("Fetching sitemap from %s...", self.SITEMAP_URL)
 
@@ -65,7 +66,7 @@ class PharmacyURLDiscoverer:
         logger.info("Found %d product URLs", len(self.product_urls))
         return self.product_urls
 
-    def discover_all_products(self, limit: int = 0, output_file: Optional[str] = None) -> Set[str]:
+    def discover_all_products(self, limit: int = 0, output_file: str | None = None) -> set[str]:
         """
         Discover all product URLs from the sitemap.
 

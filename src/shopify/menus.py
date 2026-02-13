@@ -5,10 +5,11 @@ Creates hierarchical navigation menus in Shopify based on product categories.
 Uses the Shopify Admin API (GraphQL) to create menus with nested items.
 """
 
+from __future__ import annotations
+
 import csv
 import logging
 from collections import Counter
-from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class ShopifyMenuCreator:
         # Load menu hierarchy from YAML config
         self.menu_hierarchy = load_categories()
 
-    def get_existing_menus(self) -> Dict[str, str]:
+    def get_existing_menus(self) -> dict[str, str]:
         """Fetch existing menus and return {handle: id} mapping."""
         logger.info("Fetching existing menus...")
 
@@ -80,7 +81,7 @@ class ShopifyMenuCreator:
         """Build collection URL from handle."""
         return f"/collections/{handle}"
 
-    def _build_menu_item(self, title: str, handle_prefix: str = "") -> Dict:
+    def _build_menu_item(self, title: str, handle_prefix: str = "") -> dict:
         """Build a menu item dict for a category or brand."""
         handle = generate_handle(title, prefix=handle_prefix)
         return {
@@ -89,7 +90,7 @@ class ShopifyMenuCreator:
             "type": "HTTP",
         }
 
-    def analyze_tags_from_csv(self, csv_path: str, min_products: int = 3) -> Dict[str, int]:
+    def analyze_tags_from_csv(self, csv_path: str, min_products: int = 3) -> dict[str, int]:
         """Analyze tags from CSV and return tag counts."""
         tag_counts = Counter()
 
@@ -108,7 +109,7 @@ class ShopifyMenuCreator:
 
         return {tag: count for tag, count in tag_counts.items() if count >= min_products}
 
-    def analyze_vendors_from_csv(self, csv_path: str, min_products: int = 3) -> Dict[str, int]:
+    def analyze_vendors_from_csv(self, csv_path: str, min_products: int = 3) -> dict[str, int]:
         """Analyze vendors from CSV and return vendor counts."""
         vendor_counts = Counter()
 
@@ -285,7 +286,7 @@ class ShopifyMenuCreator:
         else:
             logger.error("Failed to create 3-level main menu")
 
-    def create_menu_with_items(self, title: str, handle: str, items: List[Dict]) -> Optional[str]:
+    def create_menu_with_items(self, title: str, handle: str, items: list[dict]) -> str | None:
         """Create a menu with items in a single API call."""
         if self.dry_run:
             print(f"  [DRY RUN] Would create menu: {title} ({handle}) with {len(items)} items")

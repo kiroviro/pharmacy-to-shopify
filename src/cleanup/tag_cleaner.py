@@ -8,11 +8,12 @@ Post-processes a Shopify products CSV to:
 4. Remove promotional/temporal tags
 """
 
+from __future__ import annotations
+
 import csv
 import logging
 import os
 from collections import Counter
-from typing import List, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class TagCleaner:
         }
 
         # Cache vendor names (brands) for removal
-        self.vendor_names: Set[str] = set()
+        self.vendor_names: set[str] = set()
 
     def _load_vendors(self):
         """Load all unique vendor names from CSV."""
@@ -103,7 +104,7 @@ class TagCleaner:
         vendor_lower = vendor.lower().strip()
         return tag_lower == vendor_lower or tag_lower in self.vendor_names
 
-    def _get_l1_category(self, tags: List[str]) -> str:
+    def _get_l1_category(self, tags: list[str]) -> str:
         """Determine L1 category from existing tags."""
         for tag in tags:
             tag_lower = tag.lower().strip()
@@ -118,11 +119,11 @@ class TagCleaner:
 
         return None
 
-    def _has_l1_category(self, tags: List[str]) -> bool:
+    def _has_l1_category(self, tags: list[str]) -> bool:
         """Check if tags include an L1 category."""
         return any(tag.lower().strip() in self.l1_category_names for tag in tags)
 
-    def _clean_tags(self, tags_str: str, vendor: str) -> Tuple[str, bool]:
+    def _clean_tags(self, tags_str: str, vendor: str) -> tuple[str, bool]:
         """
         Clean tags string and return cleaned version.
 

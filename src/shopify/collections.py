@@ -5,11 +5,12 @@ Creates smart collections in Shopify based on tags from a product CSV.
 Each unique tag becomes a smart collection with rule: "tag equals [tag_name]"
 """
 
+from __future__ import annotations
+
 import csv
 import logging
 import time
 from collections import Counter
-from typing import Dict, List, Set
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +48,11 @@ class ShopifyCollectionCreator:
         self.dry_run = dry_run
 
         # Track created collections
-        self.created_collections: List[str] = []
-        self.skipped_collections: List[str] = []
-        self.failed_collections: List[Dict] = []
+        self.created_collections: list[str] = []
+        self.skipped_collections: list[str] = []
+        self.failed_collections: list[dict] = []
 
-    def get_existing_collections(self) -> Set[str]:
+    def get_existing_collections(self) -> set[str]:
         """Fetch existing collection titles to avoid duplicates."""
         logger.info("Fetching existing collections...")
 
@@ -133,7 +134,7 @@ class ShopifyCollectionCreator:
         """Create a smart collection based on vendor (brand)."""
         return self._create_collection(vendor, "vendor", vendor, handle_prefix="brand-")
 
-    def _load_vendors_from_csv(self, csv_path: str) -> Set[str]:
+    def _load_vendors_from_csv(self, csv_path: str) -> set[str]:
         """Load all unique vendor names from CSV (lowercase)."""
         vendors = set()
         try:

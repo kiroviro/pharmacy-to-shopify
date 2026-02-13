@@ -5,10 +5,11 @@ Exports products to Shopify-compatible CSV format (Official Template).
 Handles all 56 columns of the Shopify product import format.
 """
 
+from __future__ import annotations
+
 import csv
 import logging
 import os
-from typing import Dict, List, Set
 
 from ..common.text_utils import remove_source_references
 from ..models import ExtractedProduct, ProductImage
@@ -50,15 +51,17 @@ class ShopifyCSVExporter:
         exporter.export_multiple(products, "output/products.csv")
     """
 
-    def __init__(self, source_domain: str = "pharmacy.example.com"):
+    def __init__(self, source_domain: str = "pharmacy.example.com", default_inventory: int = 11):
         """
         Initialize the exporter.
 
         Args:
             source_domain: Source domain to remove from text fields
+            default_inventory: Default inventory quantity when product has none
         """
         self.fieldnames = SHOPIFY_FIELDNAMES
         self.source_domain = source_domain
+        self.default_inventory = default_inventory
 
     def clean_product(self, product: ExtractedProduct) -> ExtractedProduct:
         """
@@ -76,7 +79,7 @@ class ShopifyCSVExporter:
         product.seo_description = remove_source_references(product.seo_description, self.source_domain)
         return product
 
-    def product_to_main_row(self, product: ExtractedProduct) -> Dict[str, str]:
+    def product_to_main_row(self, product: ExtractedProduct) -> dict[str, str]:
         """
         Convert product to main CSV row (includes first image).
 
@@ -122,7 +125,7 @@ class ShopifyCSVExporter:
             'Charge tax': 'TRUE',
             'Tax code': '',
             'Inventory tracker': 'shopify',
-            'Inventory quantity': product.inventory_quantity or 11,
+            'Inventory quantity': product.inventory_quantity or self.default_inventory,
             'Continue selling when out of stock': continue_selling,
             'Weight value (grams)': product.weight_grams if product.weight_grams > 0 else '',
             'Weight unit for display': 'g' if product.weight_grams > 0 else '',
@@ -153,7 +156,7 @@ class ShopifyCSVExporter:
             'Google Shopping / Custom label 4': ''
         }
 
-    def image_to_row(self, handle: str, image: ProductImage) -> Dict[str, str]:
+    def image_to_row(self, handle: str, image: ProductImage) -> dict[str, str]:
         """
         Convert additional image to CSV row.
 
@@ -173,7 +176,7 @@ class ShopifyCSVExporter:
         })
         return row
 
-    def product_to_rows(self, product: ExtractedProduct) -> List[Dict[str, str]]:
+    def product_to_rows(self, product: ExtractedProduct) -> list[dict[str, str]]:
         """
         Convert product to all CSV rows (main + additional images).
 
@@ -219,7 +222,7 @@ class ShopifyCSVExporter:
 
     def export_multiple(
         self,
-        products: List[ExtractedProduct],
+        products: list[ExtractedProduct],
         output_path: str,
         clean_source_refs: bool = True
     ) -> int:
@@ -252,7 +255,7 @@ class ShopifyCSVExporter:
 
         return row_count
 
-    def _load_existing_handles(self, csv_path: str) -> Set[str]:
+    def _load_existing_handles(self, csv_path: str) -> set[str]:
         """Load existing product handles from CSV for dedup."""
         handles = set()
         if not os.path.exists(csv_path):
@@ -273,7 +276,8 @@ class ShopifyCSVExporter:
         self,
         product: ExtractedProduct,
         output_path: str,
-        clean_source_refs: bool = True
+        clean_source_refs: bool = True,
+        existing_handles: set[str] | None = None,
     ):
         """
         Append a product to existing CSV (creates if doesn't exist).
@@ -283,6 +287,7 @@ class ShopifyCSVExporter:
             product: Product to append
             output_path: Output CSV file path
             clean_source_refs: Whether to remove source domain references
+            existing_handles: Pre-loaded handle set for dedup (avoids rereading CSV)
         """
         file_exists = os.path.exists(output_path)
 
@@ -291,7 +296,8 @@ class ShopifyCSVExporter:
 
         # Check for duplicate handle
         if file_exists:
-            existing_handles = self._load_existing_handles(output_path)
+            if existing_handles is None:
+                existing_handles = self._load_existing_handles(output_path)
             if product.handle in existing_handles:
                 logger.info("Skipped duplicate: %s", product.handle)
                 return

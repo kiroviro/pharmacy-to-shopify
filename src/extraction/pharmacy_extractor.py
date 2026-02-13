@@ -4,10 +4,11 @@ Pharmacy Product Extractor
 Extracts product data from pharmacy website.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
-from typing import List
 from urllib.parse import quote, urlparse
 
 import requests
@@ -27,10 +28,17 @@ class PharmacyExtractor:
     _shared_brand_matcher = None
     _shared_seo_settings = None
 
-    def __init__(self, url: str, site_domain: str = "pharmacy.example.com", validate_images: bool = False):
+    def __init__(
+        self,
+        url: str,
+        site_domain: str = "pharmacy.example.com",
+        validate_images: bool = False,
+        session: requests.Session | None = None,
+    ):
         self.url = url
         self.SITE_DOMAIN = site_domain
         self.validate_images = validate_images
+        self._session = session
         self.html = None
         self.soup = None
         self.json_ld = None
@@ -52,9 +60,16 @@ class PharmacyExtractor:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
         }
-        response = requests.get(self.url, headers=headers, timeout=30)
+        requester = self._session or requests
+        response = requester.get(self.url, headers=headers, timeout=30)
         response.raise_for_status()
         self.html = response.text
+        self.soup = BeautifulSoup(self.html, "lxml")
+        self._parse_json_ld()
+
+    def load_html(self, html: str) -> None:
+        """Load pre-fetched HTML for extraction without a network request."""
+        self.html = html
         self.soup = BeautifulSoup(self.html, "lxml")
         self._parse_json_ld()
 
@@ -227,7 +242,7 @@ class PharmacyExtractor:
     def _extract_availability() -> str:
         return ""
 
-    def _extract_categories(self, product_title: str = "") -> List[str]:
+    def _extract_categories(self, product_title: str = "") -> list[str]:
         """Extract category breadcrumb."""
         categories = []
         if not product_title:
@@ -269,7 +284,7 @@ class PharmacyExtractor:
         return categories
 
     @staticmethod
-    def _extract_highlights() -> List[str]:
+    def _extract_highlights() -> list[str]:
         # Site has no highlights section; content is in tab sections instead.
         return []
 
@@ -328,7 +343,7 @@ class PharmacyExtractor:
 
         return content[:1500]
 
-    def _extract_images(self) -> List[ProductImage]:
+    def _extract_images(self) -> list[ProductImage]:
         """Extract product images."""
         images = []
         seen_urls = set()
@@ -489,7 +504,7 @@ class PharmacyExtractor:
 
         return 0
 
-    def _build_description(self, brand: str, highlights: List[str], sections: dict) -> str:
+    def _build_description(self, brand: str, highlights: list[str], sections: dict) -> str:
         """Build full HTML description from all sections.
 
         Args:
@@ -560,7 +575,7 @@ class PharmacyExtractor:
 
         return handle[:200]  # Shopify handle limit
 
-    def _generate_seo_title(self, title: str, brand: str, categories: List[str]) -> str:
+    def _generate_seo_title(self, title: str, brand: str, categories: list[str]) -> str:
         """Generate SEO title with progressive fallback.
 
         Tries formats in order until one fits within max length:
@@ -607,7 +622,7 @@ class PharmacyExtractor:
 
         return title[:max_len]
 
-    def _generate_seo_description(self, title: str, brand: str, categories: List[str], sections: dict) -> str:
+    def _generate_seo_description(self, title: str, brand: str, categories: list[str], sections: dict) -> str:
         """Generate structured SEO meta description in Bulgarian.
 
         Format: "Купете {Brand} {Title}. {FirstSentence}. Поръчайте в {Category} на ViaPharma."
@@ -659,7 +674,7 @@ class PharmacyExtractor:
 
         return candidate[:max_len]
 
-    def _optimize_image_alt_texts(self, images: List[ProductImage], brand: str, title: str) -> None:
+    def _optimize_image_alt_texts(self, images: list[ProductImage], brand: str, title: str) -> None:
         """Optimize image alt texts with brand and position context.
 
         Single image: "Brand ProductName"
@@ -749,7 +764,7 @@ class PharmacyExtractor:
         return ""
 
     @staticmethod
-    def _extract_target_audience(categories: List[str], title: str) -> str:
+    def _extract_target_audience(categories: list[str], title: str) -> str:
         """Derive target audience from categories and title.
 
         Priority: Бебета > Деца > Възрастни (default).
@@ -770,7 +785,7 @@ class PharmacyExtractor:
 
         return "Възрастни"
 
-    def _determine_google_category(self, categories: List[str]) -> str:
+    def _determine_google_category(self, categories: list[str]) -> str:
         """Map product categories to Google Shopping taxonomy via config.
 
         Uses startswith matching so "Козметика, красота и лична хигиена"
@@ -792,7 +807,7 @@ class PharmacyExtractor:
 
         return default
 
-    def _determine_google_age_group(self, categories: List[str]) -> str:
+    def _determine_google_age_group(self, categories: list[str]) -> str:
         """Determine Google Shopping age group from categories."""
         child_keywords = ["дете", "бебе", "деца", "бебета", "детски", "бебешки"]
         categories_lower = " ".join(categories).lower()

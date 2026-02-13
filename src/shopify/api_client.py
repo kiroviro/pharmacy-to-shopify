@@ -5,9 +5,10 @@ Shared client for Shopify Admin API (REST and GraphQL).
 Handles authentication, rate limiting, and error handling.
 """
 
+from __future__ import annotations
+
 import logging
 import time
-from typing import Dict, Optional
 from urllib.parse import urljoin
 
 import requests
@@ -92,9 +93,9 @@ class ShopifyAPIClient:
         self,
         method: str,
         endpoint: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         timeout: int = 30
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         """
         Make REST API request with rate limiting and error handling.
 
@@ -154,9 +155,9 @@ class ShopifyAPIClient:
     def graphql_request(
         self,
         query: str,
-        variables: Optional[Dict] = None,
+        variables: dict | None = None,
         timeout: int = 30
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         """
         Make GraphQL API request with rate limiting and error handling.
 
