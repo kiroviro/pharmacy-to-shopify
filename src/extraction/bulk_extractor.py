@@ -100,7 +100,7 @@ class BulkExtractor:
                 logger.warning("Could not load state: %s", e)
         return False
 
-    def save_state(self):
+    def save_state(self) -> None:
         """Save current extraction state."""
         state = {
             "processed_urls": list(self.processed_urls),
@@ -114,7 +114,7 @@ class BulkExtractor:
         with open(self.state_file, "w", encoding="utf-8") as f:
             json.dump(state, f, indent=2, ensure_ascii=False)
 
-    def save_failed_urls(self):
+    def save_failed_urls(self) -> None:
         """Save failed URLs to a separate file for retry."""
         with open(self.failed_file, "w", encoding="utf-8") as f:
             for failure in self.failed_urls:
@@ -169,7 +169,7 @@ class BulkExtractor:
         limit: int = 0,
         resume: bool = False,
         continue_on_error: bool = True,
-    ):
+    ) -> None:
         """
         Extract all products from URL list.
 
@@ -285,7 +285,7 @@ class BulkExtractor:
         # Summary
         self._print_summary(total_urls)
 
-    def _save_failed_html(self, url: str, html: str = None):
+    def _save_failed_html(self, url: str, html: str | None = None) -> None:
         """Save HTML of failed page for debugging.
 
         Args:
@@ -307,7 +307,7 @@ class BulkExtractor:
         except Exception:
             pass
 
-    def _print_summary(self, total_attempted: int):
+    def _print_summary(self, total_attempted: int) -> None:
         """Print extraction summary."""
         elapsed = (datetime.now() - self.start_time).total_seconds()
         total_csv_rows = self.total_extracted + self.total_image_rows

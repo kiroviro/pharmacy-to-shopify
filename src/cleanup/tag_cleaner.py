@@ -30,7 +30,7 @@ from ..common.config_loader import (
 class TagCleaner:
     """Cleans and normalizes tags in a Shopify products CSV."""
 
-    def __init__(self, input_path: str, output_path: str, report_path: str = None):
+    def __init__(self, input_path: str, output_path: str, report_path: str | None = None):
         """
         Initialize the TagCleaner.
 
@@ -69,7 +69,7 @@ class TagCleaner:
         # Cache vendor names (brands) for removal
         self.vendor_names: set[str] = set()
 
-    def _load_vendors(self):
+    def _load_vendors(self) -> None:
         """Load all unique vendor names from CSV."""
         logger.info("Loading vendor names...")
         with open(self.input_path, 'r', encoding='utf-8') as f:
@@ -83,7 +83,8 @@ class TagCleaner:
 
     def _normalize_tag(self, tag: str) -> str:
         """Normalize tag casing using the normalization map."""
-        tag_lower = tag.lower().strip()
+        tag = tag.strip()
+        tag_lower = tag.lower()
 
         if tag_lower in self.tag_normalization:
             normalized = self.tag_normalization[tag_lower]
@@ -91,7 +92,7 @@ class TagCleaner:
                 self.stats['tags_normalized'][f"{tag} -> {normalized}"] += 1
             return normalized
 
-        return tag.strip()
+        return tag
 
     def _is_promotional(self, tag: str) -> bool:
         """Check if tag is promotional/temporal."""
@@ -104,7 +105,7 @@ class TagCleaner:
         vendor_lower = vendor.lower().strip()
         return tag_lower == vendor_lower or tag_lower in self.vendor_names
 
-    def _get_l1_category(self, tags: list[str]) -> str:
+    def _get_l1_category(self, tags: list[str]) -> str | None:
         """Determine L1 category from existing tags."""
         for tag in tags:
             tag_lower = tag.lower().strip()
@@ -139,10 +140,6 @@ class TagCleaner:
         l1_added = False
 
         for tag in tags:
-            # Skip empty tags
-            if not tag.strip():
-                continue
-
             # Remove promotional tags
             if self._is_promotional(tag):
                 self.stats['promotional_removed'][tag] += 1
@@ -179,7 +176,7 @@ class TagCleaner:
 
         return ', '.join(cleaned_tags), l1_added
 
-    def process(self):
+    def process(self) -> None:
         """Process the CSV file and write cleaned output."""
         self._load_vendors()
 
@@ -245,7 +242,7 @@ class TagCleaner:
         if self.report_path:
             self._write_report()
 
-    def _print_summary(self):
+    def _print_summary(self) -> None:
         """Print cleanup summary to console."""
         print("\n" + "=" * 60)
         print("TAG CLEANUP SUMMARY")
@@ -285,7 +282,7 @@ class TagCleaner:
 
         print("=" * 60)
 
-    def _write_report(self):
+    def _write_report(self) -> None:
         """Write detailed cleanup report to file."""
         logger.info("Writing report to: %s", self.report_path)
 

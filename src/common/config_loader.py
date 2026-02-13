@@ -181,7 +181,7 @@ def build_subcategory_to_l1_map(categories: dict[str, list[str]] | None = None) 
     return subcategory_to_l1
 
 
-def get_l1_category_names(categories: dict[str, list[str]] | None = None) -> set:
+def get_l1_category_names(categories: dict[str, list[str]] | None = None) -> set[str]:
     """
     Get set of L1 category names (lowercase).
 
@@ -194,10 +194,10 @@ def get_l1_category_names(categories: dict[str, list[str]] | None = None) -> set
     if categories is None:
         categories = load_categories()
 
-    return {cat.lower() for cat in categories.keys()}
+    return {cat.lower() for cat in categories}
 
 
-def load_known_brands() -> set:
+def load_known_brands() -> set[str]:
     """
     Load known brand names for title prefix matching.
 

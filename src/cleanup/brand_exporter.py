@@ -160,14 +160,16 @@ class BrandExporter:
 
         Returns list of lists, where each inner list contains brand names for one file.
         """
+        header_size = self._get_header_size(fieldnames)
         chunks = []
         current_chunk = []
-        current_size = self._get_header_size(fieldnames)
+        current_size = header_size
 
         # Calculate sizes
-        brand_sizes = {}
-        for brand, rows in products_by_brand.items():
-            brand_sizes[brand] = self._estimate_brand_size(rows, fieldnames)
+        brand_sizes = {
+            brand: self._estimate_brand_size(rows, fieldnames)
+            for brand, rows in products_by_brand.items()
+        }
 
         # Sort by product count (largest brands first)
         sorted_brands = sorted(
@@ -180,30 +182,26 @@ class BrandExporter:
             brand_size = brand_sizes[brand]
 
             # Check if brand alone exceeds max size
-            if brand_size + self._get_header_size(fieldnames) > max_size_bytes:
+            if brand_size + header_size > max_size_bytes:
                 logger.warning("Brand '%s' (%.1fMB) exceeds max file size, placing in its own file",
                                brand, brand_size / 1024 / 1024)
-                # Put oversized brand in its own chunk
                 if current_chunk:
                     chunks.append(current_chunk)
                     current_chunk = []
-                    current_size = self._get_header_size(fieldnames)
+                    current_size = header_size
                 chunks.append([brand])
                 continue
 
             # Check if adding this brand would exceed limit
             if current_size + brand_size > max_size_bytes:
-                # Start new chunk
                 if current_chunk:
                     chunks.append(current_chunk)
                 current_chunk = [brand]
-                current_size = self._get_header_size(fieldnames) + brand_size
+                current_size = header_size + brand_size
             else:
-                # Add to current chunk
                 current_chunk.append(brand)
                 current_size += brand_size
 
-        # Don't forget the last chunk
         if current_chunk:
             chunks.append(current_chunk)
 
@@ -367,7 +365,7 @@ class BrandExporter:
         file_stats: list[dict],
         copy_images: bool,
         images_copied: int,
-    ):
+    ) -> None:
         """Print export summary to console."""
         print("\n" + "=" * 70)
         print("Export Summary")

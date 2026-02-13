@@ -132,7 +132,7 @@ class ShopifyMenuCreator:
         csv_path: str,
         menu_handle: str = "categories-menu",
         min_products: int = 3
-    ):
+    ) -> None:
         """
         Create the main navigation menu with category hierarchy.
 
@@ -201,7 +201,7 @@ class ShopifyMenuCreator:
         csv_path: str,
         menu_handle: str = "categories-menu",
         min_products: int = 3
-    ):
+    ) -> None:
         """
         Create the main navigation menu with 3-level category hierarchy.
 
@@ -333,7 +333,7 @@ class ShopifyMenuCreator:
         menu_handle: str = "brands-menu",
         min_products: int = 3,
         max_brands: int = 50
-    ):
+    ) -> None:
         """
         Create a brands navigation menu from Vendor field.
 
@@ -382,7 +382,7 @@ class ShopifyMenuCreator:
         else:
             logger.error("Failed to create brands menu")
 
-    def preview_menu_structure(self, csv_path: str, min_products: int = 3):
+    def preview_menu_structure(self, csv_path: str, min_products: int = 3) -> None:
         """Preview the menu structure that would be created."""
         print(f"\n{'='*60}")
         print("MENU STRUCTURE PREVIEW")

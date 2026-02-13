@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 from ..common.config_loader import load_seo_settings
-from ..common.transliteration import transliterate
+from ..common.transliteration import generate_handle as transliterate_handle
 from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
 
@@ -36,7 +36,7 @@ class PharmacyExtractor:
         session: requests.Session | None = None,
     ):
         self.url = url
-        self.SITE_DOMAIN = site_domain
+        self.site_domain = site_domain
         self.validate_images = validate_images
         self._session = session
         self.html = None
@@ -167,18 +167,18 @@ class PharmacyExtractor:
         if self._cached_title is not None:
             return self._cached_title
 
+        title = ""
+
         # Try JSON-LD first
         if self.json_ld and self.json_ld.get("name"):
-            self._cached_title = self.json_ld["name"].strip()
-            return self._cached_title
+            title = self.json_ld["name"].strip()
+        else:
+            # Fallback to H1
+            h1 = self.soup.find("h1")
+            if h1:
+                title = h1.get_text(strip=True)
 
-        # Fallback to H1
-        h1 = self.soup.find("h1")
-        if h1:
-            self._cached_title = h1.get_text(strip=True)
-            return self._cached_title
-
-        self._cached_title = ""
+        self._cached_title = title
         return self._cached_title
 
     def _extract_brand(self, title: str) -> str:
@@ -200,7 +200,7 @@ class PharmacyExtractor:
             return str(self.json_ld["sku"])
         return ""
 
-    def _extract_prices(self) -> tuple:
+    def _extract_prices(self) -> tuple[str, str]:
         """Extract regular prices in BGN and EUR (ignoring promotions)."""
         price_bgn = ""
         price_eur = ""
@@ -405,7 +405,7 @@ class PharmacyExtractor:
                         url_stripped = url_stripped.replace('uploads/', 'media/cache/product_view_default/', 1)
                     # Make absolute URL if relative
                     if not url_stripped.startswith(('http://', 'https://')):
-                        url = f"https://{self.SITE_DOMAIN}/{url_stripped}"
+                        url = f"https://{self.site_domain}/{url_stripped}"
                     else:
                         url = url_stripped
 
@@ -426,7 +426,7 @@ class PharmacyExtractor:
             if src:
                 # Make absolute URL if relative
                 if not src.startswith(('http://', 'https://')):
-                    src = f"https://{self.SITE_DOMAIN}/{src.lstrip('/')}"
+                    src = f"https://{self.site_domain}/{src.lstrip('/')}"
 
                 if is_product_image(src):
                     normalized = normalize_url(src)
@@ -564,16 +564,7 @@ class PharmacyExtractor:
         if not title:
             return ""
 
-        # Transliterate Bulgarian to Latin
-        handle = transliterate(title)
-
-        # Lowercase and replace spaces/special chars with hyphens
-        handle = handle.lower()
-        handle = re.sub(r'[^a-z0-9]+', '-', handle)
-        handle = re.sub(r'-+', '-', handle)
-        handle = handle.strip('-')
-
-        return handle[:200]  # Shopify handle limit
+        return transliterate_handle(title)[:200]  # Shopify handle limit
 
     def _generate_seo_title(self, title: str, brand: str, categories: list[str]) -> str:
         """Generate SEO title with progressive fallback.

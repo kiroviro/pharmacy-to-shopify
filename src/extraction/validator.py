@@ -36,8 +36,8 @@ class SpecificationValidator:
             "price": bool(self.product.price),
             "brand": bool(self.product.brand),
             "sku": bool(self.product.sku),
-            "images": len(self.product.images) > 0,
-            "categories": len(self.product.category_path) > 0,
+            "images": bool(self.product.images),
+            "categories": bool(self.product.category_path),
         }
 
         # Check content sections (highlights optional - not all sites have them)

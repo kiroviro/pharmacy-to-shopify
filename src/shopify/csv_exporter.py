@@ -199,7 +199,7 @@ class ShopifyCSVExporter:
         product: ExtractedProduct,
         output_path: str,
         clean_source_refs: bool = True
-    ):
+    ) -> None:
         """
         Export a single product to CSV.
 
@@ -278,7 +278,7 @@ class ShopifyCSVExporter:
         output_path: str,
         clean_source_refs: bool = True,
         existing_handles: set[str] | None = None,
-    ):
+    ) -> None:
         """
         Append a product to existing CSV (creates if doesn't exist).
         Skips products whose handle already exists in the CSV.

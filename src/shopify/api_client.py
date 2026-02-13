@@ -75,10 +75,10 @@ class ShopifyAPIClient:
     def __exit__(self, *args):
         self.session.close()
 
-    def close(self):
+    def close(self) -> None:
         self.session.close()
 
-    def _rate_limit(self):
+    def _rate_limit(self) -> None:
         """Implement rate limiting (2 requests/second max)."""
         now = time.time()
         elapsed = now - self.last_request_time

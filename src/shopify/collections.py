@@ -188,7 +188,7 @@ class ShopifyCollectionCreator:
         skip_existing: bool = True,
         skip_brands: bool = False,
         vendors_only: bool = False
-    ):
+    ) -> None:
         """
         Create collections from all unique tags in CSV.
 
@@ -219,16 +219,13 @@ class ShopifyCollectionCreator:
         logger.info("Tags with %d+ products: %d", min_products, len(eligible_tags))
 
         # Filter out brand tags if requested
-        brand_tags_skipped = 0
         if skip_brands:
-            filtered_tags = {}
-            for tag, count in eligible_tags.items():
-                if tag.lower() in known_vendors:
-                    brand_tags_skipped += 1
-                else:
-                    filtered_tags[tag] = count
-            eligible_tags = filtered_tags
-            logger.info("Brand tags skipped: %d", brand_tags_skipped)
+            before_count = len(eligible_tags)
+            eligible_tags = {
+                tag: count for tag, count in eligible_tags.items()
+                if tag.lower() not in known_vendors
+            }
+            logger.info("Brand tags skipped: %d", before_count - len(eligible_tags))
             logger.info("Tags after brand filter: %d", len(eligible_tags))
 
         # Get existing collections
@@ -266,7 +263,7 @@ class ShopifyCollectionCreator:
         csv_path: str,
         min_products: int = 3,
         skip_existing: bool = True
-    ):
+    ) -> None:
         """Create collections from Vendor field (brand collections)."""
         logger.info("Creating brand collections from Vendor field")
 
@@ -309,7 +306,7 @@ class ShopifyCollectionCreator:
 
         self._print_summary()
 
-    def _print_summary(self):
+    def _print_summary(self) -> None:
         """Print creation summary."""
         print("\n" + "=" * 60)
         print("COLLECTION CREATION SUMMARY")

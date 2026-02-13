@@ -23,9 +23,8 @@ class PharmacyURLDiscoverer:
         base_url: str = "https://pharmacy.example.com",
         sitemap_url: str = "https://pharmacy.example.com/sitemap.products.xml",
     ):
-        self.verbose = verbose
-        self.BASE_URL = base_url
-        self.SITEMAP_URL = sitemap_url
+        self.base_url = base_url
+        self.sitemap_url = sitemap_url
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
@@ -42,15 +41,11 @@ class PharmacyURLDiscoverer:
     def close(self):
         self.session.close()
 
-    def log(self, message: str):
-        """Log message at debug level."""
-        logger.debug(message)
-
     def discover_from_sitemap(self) -> set[str]:
         """Fetch all product URLs from the sitemap."""
-        logger.info("Fetching sitemap from %s...", self.SITEMAP_URL)
+        logger.info("Fetching sitemap from %s...", self.sitemap_url)
 
-        response = self.session.get(self.SITEMAP_URL, timeout=30)
+        response = self.session.get(self.sitemap_url, timeout=30)
         response.raise_for_status()
 
         root = ET.fromstring(response.content)
@@ -88,7 +83,7 @@ class PharmacyURLDiscoverer:
 
         return self.product_urls
 
-    def save_urls(self, filepath: str):
+    def save_urls(self, filepath: str) -> None:
         """Save discovered URLs to a file."""
         sorted_urls = sorted(self.product_urls)
 

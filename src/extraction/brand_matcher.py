@@ -66,14 +66,12 @@ class BrandMatcher:
             Matched brand name (canonical capitalization) or empty string
         """
         # Priority 1: Structured data (most reliable)
-        stripped = structured_brand.strip() if structured_brand else ""
-        if stripped:
-            return stripped
+        if structured_brand and structured_brand.strip():
+            return structured_brand.strip()
 
         # Priority 2: GTM data
-        stripped = gtm_brand.strip() if gtm_brand else ""
-        if stripped:
-            return stripped
+        if gtm_brand and gtm_brand.strip():
+            return gtm_brand.strip()
 
         # Priority 3: Title prefix matching
         return self.match_from_title(title)
