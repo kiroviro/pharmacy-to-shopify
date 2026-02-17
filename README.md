@@ -57,25 +57,52 @@ Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
 
 ## Quick Start
 
+### Option 1: Local Setup
+
 ```bash
-# Setup
+# 1. Clone and setup environment
 python3 -m venv venv
 source venv/bin/activate
 pip install .
 
-# 1. Discover product URLs from pharmacy site sitemap
+# 2. Configure credentials (optional, for Shopify/Google Ads integration)
+cp .env.example .env
+# Edit .env with your actual credentials
+
+# 3. Discover product URLs from pharmacy site sitemap
 python3 scripts/discover_urls.py --site pharmacy.example.com
 
-# 2. Extract a single product (test)
+# 4. Extract a single product (test)
 python3 scripts/extract_single.py --url "https://pharmacy.example.com/sample-product" --verbose
 
-# 3. Bulk extract all products
+# 5. Bulk extract all products
 python3 scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --continue-on-error --resume
 
-# 4. Export for Shopify (auto-splits into 14MB files)
+# 6. Export for Shopify (auto-splits into 14MB files)
 python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.com/raw/products.csv --output output/pharmacy.example.com/products.csv
 
-# 5. Import to Shopify: Admin > Products > Import > Upload CSV
+# 7. Import to Shopify: Admin > Products > Import > Upload CSV
+```
+
+### Option 2: Docker Setup
+
+```bash
+# 1. Build the Docker image
+docker-compose build
+
+# 2. Configure credentials (create .env file)
+cp .env.example .env
+# Edit .env with your actual credentials
+
+# 3. Run extraction commands
+docker-compose run extractor python scripts/discover_urls.py --site pharmacy.example.com
+docker-compose run extractor python scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt
+
+# 4. Run tests
+docker-compose --profile test run test
+
+# 5. Run linter
+docker-compose --profile lint run lint
 ```
 
 ---
@@ -124,6 +151,52 @@ webcrawler-shopify/
 - google-ads, google-auth-oauthlib (optional, for Google Ads integration: `pip install ".[google-ads]"`)
 
 All dependencies are declared in `pyproject.toml`.
+
+---
+
+## Development
+
+### Setting Up Development Environment
+
+```bash
+# Install development dependencies
+pip install ".[dev]"
+
+# Install pre-commit hooks for code quality
+pip install pre-commit
+pre-commit install
+
+# Run tests
+pytest tests/ -v
+
+# Run linter
+ruff check .
+
+# Run formatter
+ruff format .
+```
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality:
+- **Ruff**: Fast Python linter and formatter
+- **Trailing whitespace**: Removes trailing whitespace
+- **End of file fixer**: Ensures files end with newline
+- **YAML/JSON validation**: Checks syntax
+- **Secret detection**: Prevents committing credentials
+
+Run manually on all files:
+```bash
+pre-commit run --all-files
+```
+
+### Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Code style and formatting
+- Writing tests
+- Submitting pull requests
+- Reporting issues
 
 ---
 
