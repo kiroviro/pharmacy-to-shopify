@@ -10,6 +10,7 @@ from .pharmacy_discoverer import PharmacyURLDiscoverer
 # Site to discoverer mapping
 SITE_DISCOVERERS = {
     'pharmacy.example.com': PharmacyURLDiscoverer,
+    'benu.bg': PharmacyURLDiscoverer,
 }
 
 

@@ -19,6 +19,7 @@ from .validator import SpecificationValidator
 # Registry of supported site extractors
 SITE_EXTRACTORS = {
     'pharmacy.example.com': PharmacyExtractor,
+    'benu.bg': PharmacyExtractor,
 }
 
 

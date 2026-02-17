@@ -225,6 +225,43 @@ def create_listing_group_filter(
     logger.info("Created listing group filter: %s", response.results[0].resource_name)
 
 
+def add_campaign_location_targeting(
+    client, customer_id: str, campaign_resource: str, location_ids: list[str]
+):
+    """
+    Add geographic location targeting to a campaign.
+
+    Args:
+        client: Google Ads API client
+        customer_id: Customer ID
+        campaign_resource: Campaign resource name
+        location_ids: List of geo target constant IDs (e.g., ["2100"] for Bulgaria)
+    """
+    campaign_criterion_service = client.get_service("CampaignCriterionService")
+    geo_target_constant_service = client.get_service("GeoTargetConstantService")
+
+    operations = []
+
+    for location_id in location_ids:
+        operation = client.get_type("CampaignCriterionOperation")
+        campaign_criterion = operation.create
+        campaign_criterion.campaign = campaign_resource
+        campaign_criterion.location.geo_target_constant = (
+            geo_target_constant_service.geo_target_constant_path(location_id)
+        )
+        # Positive targeting (not negative/excluded)
+        campaign_criterion.negative = False
+        operations.append(operation)
+
+    response = campaign_criterion_service.mutate_campaign_criteria(
+        customer_id=customer_id, operations=operations
+    )
+
+    logger.info("Added %d location target(s) to campaign", len(response.results))
+    for i, result in enumerate(response.results):
+        logger.info("  - Location ID %s: %s", location_ids[i], result.resource_name)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Create a Performance Max campaign for ViaPharma"
@@ -240,6 +277,12 @@ def main():
         type=str,
         default="config/google-ads.yaml",
         help="Path to google-ads.yaml config file",
+    )
+    parser.add_argument(
+        "--locations",
+        type=str,
+        default="2100",
+        help="Comma-separated geo target constant IDs (default: 2100 for Bulgaria)",
     )
     parser.add_argument(
         "--dry-run",
@@ -272,10 +315,12 @@ def main():
     merchant_center_id = int(config["merchant_center_id"])
     store_url = config.get("store_url", "https://viapharma.us")
     budget_micros = int(args.budget * 1_000_000)  # Convert USD to micros
+    location_ids = [loc.strip() for loc in args.locations.split(",")]
 
     print(f"Customer ID:      {customer_id}")
     print(f"Merchant Center:  {merchant_center_id}")
     print(f"Daily Budget:     ${args.budget:.2f}")
+    print(f"Target Locations: {', '.join(location_ids)}")
     print()
 
     if args.dry_run:
@@ -286,27 +331,33 @@ def main():
 
     try:
         # Step 1: Create budget
-        logger.info("Step 1/5: Creating campaign budget...")
+        logger.info("Step 1/6: Creating campaign budget...")
         budget_resource = create_campaign_budget(client, customer_id, budget_micros)
 
         # Step 2: Create PMax campaign
-        logger.info("Step 2/5: Creating Performance Max campaign...")
+        logger.info("Step 2/6: Creating Performance Max campaign...")
         campaign_resource = create_pmax_campaign(
             client, customer_id, budget_resource, merchant_center_id
         )
 
-        # Step 3: Create asset group
-        logger.info("Step 3/5: Creating asset group...")
+        # Step 3: Add location targeting
+        logger.info("Step 3/6: Adding location targeting...")
+        add_campaign_location_targeting(
+            client, customer_id, campaign_resource, location_ids=location_ids
+        )
+
+        # Step 4: Create asset group
+        logger.info("Step 4/6: Creating asset group...")
         asset_group_resource = create_asset_group(
             client, customer_id, campaign_resource, store_url=store_url
         )
 
-        # Step 4: Create and link text assets
-        logger.info("Step 4/5: Creating text assets (headlines, descriptions)...")
+        # Step 5: Create and link text assets
+        logger.info("Step 5/6: Creating text assets (headlines, descriptions)...")
         create_text_assets(client, customer_id, asset_group_resource)
 
-        # Step 5: Create listing group filter (include all products)
-        logger.info("Step 5/5: Creating product listing group filter...")
+        # Step 6: Create listing group filter (include all products)
+        logger.info("Step 6/6: Creating product listing group filter...")
         create_listing_group_filter(client, customer_id, asset_group_resource)
 
         print()
@@ -317,7 +368,9 @@ def main():
         print("  1. Go to ads.google.com")
         print("  2. Review the campaign and asset group")
         print("  3. Add image assets (logo, marketing images)")
-        print("  4. Enable the campaign when ready")
+        print("  4. Verify Merchant Center products target the same locations")
+        print("     (Merchant Center > Products > Shipping & returns)")
+        print("  5. Enable the campaign when ready")
         print()
         print("=" * 60)
 

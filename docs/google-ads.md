@@ -26,18 +26,24 @@ Create and manage Google Ads Performance Max campaigns via the API to drive traf
 
    # Create campaign with custom daily budget
    python3 scripts/google_ads_pmax.py --budget 5.00
+
+   # Create campaign targeting specific locations (default: Bulgaria, ID 2100)
+   python3 scripts/google_ads_pmax.py --locations "2100,2840" # Bulgaria + USA
    ```
 
 ## What the Campaign Script Creates
 
 - **Campaign budget** -- daily budget (default $20, configurable via `--budget`)
 - **Performance Max campaign** -- linked to Merchant Center product feed, using Maximize Conversion Value bidding
+- **Location targeting** -- Bulgaria by default (geo target ID: 2100), configurable via `--locations`
 - **Asset group** -- with `viapharma.us` as the landing page
 - **Text assets** -- 5 headlines, 2 long headlines, 4 descriptions in Bulgarian, business name
 - **Listing group filter** -- includes all products from the Merchant Center feed
 - **Target market** -- Bulgaria (Bulgarian language ads)
 
 The campaign is created in **PAUSED** state. Review it in the Google Ads UI, add image assets (logo, marketing images), and enable when ready.
+
+**Important**: Ensure your Merchant Center products are configured to ship to the same countries you're targeting in your campaign. Go to Merchant Center > Products > Shipping & returns to set up your target countries and shipping rates.
 
 ## Google Ads Policy Note
 

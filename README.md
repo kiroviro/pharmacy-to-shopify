@@ -30,9 +30,9 @@ The gap between "scraping product pages" and "running a live store" is enormous.
 
 This tool restructures publicly available product information so that a vendor's own wholesale customers can present the same products they already purchase and resell. No proprietary data is accessed -- everything extracted is visible on the public-facing vendor website. The goal is equity: giving small pharmacies the same digital presence their suppliers already have.
 
-### Built with AI
+### Technical Approach
 
-**Built entirely with [Claude Code](https://docs.anthropic.com/en/docs/claude-code)** -- from the first line of code to the live store. This project demonstrates that a small business owner, working with AI tools, can build production-quality software that solves a real business problem -- without a traditional engineering team. Claude Code also serves as an ongoing operational tool for store management: theme customization, filter configuration, collection creation, and more.
+This project demonstrates that modern tooling enables rapid development of production-quality software that solves real business problems. The entire pipeline -- from initial extraction logic to the live store deployment -- was built iteratively with a focus on data quality, Shopify compliance, and automation.
 
 ---
 
@@ -135,6 +135,6 @@ All dependencies are declared in `pyproject.toml`.
 
 ## Built With
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- AI-powered development
 - [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/) -- HTML parsing
 - [Shopify Admin API](https://shopify.dev/docs/api/admin) -- store management
+- [Google Ads API](https://developers.google.com/google-ads/api/docs/start) -- campaign automation

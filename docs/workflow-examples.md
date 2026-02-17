@@ -80,11 +80,11 @@ client.rest_request("PUT", "themes/THEME_ID/assets.json", data={
 })
 ```
 
-## Managing Your Shopify Store with Claude Code
+## Programmatic Store Management
 
-Once your products are imported, you can use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) to manage your Shopify store directly -- updating products, creating collections, adjusting navigation, customizing theme translations, and more. This project includes Shopify API integration (`src/shopify/api_client.py`) that Claude Code can use as a foundation.
+Once your products are imported, you can use the included Shopify API integration (`src/shopify/api_client.py`) to manage your store programmatically -- updating products, creating collections, adjusting navigation, customizing theme translations, and more.
 
-Examples of store management tasks performed with Claude Code:
+Examples of automated store management tasks:
 - Creating smart collections and navigation menus from extracted categories
 - Configuring sidebar filters with Bulgarian translations (metafield definitions + theme locale)
 - Modifying theme locale strings (e.g., removing shipping messages from product pages)
