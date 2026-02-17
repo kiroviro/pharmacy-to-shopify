@@ -1,5 +1,26 @@
 # Workflow Examples
 
+## Quick Demo (No Setup)
+
+Try the demo first to see extraction in action:
+
+```bash
+# Run demo with sample HTML (no dependencies, no credentials)
+python3 scripts/demo.py
+```
+
+This extracts a sample product and displays:
+- Product details (title, brand, SKU, barcode)
+- Pricing (BGN and EUR)
+- Categories and tags
+- Images with captions
+- SEO metadata
+- Shopify-ready fields
+
+Perfect for understanding what the tool does before diving into real extraction.
+
+---
+
 ## Full Extraction
 
 ```bash

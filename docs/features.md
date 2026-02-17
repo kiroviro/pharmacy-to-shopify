@@ -17,6 +17,7 @@
 - **Clean data** -- source site references automatically stripped from text fields
 
 ## Workflow Tools
+- **Demo script** -- interactive showcase with sample HTML (no setup required)
 - **Bulk extraction** with progress tracking and resume capability
 - **Selective brand export** -- import by brand, top-N, or exclude specific brands
 - **Tag cleanup** -- normalize casing, remove promotional tags, infer missing categories
@@ -25,6 +26,14 @@
 - **Filter configuration** -- create custom metafield definitions and translate theme filter labels to Bulgarian via Admin API
 - **Theme customization** -- modify theme locale strings and assets via Admin API (e.g., storefront labels, tax/shipping messages)
 - **Filter label translation** -- patched `snippets/facets.liquid` in the Mediva theme to use locale-based translations for sidebar filter labels (Availability -> Наличност, Price -> Цена, Vendor -> Марка, Product Type -> Категория)
+
+## Development & Deployment
+- **Docker support** -- multi-stage Dockerfile and docker-compose with service profiles
+- **Pre-commit hooks** -- automatic linting, formatting, and secret detection
+- **CI/CD pipeline** -- GitHub Actions with lint and test jobs (Python 3.9, 3.11, 3.13)
+- **Environment templates** -- `.env.example` for secure credential management
+- **GitHub templates** -- bug reports, feature requests, and pull request templates
+- **Comprehensive documentation** -- architecture, workflows, configuration guides
 
 ## Required Shopify Apps
 
