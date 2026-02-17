@@ -169,14 +169,17 @@ class PharmacyExtractor:
         """
         barcode = ""
 
-        # 1. Try JSON-LD first (most reliable)
+        # 1. Try JSON-LD first (most reliable) - only actual barcode fields
         if self.json_ld:
-            for key in ['gtin', 'gtin13', 'gtin8', 'gtin12', 'gtin14', 'ean', 'mpn']:
+            for key in ['gtin', 'gtin13', 'gtin8', 'gtin12', 'gtin14', 'ean']:
                 value = self.json_ld.get(key)
                 if value and str(value).strip():
-                    barcode = str(value).strip()
-                    logger.debug(f"Barcode from JSON-LD[{key}]: {barcode}")
-                    break
+                    candidate = str(value).strip()
+                    # Validate it's a proper barcode (8-14 digits)
+                    if re.match(r'^\d{8,14}$', candidate):
+                        barcode = candidate
+                        logger.debug(f"Barcode from JSON-LD[{key}]: {barcode}")
+                        break
 
         # 2. Try meta tags
         if not barcode and self.soup:
@@ -193,13 +196,11 @@ class PharmacyExtractor:
             more_info = self._extract_tab_content("Допълнителна информация",
                                                   self.soup.get_text(separator="\n") if self.soup else "")
             if more_info:
-                # Try multiple patterns for "Баркод"
+                # Try multiple patterns - ONLY with explicit labels to avoid matching SKUs
                 patterns = [
-                    r'Баркод\s*:\s*(\d[\d\s-]*)',  # "Баркод : 1234567890" (allow spaces/dashes)
-                    r'EAN\s*:\s*(\d[\d\s-]*)',     # "EAN : 1234567890"
-                    r'GTIN\s*:\s*(\d[\d\s-]*)',    # "GTIN : 1234567890"
-                    r'(\d{13})',                    # Standalone 13-digit EAN-13
-                    r'(\d{8})',                     # Standalone 8-digit EAN-8
+                    r'Баркод\s*:\s*(\d{8,14})',     # "Баркод : 1234567890" (8-14 digits only)
+                    r'EAN\s*:\s*(\d{8,14})',        # "EAN : 1234567890"
+                    r'GTIN\s*:\s*(\d{8,14})',       # "GTIN : 1234567890"
                 ]
 
                 for pattern in patterns:
@@ -209,16 +210,8 @@ class PharmacyExtractor:
                         logger.debug(f"Barcode from pattern {pattern}: {barcode}")
                         break
 
-        # 4. Try searching full page text as last resort
-        if not barcode and self.soup:
-            page_text = self.soup.get_text(separator=" ")
-            # Look for isolated 13-digit or 8-digit numbers (likely EAN codes)
-            match = re.search(r'\b(\d{13})\b', page_text)
-            if not match:
-                match = re.search(r'\b(\d{8})\b', page_text)
-            if match:
-                barcode = match.group(1)
-                logger.debug(f"Barcode from page text scan: {barcode}")
+        # 4. Page text scan removed - too many false positives (SKUs, product IDs, etc.)
+        # If we don't have a barcode by now, the product likely doesn't have one
 
         # Clean barcode (remove spaces, dashes, keep only digits)
         if barcode:

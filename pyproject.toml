@@ -52,4 +52,7 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "E402",  # Module level import not at top (common pattern for logger initialization)
+]
