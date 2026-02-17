@@ -55,6 +55,32 @@ Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
 
 ---
 
+## Try It Out (No Setup Required)
+
+**Want to see how it works without any setup?** Run the demo script:
+
+```bash
+# Clone the repository
+git clone https://github.com/kiroviro/pharmacy-to-shopify.git
+cd pharmacy-to-shopify
+
+# Run the demo (no dependencies needed)
+python3 scripts/demo.py
+```
+
+The demo script extracts a sample product page and shows all extracted fields:
+- ✅ Product title, brand, SKU, barcode
+- ✅ Prices (BGN & EUR), availability
+- ✅ Categories, tags, and organization
+- ✅ Product descriptions, composition, usage instructions
+- ✅ Images with captions
+- ✅ SEO metadata and Google Shopping fields
+- ✅ Shopify-ready formatting
+
+**No credentials, API keys, or real websites needed!**
+
+---
+
 ## Quick Start
 
 ### Option 1: Local Setup
