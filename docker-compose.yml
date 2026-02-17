@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Product extraction service
+  extractor:
+    build: .
+    image: pharmacy-to-shopify:latest
+    volumes:
+      # Mount data directories for persistence
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./config:/app/config
+    environment:
+      # Shopify credentials (use .env file or pass via command line)
+      - SHOPIFY_API_KEY=${SHOPIFY_API_KEY:-}
+      - SHOPIFY_SHOP_URL=${SHOPIFY_SHOP_URL:-}
+      - SHOPIFY_ACCESS_TOKEN=${SHOPIFY_ACCESS_TOKEN:-}
+      # Google Ads credentials (optional)
+      - GOOGLE_ADS_DEVELOPER_TOKEN=${GOOGLE_ADS_DEVELOPER_TOKEN:-}
+      - GOOGLE_ADS_CLIENT_ID=${GOOGLE_ADS_CLIENT_ID:-}
+      - GOOGLE_ADS_CLIENT_SECRET=${GOOGLE_ADS_CLIENT_SECRET:-}
+    # Override command to run specific script
+    # Example: docker-compose run extractor python scripts/bulk_extract.py --help
+    command: ["python", "--version"]
+    profiles:
+      - tools
+
+  # Testing service
+  test:
+    build: .
+    image: pharmacy-to-shopify:latest
+    command: ["python", "-m", "pytest", "tests/", "-v"]
+    profiles:
+      - test
+
+  # Linting service
+  lint:
+    build: .
+    image: pharmacy-to-shopify:latest
+    command: ["python", "-m", "ruff", "check", "."]
+    profiles:
+      - lint
+
+# Example usage:
+# Build: docker-compose build
+# Run extraction: docker-compose run extractor python scripts/discover_urls.py --site example.com
+# Run tests: docker-compose --profile test run test
+# Run linter: docker-compose --profile lint run lint

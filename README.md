@@ -1,5 +1,10 @@
 # Pharmacy Product Catalogue Tool
 
+[![CI](https://github.com/kiroviro/pharmacy-to-shopify/actions/workflows/ci.yml/badge.svg)](https://github.com/kiroviro/pharmacy-to-shopify/actions)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 Extracts product catalogues from pharmacy vendor websites, generates Shopify-compatible CSV files, and automates the entire store setup -- collections, navigation, filters, translations, and Google Ads campaigns.
 
 **See it live:** [viapharma.us](https://viapharma.us) -- a fully operational Shopify store with 11,000+ products, built entirely with this pipeline.

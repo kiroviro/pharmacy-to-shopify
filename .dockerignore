@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Claude Code
+.claude/
+
+# Documentation (already in image)
+*.md
+docs/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Data directories (mounted as volumes)
+data/
+output/
+reports/
+
+# Secrets
+.env
+.env.local
+*.json
+!config/*.json
+
+# Theme exports
+theme_export__*/
+
+# Misc
+*.log
+.ruff_cache/
