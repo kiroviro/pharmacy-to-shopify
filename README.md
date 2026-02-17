@@ -110,6 +110,25 @@ python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.co
 # 7. Import to Shopify: Admin > Products > Import > Upload CSV
 ```
 
+### Ongoing Price Management
+
+After initial import, use the price sync tool to detect and update price changes without a full re-crawl:
+
+```bash
+# 1. Check for price differences (sample)
+python3 scripts/price_sync.py --sample 100
+
+# 2. Full catalog comparison
+python3 scripts/price_sync.py
+
+# 3. Generate Shopify import CSV with only changed prices
+python3 scripts/price_sync.py --output output/price_updates.csv
+
+# 4. Import updates: Admin > Products > Import > "Overwrite existing products"
+```
+
+This compares live benu.bg prices with your Shopify store and generates a minimal CSV containing only products that need price updates.
+
 ### Option 2: Docker Setup
 
 ```bash
@@ -142,6 +161,8 @@ webcrawler-shopify/
 │   ├── extract_single.py            # Single product extraction with validation
 │   ├── bulk_extract.py              # Bulk extraction with resume
 │   ├── export_by_brand.py           # Selective brand export
+│   ├── price_sync.py                 # Price monitoring and sync (benu.bg vs Shopify)
+│   ├── chunk_csv.py                  # Split large CSVs for Shopify import
 │   ├── cleanup_tags.py              # Tag cleanup and normalization
 │   ├── create_shopify_collections.py # Shopify collection creation
 │   ├── create_shopify_menus.py      # Shopify navigation menu creation
