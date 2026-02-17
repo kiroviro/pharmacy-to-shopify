@@ -265,35 +265,96 @@ class PharmacyExtractor:
         return ""
 
     def _extract_prices(self) -> tuple[str, str]:
-        """Extract regular prices in BGN and EUR (ignoring promotions)."""
+        """Extract current selling price in BGN and EUR.
+
+        Strategy (in order of reliability):
+        1. JSON-LD structured data (most reliable, used by Google)
+        2. Specific price element selectors (new-price for promos, or regular price)
+        3. Meta tags with price info
+
+        For promotional products, we extract the CURRENT selling price (new-price),
+        not the original price.
+        """
         price_bgn = ""
         price_eur = ""
 
-        # Primary: Get price from main product area (.product-info .product-prices)
-        # This contains the regular price (shown as old-price when on promotion)
-        price_area = self.soup.select_one(".product-info .product-prices")
-        if price_area:
-            text = price_area.get_text()
-            bgn_match = re.search(r'(\d+[.,]\d{2})\s*лв', text)
-            eur_match = re.search(r'(\d+[.,]\d{2})\s*€', text)
-            if bgn_match:
-                price_bgn = bgn_match.group(1).replace(",", ".")
-            if eur_match:
-                price_eur = eur_match.group(1).replace(",", ".")
+        # EUR to BGN fixed rate (EU Council, ERM II - legally fixed)
+        EUR_TO_BGN = 1.95583
 
-        # Fallback: Use JSON-LD price (EUR only)
-        if not price_eur and self.json_ld:
+        # =================================================================
+        # PRIMARY: JSON-LD structured data (most reliable source)
+        # =================================================================
+        if self.json_ld:
             offers = self.json_ld.get("offers", {})
             if isinstance(offers, list):
                 offers = offers[0] if offers else {}
             price = offers.get("price")
             if price:
-                price_eur = f"{float(str(price).replace(',', '.')):.2f}"
-                # Convert to BGN if not found
-                if not price_bgn:
-                    # 1.95583 is the legally fixed EUR/BGN rate (EU Council, ERM II)
-                    price_bgn = f"{float(price_eur) * 1.95583:.2f}"
+                try:
+                    price_eur = f"{float(str(price).replace(',', '.')):.2f}"
+                    price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
+                    logger.debug(f"Price from JSON-LD: {price_eur} EUR / {price_bgn} BGN")
+                    return price_bgn, price_eur
+                except (ValueError, TypeError):
+                    pass
 
+        # =================================================================
+        # FALLBACK 1: Specific price element selectors
+        # =================================================================
+        # Try promotional price first (new-price), then regular price
+        price_selectors = [
+            # Promotional price (current selling price during promo)
+            ".product-prices .new-price",
+            ".product-info .new-price",
+            # Regular price (when no promotion)
+            ".product-prices .price:not(.old-price)",
+            ".product-info .price:not(.old-price)",
+            # Generic price container (last resort)
+            ".product-prices > .price",
+        ]
+
+        for selector in price_selectors:
+            price_elem = self.soup.select_one(selector)
+            if price_elem:
+                text = price_elem.get_text()
+                # Extract EUR price (primary currency on benu.bg)
+                eur_match = re.search(r'(\d+[.,]\d{2})\s*€', text)
+                if eur_match:
+                    try:
+                        price_eur = eur_match.group(1).replace(",", ".")
+                        price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
+                        logger.debug(f"Price from selector '{selector}': {price_eur} EUR")
+                        return price_bgn, price_eur
+                    except (ValueError, TypeError):
+                        pass
+
+                # Try BGN if EUR not found
+                bgn_match = re.search(r'(\d+[.,]\d{2})\s*лв', text)
+                if bgn_match:
+                    try:
+                        price_bgn = bgn_match.group(1).replace(",", ".")
+                        price_eur = f"{float(price_bgn) / EUR_TO_BGN:.2f}"
+                        logger.debug(f"Price from selector '{selector}': {price_bgn} BGN")
+                        return price_bgn, price_eur
+                    except (ValueError, TypeError):
+                        pass
+
+        # =================================================================
+        # FALLBACK 2: Meta tags
+        # =================================================================
+        meta_price = self.soup.select_one('meta[property="product:price:amount"]')
+        if meta_price:
+            price_val = meta_price.get("content", "")
+            if price_val:
+                try:
+                    price_eur = f"{float(price_val.replace(',', '.')):.2f}"
+                    price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
+                    logger.debug(f"Price from meta tag: {price_eur} EUR")
+                    return price_bgn, price_eur
+                except (ValueError, TypeError):
+                    pass
+
+        logger.warning(f"Could not extract price for {self.url}")
         return price_bgn, price_eur
 
     # Site does not expose original/compare-at price or availability status.
