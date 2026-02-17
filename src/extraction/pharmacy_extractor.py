@@ -119,7 +119,7 @@ class PharmacyExtractor:
         images = self._extract_images()
         self._optimize_image_alt_texts(images, brand, title)
 
-        barcode = self._extract_barcode(more_info)
+        barcode = self._extract_barcode()  # Now uses self.soup, self.json_ld
         highlights = self._extract_highlights()
 
         return ExtractedProduct(
@@ -154,13 +154,84 @@ class PharmacyExtractor:
             google_age_group=self._determine_google_age_group(categories),
         )
 
-    @staticmethod
-    def _extract_barcode(more_info: str) -> str:
-        """Extract barcode from 'Допълнителна информация' text."""
-        if not more_info:
-            return ""
-        match = re.search(r'Баркод\s*:\s*(\S+)', more_info)
-        return match.group(1) if match else ""
+    def _extract_barcode(self) -> str:
+        """
+        Extract barcode/GTIN from multiple sources with fallback chain.
+
+        Checks (in order):
+        1. JSON-LD structured data (gtin, gtin13, gtin8, ean)
+        2. Meta tags (og:gtin, product:gtin)
+        3. "Допълнителна информация" section (Баркод: pattern)
+        4. Page text with multiple pattern variations
+
+        Returns:
+            Barcode string (cleaned, digits only)
+        """
+        barcode = ""
+
+        # 1. Try JSON-LD first (most reliable)
+        if self.json_ld:
+            for key in ['gtin', 'gtin13', 'gtin8', 'gtin12', 'gtin14', 'ean', 'mpn']:
+                value = self.json_ld.get(key)
+                if value and str(value).strip():
+                    barcode = str(value).strip()
+                    logger.debug(f"Barcode from JSON-LD[{key}]: {barcode}")
+                    break
+
+        # 2. Try meta tags
+        if not barcode and self.soup:
+            meta_tags = self.soup.find_all('meta', attrs={'property': re.compile(r'gtin|ean|barcode', re.I)})
+            for meta in meta_tags:
+                content = meta.get('content', '').strip()
+                if content:
+                    barcode = content
+                    logger.debug(f"Barcode from meta tag: {barcode}")
+                    break
+
+        # 3. Try "Допълнителна информация" section (existing logic - enhanced)
+        if not barcode:
+            more_info = self._extract_tab_content("Допълнителна информация",
+                                                  self.soup.get_text(separator="\n") if self.soup else "")
+            if more_info:
+                # Try multiple patterns for "Баркод"
+                patterns = [
+                    r'Баркод\s*:\s*(\d[\d\s-]*)',  # "Баркод : 1234567890" (allow spaces/dashes)
+                    r'EAN\s*:\s*(\d[\d\s-]*)',     # "EAN : 1234567890"
+                    r'GTIN\s*:\s*(\d[\d\s-]*)',    # "GTIN : 1234567890"
+                    r'(\d{13})',                    # Standalone 13-digit EAN-13
+                    r'(\d{8})',                     # Standalone 8-digit EAN-8
+                ]
+
+                for pattern in patterns:
+                    match = re.search(pattern, more_info, re.IGNORECASE)
+                    if match:
+                        barcode = match.group(1)
+                        logger.debug(f"Barcode from pattern {pattern}: {barcode}")
+                        break
+
+        # 4. Try searching full page text as last resort
+        if not barcode and self.soup:
+            page_text = self.soup.get_text(separator=" ")
+            # Look for isolated 13-digit or 8-digit numbers (likely EAN codes)
+            match = re.search(r'\b(\d{13})\b', page_text)
+            if not match:
+                match = re.search(r'\b(\d{8})\b', page_text)
+            if match:
+                barcode = match.group(1)
+                logger.debug(f"Barcode from page text scan: {barcode}")
+
+        # Clean barcode (remove spaces, dashes, keep only digits)
+        if barcode:
+            cleaned = re.sub(r'[^\d]', '', barcode)
+
+            # Validate length (EAN-8, UPC-A, EAN-13, GTIN-14 are most common)
+            if len(cleaned) in [8, 12, 13, 14]:
+                return cleaned
+            else:
+                logger.warning(f"Invalid barcode length ({len(cleaned)}): {barcode}")
+                return ""  # Invalid barcode
+
+        return ""
 
     def _extract_title(self) -> str:
         """Extract product title (cached after first call)."""
