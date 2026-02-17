@@ -11,7 +11,7 @@ import sys
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.extraction.pharmacy_extractor import PharmacyExtractor
+from src.extraction.pharmacy_extractor import PharmacyExtractor  # noqa: I001
 
 def test_barcode_extraction():
     """Test barcode extraction with sample HTML."""
