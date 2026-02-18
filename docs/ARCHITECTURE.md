@@ -200,8 +200,9 @@ The extractor uses multiple data sources with fallback priority:
 | Field | Priority 1 | Priority 2 | Priority 3 | Priority 4 |
 |-------|------------|------------|------------|------------|
 | Brand | JSON-LD | GTM data | Title prefix | Known brands list |
-| Price (EUR) | JSON-LD offers | HTML .product-prices | - | - |
-| Price (BGN) | HTML .product-prices | Calculated from EUR | - | - |
+| **Price (EUR)** | **Vue.js component** | **JSON-LD offers** | HTML .product-prices | - |
+| **Price (BGN)** | **Calculated from EUR** | - | - | - |
+| **Original Price** | **Vue.js component** | - | - | - |
 | SKU | JSON-LD | - | - | - |
 | Categories | Breadcrumb | - | - | - |
 | Tags | From categories | - | - | - |
@@ -210,6 +211,53 @@ The extractor uses multiple data sources with fallback priority:
 | Target Audience | Categories + title | - | - | - |
 | Images | JSON-LD (rewritten to CDN) | Gallery selectors | - | HEAD validation |
 | Content | Accordion tabs | JSON-LD fields | Leaflet sections | HTML panels |
+
+### Price Extraction (Updated Feb 2026)
+
+**Primary source:** Vue.js `<add-to-cart>` component `:product` prop
+
+The site uses a Vue.js component that contains accurate, real-time pricing data:
+
+```html
+<add-to-cart :product="{
+  'price': 13.75,              // Regular price (EUR)
+  'variants': [{
+    'price': 13.75,
+    'discountedPrice': 11.65,  // Current selling price (EUR)
+    'discountStartDate': '01.02.2026',
+    'discountEndDate': '28.02.2026'
+  }]
+}" />
+```
+
+**Extraction logic:**
+1. **Vue component data** (most reliable):
+   - `discountedPrice` → Current selling price (what customers pay)
+   - `price` → Original price (if `price != discountedPrice`, product is on promotion)
+   - Calculate BGN using fixed rate: 1 EUR = 1.95583 BGN (ERM II)
+
+2. **JSON-LD fallback** (may be stale):
+   - Used if Vue component data unavailable
+   - Logged as warning since JSON-LD can contain outdated prices
+
+3. **HTML selectors** (last resort):
+   - Skips carousel elements (related products)
+   - Only used if Vue and JSON-LD both fail
+
+**Promotional vs Regular pricing:**
+- **On promotion:** `price != discountedPrice`
+  - Current price: `discountedPrice`
+  - Compare-at price: `price` (shown crossed out in Shopify)
+  - Promotion dates extracted for reference
+
+- **Regular price:** `price == discountedPrice`
+  - Current price: `discountedPrice`
+  - Compare-at price: empty
+
+**EUR/BGN dual currency:** Bulgaria is transitioning to EUR. Both currencies are exported:
+- `Price` column: BGN (primary for now)
+- `Price EUR` column: EUR (will become primary in 2027-2028)
+- Easy configuration switch when Bulgaria fully adopts EUR
 
 ### Image URL Resolution
 

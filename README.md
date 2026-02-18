@@ -83,6 +83,21 @@ The demo script extracts a sample product page and shows all extracted fields:
 
 ## Quick Start
 
+### Complete Workflow Overview
+
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Discover  │ -> │   Extract    │ -> │   Export    │ -> │   Import    │
+│     URLs    │    │   Products   │    │   to CSV    │    │  to Shopify │
+└─────────────┘    └──────────────┘    └─────────────┘    └─────────────┘
+  sitemap.xml      Fresh prices         Split into         Shopify Admin
+  9,272 URLs       9,270 products       14MB chunks        Products > Import
+```
+
+**File locations:**
+- **Source data:** `data/benu.bg/raw/products.csv` (output from bulk extraction)
+- **Shopify import:** `output/shopify/products_*.csv` (split files ready for import)
+
 ### Option 1: Local Setup
 
 ```bash
@@ -96,19 +111,84 @@ cp .env.example .env
 # Edit .env with your actual credentials
 
 # 3. Discover product URLs from pharmacy site sitemap
-python3 scripts/discover_urls.py --site pharmacy.example.com
+python3 scripts/discover_urls.py --site benu.bg
+# Output: data/benu.bg/raw/urls.txt (9,272 URLs)
 
 # 4. Extract a single product (test)
-python3 scripts/extract_single.py --url "https://pharmacy.example.com/sample-product" --verbose
+python3 scripts/extract_single.py --url "https://benu.bg/sample-product" --verbose
 
-# 5. Bulk extract all products
-python3 scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --continue-on-error --resume
+# 5. Bulk extract all products (~4.8 hours for 9,270 products)
+python3 scripts/bulk_extract.py \
+  --urls data/benu.bg/raw/urls.txt \
+  --output data/benu.bg/raw/products.csv \
+  --continue-on-error \
+  --delay 1.0
+
+# Output summary:
+#   ✅ Products extracted: 9,270
+#   ✅ Total images:       9,921
+#   ✅ Failed URLs:        2
+#   ✅ File size:          29 MB
+#   ✅ Price accuracy:     Fresh from live site
+#   ✅ Success rate:       99.98%
 
 # 6. Export for Shopify (auto-splits into 14MB files)
-python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.com/raw/products.csv --output output/pharmacy.example.com/products.csv
+python3 scripts/export_by_brand.py \
+  --all-brands \
+  --input data/benu.bg/raw/products.csv \
+  --output output/shopify/products.csv \
+  --max-size 14
 
-# 7. Import to Shopify: Admin > Products > Import > Upload CSV
+# Output: Creates products_001.csv, products_002.csv, products_003.csv
+
+# 7. Import to Shopify
+#    Go to: Shopify Admin > Products > Import
+#    Upload: output/shopify/products_001.csv
+#    Settings:
+#      ✅ "Overwrite existing products that have the same handle"
+#      ✅ "Publish new products to online store"
+#    Repeat for products_002.csv, products_003.csv
 ```
+
+### Data Quality Verification
+
+After extraction, verify your data:
+
+```bash
+# Check CSV structure
+wc -l data/benu.bg/raw/products.csv
+# Expected: 9,921 rows (9,270 products + 651 image rows + 1 header)
+
+# Verify required fields are complete
+python3 -c "
+import csv
+with open('data/benu.bg/raw/products.csv', 'r') as f:
+    products = [r for r in csv.DictReader(f) if r.get('Title', '').strip()]
+    print(f'Total products: {len(products):,}')
+    print(f'With prices:    {sum(1 for p in products if p.get(\"Price\")):,}')
+    print(f'With barcodes:  {sum(1 for p in products if p.get(\"Barcode\")):,}')
+    print(f'With compare-at:{sum(1 for p in products if p.get(\"Compare-at price\")):,}')
+"
+```
+
+**Expected data completeness:**
+- Title: 100% (9,270/9,270)
+- Price: 100% (9,270/9,270) ✅ **Fresh prices from Vue.js component**
+- Compare-at price: ~15-25% (products on promotion only)
+- SKU: 100% (9,270/9,270)
+- Barcode: 88.1% (8,164/9,270)
+- Description: 100% (9,270/9,270)
+- Vendor/Brand: 100% (9,270/9,270)
+
+**Price accuracy (Feb 2026 update):**
+
+Prices are now extracted from Vue.js component data instead of JSON-LD:
+- ✅ Always current (matches what customers see)
+- ✅ Distinguishes regular vs promotional pricing
+- ✅ Includes original price for products on sale
+- ✅ Supports running your own promotions in Shopify
+
+See `CHANGELOG.md` for implementation details.
 
 ### Ongoing Price Management
 
@@ -128,6 +208,77 @@ python3 scripts/price_sync.py --output output/price_updates.csv
 ```
 
 This compares live benu.bg prices with your Shopify store and generates a minimal CSV containing only products that need price updates.
+
+### Automated Price Monitoring (Cron Job)
+
+For hands-off price synchronization, set up a daily cron job to automatically monitor and sync prices:
+
+**Option 1: Price Monitor (Full Automation)**
+
+```bash
+# Setup environment variables
+export SHOPIFY_SHOP="your-store-name"
+export SHOPIFY_ACCESS_TOKEN="your-admin-api-token"
+
+# Add to crontab (run daily at 3 AM)
+crontab -e
+
+# Add this line:
+0 3 * * * cd /Users/kiril/IdeaProjects/pharmacy-to-shopify && python3 scripts/price_monitor.py --auto-sync >> logs/price_sync.log 2>&1
+```
+
+**What it does:**
+- Fetches live prices from benu.bg
+- Compares with current Shopify prices
+- Automatically updates prices via Shopify Admin API
+- Logs all changes to `logs/price_sync.log`
+
+**Option 2: Price Sync (Manual Review)**
+
+For more control, generate a daily report without auto-updating:
+
+```bash
+# Add to crontab (generate report daily at 3 AM)
+0 3 * * * cd /Users/kiril/IdeaProjects/pharmacy-to-shopify && python3 scripts/price_sync.py --output output/price_updates_$(date +\%Y\%m\%d).csv >> logs/price_check.log 2>&1
+```
+
+Then manually review and import the CSV when ready.
+
+**Available scripts:**
+
+| Script | Purpose | Use Case |
+|--------|---------|----------|
+| `price_monitor.py` | Auto-sync via API | Hands-off automation |
+| `price_sync.py` | Generate CSV report | Manual review workflow |
+
+**Setup instructions:**
+
+1. Create logs directory:
+   ```bash
+   mkdir -p logs
+   ```
+
+2. Set environment variables in `.env`:
+   ```bash
+   SHOPIFY_SHOP=your-store-name
+   SHOPIFY_ACCESS_TOKEN=shpat_xxxxx
+   ```
+
+3. Test the script manually first:
+   ```bash
+   # Test with sample (no changes made)
+   python3 scripts/price_monitor.py --sample 100 --report-only
+
+   # Test full sync (review mode - asks for confirmation)
+   python3 scripts/price_monitor.py --review
+   ```
+
+4. Add to crontab once verified
+
+**Monitoring recommendations:**
+- **Daily:** Check for price changes (catches most updates)
+- **Weekly:** Review price sync logs for anomalies
+- **Monthly:** Full re-extraction to capture new products
 
 ### Option 2: Docker Setup
 
