@@ -179,28 +179,6 @@ class TestPriceExtractionCSSFallback:
         assert float(price_bgn) == pytest.approx(24.50 * EUR_TO_BGN, rel=0.01)
 
 
-class TestPriceExtractionMetaFallback:
-    """Test meta tag fallback when JSON-LD and CSS fail"""
-
-    @pytest.mark.skip(reason="Meta tag extraction not implemented - code only supports Vue.js, JSON-LD, and CSS selectors")
-    def test_meta_price_extraction(self):
-        """Extract from meta[property='product:price:amount']"""
-        html = '''
-        <html>
-        <head>
-            <meta property="product:price:amount" content="8.99" />
-            <meta property="product:price:currency" content="EUR" />
-        </head>
-        <body></body>
-        </html>
-        '''
-        extractor = PharmacyExtractor("https://benu.bg/test")
-        extractor.load_html(html)
-        price_bgn, price_eur = extractor._extract_prices()
-
-        assert price_eur == "8.99"
-
-
 class TestPriceExtractionEdgeCases:
     """Test edge cases and potential false matches"""
 
@@ -409,7 +387,7 @@ class TestRealWorldPriceExamples:
 
 
 class TestPriceConversion:
-    """Test EUR ↔ BGN conversion accuracy"""
+    """Test EUR to BGN conversion accuracy"""
 
     def test_eur_to_bgn_conversion(self):
         """Verify EUR to BGN conversion uses correct rate"""
@@ -430,25 +408,6 @@ class TestPriceConversion:
         assert price_eur == "10.00"
         # EUR_TO_BGN = 1.95583
         assert float(price_bgn) == pytest.approx(19.56, rel=0.01)
-
-    @pytest.mark.skip(reason="BGN-to-EUR conversion not implemented - code always extracts EUR first (searches for '€' symbol), then converts to BGN")
-    def test_bgn_to_eur_conversion(self):
-        """Verify BGN to EUR conversion when only BGN available"""
-        html = '''
-        <html>
-        <body>
-            <div class="product-prices">
-                <span class="price">19.56 лв</span>
-            </div>
-        </body>
-        </html>
-        '''
-        extractor = PharmacyExtractor("https://benu.bg/test")
-        extractor.load_html(html)
-        price_bgn, price_eur = extractor._extract_prices()
-
-        assert price_bgn == "19.56"
-        assert float(price_eur) == pytest.approx(10.00, rel=0.01)
 
 
 if __name__ == "__main__":
