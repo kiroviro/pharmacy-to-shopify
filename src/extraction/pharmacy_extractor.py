@@ -6,6 +6,7 @@ Extracts product data from pharmacy website.
 
 from __future__ import annotations
 
+import html as html_module
 import json
 import logging
 import re
@@ -14,13 +15,13 @@ from urllib.parse import quote, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-logger = logging.getLogger(__name__)
-
 from ..common.config_loader import load_seo_settings
 from ..common.constants import EUR_TO_BGN
 from ..common.transliteration import generate_handle as transliterate_handle
 from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
+
+logger = logging.getLogger(__name__)
 
 
 class PharmacyExtractor:
@@ -28,6 +29,7 @@ class PharmacyExtractor:
 
     _shared_brand_matcher = None
     _shared_seo_settings = None
+    _VUE_DATA_NOT_PARSED = object()  # sentinel for _cached_vue_data
 
     def __init__(
         self,
@@ -44,6 +46,7 @@ class PharmacyExtractor:
         self.soup = None
         self.json_ld = None
         self._cached_title = None
+        self._cached_vue_data = PharmacyExtractor._VUE_DATA_NOT_PARSED
         self.product_type = "otc"
 
         if PharmacyExtractor._shared_brand_matcher is None:
@@ -66,12 +69,14 @@ class PharmacyExtractor:
         response.raise_for_status()
         self.html = response.text
         self.soup = BeautifulSoup(self.html, "lxml")
+        self._cached_vue_data = PharmacyExtractor._VUE_DATA_NOT_PARSED
         self._parse_json_ld()
 
     def load_html(self, html: str) -> None:
         """Load pre-fetched HTML for extraction without a network request."""
         self.html = html
         self.soup = BeautifulSoup(self.html, "lxml")
+        self._cached_vue_data = PharmacyExtractor._VUE_DATA_NOT_PARSED
         self._parse_json_ld()
 
     def _parse_json_ld(self) -> None:
@@ -270,6 +275,7 @@ class PharmacyExtractor:
         Parse Vue.js component product data from <add-to-cart> element.
 
         The Vue component contains accurate real-time pricing data in the :product attribute.
+        Result is cached per HTML load to avoid re-parsing when called from multiple methods.
 
         Returns:
             Dict with 'variants' key containing product data, or None if parsing fails.
@@ -284,22 +290,25 @@ class PharmacyExtractor:
                 }]
             }
         """
+        if self._cached_vue_data is not PharmacyExtractor._VUE_DATA_NOT_PARSED:
+            return self._cached_vue_data
+
         add_to_cart = self.soup.select_one('add-to-cart')
         if not add_to_cart or not add_to_cart.get(':product'):
+            self._cached_vue_data = None
             return None
 
-        import html as html_module
-
-        # The :product attr contains HTML-encoded JSON (&quot; instead of ")
+        # BeautifulSoup decodes HTML entities when parsing attributes,
+        # but unescape defensively in case of edge cases with other parsers.
         product_json = html_module.unescape(add_to_cart.get(':product', '{}'))
-        product_json = product_json.replace('&quot;', '"')
 
         try:
-            product_data = json.loads(product_json)
-            return product_data
-        except (json.JSONDecodeError, ValueError, KeyError) as e:
+            self._cached_vue_data = json.loads(product_json)
+        except (json.JSONDecodeError, ValueError) as e:
             logger.debug(f"Failed to parse Vue product data: {e}")
-            return None
+            self._cached_vue_data = None
+
+        return self._cached_vue_data
 
     def _extract_prices(self) -> tuple[str, str]:
         """Extract current selling price in BGN and EUR.
@@ -347,7 +356,7 @@ class PharmacyExtractor:
                             logger.debug(f"Price from Vue: {price_eur} EUR / {price_bgn} BGN")
 
                         return price_bgn, price_eur
-                except (ValueError, KeyError) as e:
+                except ValueError as e:
                     logger.debug(f"Failed to extract price from Vue variant data: {e}")
 
         # =================================================================
@@ -437,7 +446,7 @@ class PharmacyExtractor:
                 )
                 return f"{original_price_bgn:.2f}"
 
-        except (ValueError, KeyError) as e:
+        except ValueError as e:
             logger.debug(f"Failed to extract original price from Vue variant data: {e}")
 
         # No promotion or extraction failed

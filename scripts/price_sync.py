@@ -33,11 +33,13 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
+# Add project root to path for proper package imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from src.common.constants import EUR_TO_BGN
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-# Fixed EUR to BGN rate (ERM II)
-EUR_TO_BGN = 1.95583
 
 
 @dataclass
