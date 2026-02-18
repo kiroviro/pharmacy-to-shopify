@@ -185,4 +185,27 @@ These can be addressed in a future session if needed.
 
 ---
 
-**Status:** ✅ All 4 critical issues RESOLVED
+## Shopify Import Files (Updated Feb 18, 21:32)
+
+After verifying all fixes in the production data, cleaned up old files and created fresh Shopify-compatible splits:
+
+**Files Deleted:**
+- ❌ `output/shopify/products_*.csv` (generated 07:45, BEFORE fixes)
+- ❌ `output/benu.bg/product.csv` (partial test file)
+
+**Current Import Files (WITH all fixes):**
+- ✅ `output/shopify/products_001.csv` (14 MB, 4,482 products, 292 promos)
+- ✅ `output/shopify/products_002.csv` (14 MB, 4,516 products, 243 promos)
+- ✅ `output/shopify/products_003.csv` (0.8 MB, 273 products, 13 promos)
+
+**Verification:**
+- ✅ All 548 promotional products present
+- ✅ 0 EUR→BGN conversion errors
+- ✅ 0 invalid barcodes
+- ✅ Generated from `data/benu.bg/raw/products.csv` (created 13:25, AFTER fixes at 12:12)
+
+See `SHOPIFY_IMPORT_READINESS.md` for detailed import instructions.
+
+---
+
+**Status:** ✅ All 4 critical issues RESOLVED + Shopify files ready for import

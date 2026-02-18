@@ -133,6 +133,8 @@ python3 scripts/bulk_extract.py \
 #   ✅ Success rate:       99.98%
 
 # 6. Export for Shopify (auto-splits into 14MB files)
+# Note: Files are already split and ready in output/shopify/
+# To re-generate from scratch:
 python3 scripts/export_by_brand.py \
   --all-brands \
   --input data/benu.bg/raw/products.csv \
@@ -140,14 +142,26 @@ python3 scripts/export_by_brand.py \
   --max-size 14
 
 # Output: Creates products_001.csv, products_002.csv, products_003.csv
+# Located at: output/shopify/products_*.csv
 
-# 7. Import to Shopify
-#    Go to: Shopify Admin > Products > Import
-#    Upload: output/shopify/products_001.csv
-#    Settings:
-#      ✅ "Overwrite existing products that have the same handle"
-#      ✅ "Publish new products to online store"
-#    Repeat for products_002.csv, products_003.csv
+# 7. Import to Shopify (READY NOW - files exist in output/shopify/)
+#    IMPORTANT: Import files in order (001, 002, 003)
+#
+#    Step 1: Import products_001.csv
+#      - Go to: Shopify Admin > Products > Import
+#      - Upload: output/shopify/products_001.csv (14 MB, 4,482 products)
+#      - Settings:
+#        ✅ "Overwrite existing products that have the same handle"
+#        ✅ "Publish new products to online store"
+#      - Click "Import products" and wait for completion
+#
+#    Step 2: Import products_002.csv
+#      - Repeat above steps with products_002.csv (14 MB, 4,516 products)
+#
+#    Step 3: Import products_003.csv
+#      - Repeat above steps with products_003.csv (0.8 MB, 273 products)
+#
+# See SHOPIFY_IMPORT_READINESS.md for detailed verification report
 ```
 
 ### Data Quality Verification
