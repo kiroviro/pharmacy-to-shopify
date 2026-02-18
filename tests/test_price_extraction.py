@@ -19,11 +19,8 @@ from pathlib import Path
 # Add project root to path for proper package imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from src.common.constants import EUR_TO_BGN
 from src.extraction.pharmacy_extractor import PharmacyExtractor
-
-
-# EUR to BGN fixed rate
-EUR_TO_BGN = 1.95583
 
 
 class TestPriceExtractionJsonLD:

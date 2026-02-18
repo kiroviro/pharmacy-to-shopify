@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 from ..common.config_loader import load_seo_settings
+from ..common.constants import EUR_TO_BGN
 from ..common.transliteration import generate_handle as transliterate_handle
 from ..models import ExtractedProduct, ProductImage
 from .brand_matcher import BrandMatcher
@@ -264,25 +265,93 @@ class PharmacyExtractor:
             return str(self.json_ld["sku"])
         return ""
 
+    def _parse_vue_product_data(self) -> dict | None:
+        """
+        Parse Vue.js component product data from <add-to-cart> element.
+
+        The Vue component contains accurate real-time pricing data in the :product attribute.
+
+        Returns:
+            Dict with 'variants' key containing product data, or None if parsing fails.
+
+        Example structure:
+            {
+                'variants': [{
+                    'price': 13.75,              # Regular price (EUR)
+                    'discountedPrice': 11.65,    # Current selling price (EUR)
+                    'discountStartDate': '01.02.2026',
+                    'discountEndDate': '28.02.2026'
+                }]
+            }
+        """
+        add_to_cart = self.soup.select_one('add-to-cart')
+        if not add_to_cart or not add_to_cart.get(':product'):
+            return None
+
+        import html as html_module
+
+        # The :product attr contains HTML-encoded JSON (&quot; instead of ")
+        product_json = html_module.unescape(add_to_cart.get(':product', '{}'))
+        product_json = product_json.replace('&quot;', '"')
+
+        try:
+            product_data = json.loads(product_json)
+            return product_data
+        except (json.JSONDecodeError, ValueError, KeyError) as e:
+            logger.debug(f"Failed to parse Vue product data: {e}")
+            return None
+
     def _extract_prices(self) -> tuple[str, str]:
         """Extract current selling price in BGN and EUR.
 
         Strategy (in order of reliability):
-        1. JSON-LD structured data (most reliable, used by Google)
-        2. Specific price element selectors (new-price for promos, or regular price)
-        3. Meta tags with price info
+        1. Vue.js component data (most reliable, always current)
+        2. JSON-LD structured data (fallback, may be stale)
+        3. HTML price element selectors (last resort)
 
-        For promotional products, we extract the CURRENT selling price (new-price),
-        not the original price.
+        For promotional products:
+        - Returns discounted price as current price
+        - Original price stored separately (see _extract_original_price)
+
+        Returns:
+            Tuple of (price_bgn, price_eur)
         """
         price_bgn = ""
         price_eur = ""
 
-        # EUR to BGN fixed rate (EU Council, ERM II - legally fixed)
-        EUR_TO_BGN = 1.95583
+        # =================================================================
+        # PRIMARY: Vue.js component data (most reliable, always current)
+        # =================================================================
+        product_data = self._parse_vue_product_data()
+        if product_data:
+            variants = product_data.get('variants', [])
+            if variants:
+                try:
+                    variant = variants[0]  # First variant (most products have 1)
+
+                    # Get discounted price (what customers actually pay)
+                    discounted_price_eur = float(variant.get('discountedPrice', 0))
+
+                    if discounted_price_eur > 0:
+                        price_eur = f"{discounted_price_eur:.2f}"
+                        price_bgn = f"{discounted_price_eur * EUR_TO_BGN:.2f}"
+
+                        # Log if product is on promotion
+                        regular_price_eur = float(variant.get('price', 0))
+                        if regular_price_eur != discounted_price_eur:
+                            logger.debug(
+                                f"Price from Vue (ON PROMO): {price_eur} EUR "
+                                f"(regular: {regular_price_eur:.2f} EUR)"
+                            )
+                        else:
+                            logger.debug(f"Price from Vue: {price_eur} EUR / {price_bgn} BGN")
+
+                        return price_bgn, price_eur
+                except (ValueError, KeyError) as e:
+                    logger.debug(f"Failed to extract price from Vue variant data: {e}")
 
         # =================================================================
-        # PRIMARY: JSON-LD structured data (most reliable source)
+        # FALLBACK 1: JSON-LD structured data (may be stale!)
         # =================================================================
         if self.json_ld:
             offers = self.json_ld.get("offers", {})
@@ -293,29 +362,31 @@ class PharmacyExtractor:
                 try:
                     price_eur = f"{float(str(price).replace(',', '.')):.2f}"
                     price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
-                    logger.debug(f"Price from JSON-LD: {price_eur} EUR / {price_bgn} BGN")
+                    logger.warning(
+                        f"Price from JSON-LD (fallback): {price_eur} EUR / {price_bgn} BGN "
+                        f"- may be stale, Vue data preferred"
+                    )
                     return price_bgn, price_eur
                 except (ValueError, TypeError):
                     pass
 
         # =================================================================
-        # FALLBACK 1: Specific price element selectors
+        # FALLBACK 2: HTML price element selectors (last resort)
         # =================================================================
-        # Try promotional price first (new-price), then regular price
+        # Note: These are mostly in product carousels, not main product
+        # Kept for backward compatibility
         price_selectors = [
-            # Promotional price (current selling price during promo)
-            ".product-prices .new-price",
-            ".product-info .new-price",
-            # Regular price (when no promotion)
             ".product-prices .price:not(.old-price)",
             ".product-info .price:not(.old-price)",
-            # Generic price container (last resort)
-            ".product-prices > .price",
         ]
 
         for selector in price_selectors:
             price_elem = self.soup.select_one(selector)
             if price_elem:
+                # Skip if inside carousel (not main product)
+                if price_elem.find_parent(class_='owl-carousel'):
+                    continue
+
                 text = price_elem.get_text()
                 # Extract EUR price (primary currency on benu.bg)
                 eur_match = re.search(r'(\d+[.,]\d{2})\s*€', text)
@@ -323,48 +394,58 @@ class PharmacyExtractor:
                     try:
                         price_eur = eur_match.group(1).replace(",", ".")
                         price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
-                        logger.debug(f"Price from selector '{selector}': {price_eur} EUR")
+                        logger.warning(
+                            f"Price from HTML selector '{selector}': {price_eur} EUR "
+                            f"- Vue/JSON-LD preferred"
+                        )
                         return price_bgn, price_eur
                     except (ValueError, TypeError):
                         pass
-
-                # Try BGN if EUR not found
-                bgn_match = re.search(r'(\d+[.,]\d{2})\s*лв', text)
-                if bgn_match:
-                    try:
-                        price_bgn = bgn_match.group(1).replace(",", ".")
-                        price_eur = f"{float(price_bgn) / EUR_TO_BGN:.2f}"
-                        logger.debug(f"Price from selector '{selector}': {price_bgn} BGN")
-                        return price_bgn, price_eur
-                    except (ValueError, TypeError):
-                        pass
-
-        # =================================================================
-        # FALLBACK 2: Meta tags
-        # =================================================================
-        meta_price = self.soup.select_one('meta[property="product:price:amount"]')
-        if meta_price:
-            price_val = meta_price.get("content", "")
-            if price_val:
-                try:
-                    price_eur = f"{float(price_val.replace(',', '.')):.2f}"
-                    price_bgn = f"{float(price_eur) * EUR_TO_BGN:.2f}"
-                    logger.debug(f"Price from meta tag: {price_eur} EUR")
-                    return price_bgn, price_eur
-                except (ValueError, TypeError):
-                    pass
 
         logger.warning(f"Could not extract price for {self.url}")
         return price_bgn, price_eur
 
-    # Site does not expose original/compare-at price or availability status.
-    # Stubbed for ExtractedProduct interface; override in future site extractors.
-    @staticmethod
-    def _extract_original_price() -> str:
+    def _extract_original_price(self) -> str:
+        """
+        Extract original/regular price (for products on promotion).
+
+        Returns the pre-discount price for promotional products.
+        For regular-priced products, returns empty string.
+
+        Used for Shopify's "Compare-at price" field to show savings.
+        """
+        product_data = self._parse_vue_product_data()
+        if not product_data:
+            return ""
+
+        variants = product_data.get('variants', [])
+        if not variants:
+            return ""
+
+        try:
+            variant = variants[0]
+
+            regular_price_eur = float(variant.get('price', 0))
+            discounted_price_eur = float(variant.get('discountedPrice', 0))
+
+            # Only return original price if product is on promotion
+            if regular_price_eur > 0 and regular_price_eur != discounted_price_eur:
+                original_price_bgn = regular_price_eur * EUR_TO_BGN
+                logger.debug(
+                    f"Original price (before discount): "
+                    f"{regular_price_eur:.2f} EUR / {original_price_bgn:.2f} BGN"
+                )
+                return f"{original_price_bgn:.2f}"
+
+        except (ValueError, KeyError) as e:
+            logger.debug(f"Failed to extract original price from Vue variant data: {e}")
+
+        # No promotion or extraction failed
         return ""
 
     @staticmethod
     def _extract_availability() -> str:
+        """Extract availability status (not exposed by site)."""
         return ""
 
     def _extract_categories(self, product_title: str = "") -> list[str]:

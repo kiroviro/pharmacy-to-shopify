@@ -24,63 +24,72 @@ class TestBarcodeValidation:
     def test_valid_ean8(self):
         """Accept 8-digit EAN-8 barcodes"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 12345678</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "12345678"
 
     def test_valid_upc_a(self):
         """Accept 12-digit UPC-A barcodes"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 123456789012</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "123456789012"
 
     def test_valid_ean13(self):
         """Accept 13-digit EAN-13 barcodes"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 3352710009079</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "3352710009079"
 
     def test_valid_gtin14(self):
         """Accept 14-digit GTIN-14 barcodes"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 12345678901234</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "12345678901234"
 
     def test_reject_3_digits(self):
         """Reject 3-digit SKUs"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 559</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == ""
 
     def test_reject_4_digits(self):
         """Reject 4-digit SKUs"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 5909</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == ""
 
     def test_reject_5_digits(self):
         """Reject 5-digit SKUs"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 25145</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == ""
 
     def test_reject_11_digits(self):
         """Reject 11-digit codes (common SOLGAR issue)"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 33984007536</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == ""
 
     def test_reject_15_digits(self):
         """Reject 15-digit internal IDs"""
         html = '<html><body><h3>Допълнителна информация</h3><p>Баркод : 202501240000001</p></body></html>'
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == ""
 
@@ -105,7 +114,8 @@ class TestBarcodeExtractionSources:
         <body></body>
         </html>
         '''
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "3352710009079"
 
@@ -119,7 +129,8 @@ class TestBarcodeExtractionSources:
         <body></body>
         </html>
         '''
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "3600523908639"
 
@@ -134,7 +145,8 @@ class TestBarcodeExtractionSources:
         </body>
         </html>
         '''
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "3352710009079"
 
@@ -154,7 +166,8 @@ class TestBarcodeExtractionSources:
         </body>
         </html>
         '''
-        extractor = PharmacyExtractor("https://example.com", html)
+        extractor = PharmacyExtractor("https://example.com")
+        extractor.load_html(html)
         barcode = extractor._extract_barcode()
         assert barcode == "1111111111111"
 

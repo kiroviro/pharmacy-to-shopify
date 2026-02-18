@@ -56,13 +56,11 @@ from bs4 import BeautifulSoup
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from src.common.constants import EUR_TO_BGN
 from src.shopify.api_client import ShopifyAPIClient
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
-
-# Fixed EUR to BGN rate (ERM II)
-EUR_TO_BGN = 1.95583
 
 
 @dataclass
