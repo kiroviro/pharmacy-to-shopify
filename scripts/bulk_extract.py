@@ -116,9 +116,9 @@ def main():
         help="Resume from previous extraction state"
     )
     parser.add_argument(
-        "--continue-on-error",
+        "--stop-on-error",
         action="store_true",
-        help="Continue extraction even if some products fail"
+        help="Stop extraction if any product fails (default: continue on error)"
     )
     parser.add_argument(
         "--save-failed-html",
@@ -209,7 +209,7 @@ def main():
         extractor_class=ExtractorClass,
         limit=args.limit,
         resume=args.resume,
-        continue_on_error=args.continue_on_error,
+        continue_on_error=not args.stop_on_error,
     )
 
     logger.info("Extraction complete. Output: %s", output_csv)
