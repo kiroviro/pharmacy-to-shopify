@@ -289,6 +289,22 @@ class BrandExporter:
         )
         logger.info("Found %d products", total_products)
 
+        # Guard: warn if image URLs contain a placeholder domain
+        bad_urls = [
+            row.get('Product image URL', '')
+            for rows in products_by_brand.values()
+            for row in rows
+            if 'example.com' in row.get('Product image URL', '')
+            or 'localhost' in row.get('Product image URL', '')
+        ]
+        if bad_urls:
+            logger.warning(
+                "%d image URL(s) contain a placeholder domain (e.g. %s). "
+                "Shopify will fail to fetch these images. "
+                "Re-run extraction with the correct source domain.",
+                len(bad_urls), bad_urls[0],
+            )
+
         # Calculate max size in bytes
         max_size_bytes = int(self.max_size_mb * 1024 * 1024)
 

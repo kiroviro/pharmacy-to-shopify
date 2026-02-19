@@ -68,6 +68,8 @@ class BulkExtractor:
         # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
 
+        self.source_domain = source_domain
+
         # CSV exporter (single source of truth for row generation)
         self._csv_exporter = ShopifyCSVExporter(source_domain=source_domain)
         self.fieldnames = SHOPIFY_FIELDNAMES
@@ -221,7 +223,7 @@ class BulkExtractor:
 
                 extractor = None
                 try:
-                    extractor = extractor_class(url, session=session)
+                    extractor = extractor_class(url, session=session, site_domain=self.source_domain)
                     extractor.fetch()
                     product = extractor.extract()
 
