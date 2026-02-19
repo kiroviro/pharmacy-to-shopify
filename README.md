@@ -118,6 +118,15 @@ python3 scripts/discover_urls.py --site benu.bg
 python3 scripts/extract_single.py --url "https://benu.bg/sample-product" --verbose
 
 # 5. Bulk extract all products (~4.8 hours for 9,270 products)
+# Option A: Extract + Auto-export to Shopify (recommended)
+python3 scripts/bulk_extract.py \
+  --urls data/benu.bg/raw/urls.txt \
+  --output data/benu.bg/raw/products.csv \
+  --continue-on-error \
+  --delay 1.0 \
+  --export-shopify
+
+# Option B: Extract only (manual export later)
 python3 scripts/bulk_extract.py \
   --urls data/benu.bg/raw/urls.txt \
   --output data/benu.bg/raw/products.csv \
@@ -131,10 +140,11 @@ python3 scripts/bulk_extract.py \
 #   ✅ File size:          29 MB
 #   ✅ Price accuracy:     Fresh from live site
 #   ✅ Success rate:       99.98%
+#   ✅ Shopify files:      Ready in output/shopify/ (if --export-shopify used)
 
 # 6. Export for Shopify (auto-splits into 14MB files)
-# Note: Files are already split and ready in output/shopify/
-# To re-generate from scratch:
+# Note: Skip this step if you used --export-shopify during extraction!
+# Otherwise, manually export with:
 python3 scripts/export_by_brand.py \
   --all-brands \
   --input data/benu.bg/raw/products.csv \
