@@ -76,7 +76,11 @@ def main():
     DiscovererClass = get_discoverer_for_site(args.site)
 
     print("  Method: Sitemap")
-    discoverer = DiscovererClass(verbose=args.verbose)
+    discoverer = DiscovererClass(
+        verbose=args.verbose,
+        base_url=f"https://{args.site}",
+        sitemap_url=f"https://{args.site}/sitemap.products.xml",
+    )
     discoverer.discover_all_products(limit=args.limit, output_file=output_path)
 
     # Summary
