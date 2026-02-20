@@ -16,7 +16,6 @@ from src.extraction.brand_matcher import BrandMatcher
 from src.extraction.consistency_checker import SourceConsistencyChecker
 from src.models import ExtractedProduct, ProductImage
 
-
 # ── Shared helpers ─────────────────────────────────────────────────────────────
 
 def _make_soup(html: str) -> BeautifulSoup:

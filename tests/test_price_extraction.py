@@ -12,9 +12,10 @@ These tests prevent regression of the price extraction bug that caused
 87% of products to have incorrect prices (fixed 2026-02-17).
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path for proper package imports
 sys.path.insert(0, str(Path(__file__).parent.parent))

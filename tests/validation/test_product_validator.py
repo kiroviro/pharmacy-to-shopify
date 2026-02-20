@@ -1,6 +1,5 @@
 """Tests for content-quality checks added to SpecificationValidator."""
 
-import pytest
 
 from src.extraction.validator import SpecificationValidator
 from src.models import ExtractedProduct, ProductImage

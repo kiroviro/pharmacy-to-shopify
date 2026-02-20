@@ -6,7 +6,6 @@ Tests validate the CRITICAL distinction:
 - SKU: Internal retailer code (any length) ✗ REJECT
 """
 
-import re
 
 
 def is_valid_gtin(barcode: str) -> bool:

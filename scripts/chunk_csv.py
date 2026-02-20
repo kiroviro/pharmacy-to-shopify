@@ -18,7 +18,6 @@ import os
 import sys
 from pathlib import Path
 
-
 # Default chunk size (products per file)
 DEFAULT_CHUNK_SIZE = 4000  # Conservative limit under Shopify's 5,000
 
@@ -160,7 +159,7 @@ def main():
     print(f"  Expected chunks: {expected_chunks}")
 
     # Chunk the CSV
-    print(f"\nSplitting into chunks...")
+    print("\nSplitting into chunks...")
     output_files = chunk_csv(args.input_csv, output_dir, args.chunk_size)
 
     print(f"\nDone! Created {len(output_files)} files in {output_dir}")

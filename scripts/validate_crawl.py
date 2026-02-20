@@ -275,7 +275,7 @@ def main() -> None:
     if prices:
         print(f"\nPrice range: {min(prices):.2f} – {max(prices):.2f} BGN")
 
-    print(f"\nField issue counts (top 10):")
+    print("\nField issue counts (top 10):")
     for field, count in sorted(field_issue_counts.items(), key=lambda x: -x[1])[:10]:
         print(f"  {field:<30} {count}")
 

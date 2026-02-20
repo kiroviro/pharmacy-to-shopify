@@ -15,9 +15,10 @@ Covers:
 8. EUR to BGN conversion
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path for proper package imports
 sys.path.insert(0, str(Path(__file__).parent.parent))

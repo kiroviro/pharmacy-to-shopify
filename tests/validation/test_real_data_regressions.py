@@ -24,7 +24,6 @@ from src.extraction.validator import SpecificationValidator, _is_placeholder_dom
 from src.models import ExtractedProduct, ProductImage
 from src.validation.crawl_tracker import CrawlQualityTracker
 
-
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------

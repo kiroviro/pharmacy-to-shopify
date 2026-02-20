@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import csv
 
-import pytest
-
 from src.extraction.bulk_extractor import BulkExtractor
 from src.models import ExtractedProduct, ProductImage
 

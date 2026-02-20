@@ -151,7 +151,7 @@ def main() -> None:
     sample_size = min(args.sample, len(products))
     sample = random.sample(products, sample_size)
 
-    print(f"\nShopify Post-Import Verification")
+    print("\nShopify Post-Import Verification")
     print(f"  Shop:    {args.shop}.myshopify.com")
     print(f"  CSV:     {args.csv}")
     print(f"  Total:   {len(products)} products in CSV")

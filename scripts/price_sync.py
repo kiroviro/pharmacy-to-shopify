@@ -28,7 +28,6 @@ import random
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -253,14 +252,14 @@ def print_summary(changes: list[PriceChange]) -> None:
     print(f"  Price decreases: {len(decreases)}")
 
     if increases:
-        print(f"\n--- TOP INCREASES ---")
+        print("\n--- TOP INCREASES ---")
         for c in sorted(increases, key=lambda x: -x.change_pct)[:5]:
             print(f"  {c.handle[:40]}...")
             print(f"    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN (+{c.change_pct:.1f}%)")
             print(f"    {c.benu_url}")
 
     if decreases:
-        print(f"\n--- TOP DECREASES ---")
+        print("\n--- TOP DECREASES ---")
         for c in sorted(decreases, key=lambda x: x.change_pct)[:5]:
             print(f"  {c.handle[:40]}...")
             print(f"    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN ({c.change_pct:.1f}%)")
@@ -332,7 +331,7 @@ def main():
         print("  4. Review and confirm")
     elif changes and not args.output:
         print("\nTo generate Shopify import CSV, run with --output:")
-        print(f"  python3 scripts/price_sync.py --output output/price_updates.csv")
+        print("  python3 scripts/price_sync.py --output output/price_updates.csv")
 
 
 if __name__ == "__main__":

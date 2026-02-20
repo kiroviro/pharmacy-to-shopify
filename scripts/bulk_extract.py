@@ -191,7 +191,7 @@ def main():
     print(f"  Resume mode:      {args.resume}")
     print(f"  Extractor:        {ExtractorClass.__name__}")
     if args.export_shopify:
-        print(f"  Export to Shopify: YES")
+        print("  Export to Shopify: YES")
         print(f"  Shopify output:   {args.shopify_output_dir}")
         print(f"  Max file size:    {args.max_size}MB")
 
