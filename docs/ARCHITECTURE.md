@@ -16,6 +16,8 @@ webcrawler-shopify/
 │   ├── extract_single.py          # Single product extraction with validation
 │   ├── discover_urls.py           # URL discovery from sitemaps
 │   ├── bulk_extract.py            # Bulk extraction with resume
+│   ├── validate_crawl.py          # Post-crawl CSV validation + spot-check
+│   ├── verify_shopify.py          # Post-import Shopify verification
 │   ├── export_by_brand.py         # Brand-based export with splitting
 │   ├── cleanup_tags.py            # Tag normalization
 │   ├── create_shopify_collections.py
@@ -30,7 +32,8 @@ webcrawler-shopify/
 │
 ├── src/                           # Business logic modules
 │   ├── models/                    # Data models
-│   ├── extraction/                # Product extraction
+│   ├── extraction/                # Product extraction + validation
+│   ├── validation/                # Aggregate quality tracking
 │   ├── discovery/                 # URL discovery
 │   ├── shopify/                   # Shopify integration
 │   ├── cleanup/                   # Post-processing
@@ -71,14 +74,23 @@ Core extraction logic for product data.
 
 | Module | Class | Purpose |
 |--------|-------|---------|
-| `pharmacy_extractor.py` | `PharmacyExtractor` | Extractor for pharmacy.example.com |
-| `validator.py` | `SpecificationValidator` | Validates extraction completeness |
-| `bulk_extractor.py` | `BulkExtractor` | Batch processing with progress tracking |
+| `pharmacy_extractor.py` | `PharmacyExtractor` | Extractor for pharmacy.example.com / benu.bg |
+| `validator.py` | `SpecificationValidator` | Per-product format/presence checks (errors + warnings) |
+| `consistency_checker.py` | `SourceConsistencyChecker` | Cross-checks extracted values against independent HTML sources |
+| `bulk_extractor.py` | `BulkExtractor` | Batch processing with progress tracking and quality reporting |
 | `brand_matcher.py` | `BrandMatcher` | Brand detection from YAML config |
 
 **Helper functions:**
 - `get_extractor_for_url(url)` - Returns appropriate extractor class for URL
-- `get_site_from_url(url)` - Returns site identifier (e.g., "pharmacy.example.com")
+- `get_site_from_url(url)` - Returns site identifier (e.g., "benu.bg")
+
+### `src/validation/`
+
+Aggregate quality tracking across the full crawl.
+
+| Module | Class | Purpose |
+|--------|-------|---------|
+| `crawl_tracker.py` | `CrawlQualityTracker` | Accumulates per-product validation results; prints periodic and final quality reports; PASS/FAIL gate at >5% error rate |
 
 ### `src/discovery/`
 
@@ -135,17 +147,36 @@ Shared utilities used across modules.
 1. DISCOVERY
    discover_urls.py --site {site} → Discoverer → data/{site}/raw/urls.txt
 
-2. EXTRACTION
+2. EXTRACTION  (validation runs inline — zero extra HTTP)
    bulk_extract.py --urls data/{site}/raw/urls.txt → BulkExtractor → Extractor (auto-detected)
-                                                   → data/{site}/raw/products.csv
+     ├── SpecificationValidator (per-product field presence + format checks)
+     ├── SourceConsistencyChecker (cross-checks Vue vs JSON-LD vs HTML DOM)
+     └── CrawlQualityTracker (aggregate stats + PASS/FAIL gate at >5% errors)
+   → data/{site}/raw/products.csv
 
-3. CLEANUP
+3. POST-CRAWL VALIDATION  (optional but recommended before export)
+   validate_crawl.py --csv data/{site}/raw/products.csv [--spot-check 100]
+     ├── Duplicate handle/SKU detection
+     ├── Field coverage rates
+     ├── Image URL domain checks
+     └── Live spot-check against source site (HEAD requests)
+   → Exit 0 = PASS, Exit 1 = FAIL
+
+4. CLEANUP
    cleanup_tags.py → TagCleaner → data/{site}/processed/products_cleaned.csv
 
-4. EXPORT
+5. EXPORT
    export_by_brand.py → BrandExporter → output/{site}/products_001.csv, ...
 
-5. SHOPIFY
+6. SHOPIFY IMPORT
+   Manual: Shopify Admin > Products > Import (files in order)
+
+7. POST-IMPORT VERIFICATION  (optional)
+   verify_shopify.py --csv data/{site}/raw/products.csv --shop {store} --sample 100
+     ├── Spot-checks title, vendor, price against Shopify API
+     └── Reports missing products and field mismatches
+
+8. STORE SETUP
    create_shopify_collections.py → ShopifyCollectionCreator → Shopify API
    create_shopify_menus.py → ShopifyMenuCreator → Shopify API
    configure_shopify_filters.py → ShopifyAPIClient → Metafield definitions + theme locale

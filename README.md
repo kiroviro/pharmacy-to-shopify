@@ -122,7 +122,6 @@ python3 scripts/extract_single.py --url "https://benu.bg/sample-product" --verbo
 python3 scripts/bulk_extract.py \
   --urls data/benu.bg/raw/urls.txt \
   --output data/benu.bg/raw/products.csv \
-  --continue-on-error \
   --delay 1.0 \
   --export-shopify
 
@@ -130,7 +129,6 @@ python3 scripts/bulk_extract.py \
 python3 scripts/bulk_extract.py \
   --urls data/benu.bg/raw/urls.txt \
   --output data/benu.bg/raw/products.csv \
-  --continue-on-error \
   --delay 1.0
 
 # Output summary:
@@ -176,24 +174,30 @@ python3 scripts/export_by_brand.py \
 
 ### Data Quality Verification
 
-After extraction, verify your data:
+After extraction, validate the CSV before exporting to Shopify:
 
 ```bash
-# Check CSV structure
-wc -l data/benu.bg/raw/products.csv
-# Expected: 9,921 rows (9,270 products + 651 image rows + 1 header)
+# Run post-crawl validation (checks duplicates, coverage, image URLs)
+python3 scripts/validate_crawl.py --csv data/benu.bg/raw/products.csv
 
-# Verify required fields are complete
-python3 -c "
-import csv
-with open('data/benu.bg/raw/products.csv', 'r') as f:
-    products = [r for r in csv.DictReader(f) if r.get('Title', '').strip()]
-    print(f'Total products: {len(products):,}')
-    print(f'With prices:    {sum(1 for p in products if p.get(\"Price\")):,}')
-    print(f'With barcodes:  {sum(1 for p in products if p.get(\"Barcode\")):,}')
-    print(f'With compare-at:{sum(1 for p in products if p.get(\"Compare-at price\")):,}')
-"
+# Optional: also spot-check 100 random products against the live site
+python3 scripts/validate_crawl.py \
+  --csv data/benu.bg/raw/products.csv \
+  --spot-check 100
 ```
+
+Exit code `0` = PASS (ready to export). Exit code `1` = FAIL (investigate before importing).
+
+After importing to Shopify, verify products landed correctly:
+
+```bash
+python3 scripts/verify_shopify.py \
+  --csv data/benu.bg/raw/products.csv \
+  --shop viapharma \
+  --sample 100
+```
+
+Note: during extraction, three layers of validation run automatically — field checks (`SpecificationValidator`), source cross-checks (`SourceConsistencyChecker`), and aggregate tracking (`CrawlQualityTracker`). The final quality report is printed at the end of `bulk_extract.py`. See [Testing and Validation](docs/TESTING_AND_VALIDATION.md) for details.
 
 **Expected data completeness:**
 - Title: 100% (9,270/9,270)
@@ -335,6 +339,8 @@ webcrawler-shopify/
 │   ├── discover_urls.py              # URL discovery from sitemaps
 │   ├── extract_single.py            # Single product extraction with validation
 │   ├── bulk_extract.py              # Bulk extraction with resume
+│   ├── validate_crawl.py            # Post-crawl CSV validation + optional spot-check
+│   ├── verify_shopify.py            # Post-import Shopify product verification
 │   ├── export_by_brand.py           # Selective brand export
 │   ├── price_sync.py                 # Price monitoring and sync (benu.bg vs Shopify)
 │   ├── chunk_csv.py                  # Split large CSVs for Shopify import
@@ -351,7 +357,8 @@ webcrawler-shopify/
 │
 ├── src/
 │   ├── models/                      # Data models (ExtractedProduct, ProductImage)
-│   ├── extraction/                  # Product extraction (PharmacyExtractor, validator, brand matching)
+│   ├── extraction/                  # Product extraction (PharmacyExtractor, validator, brand matching, consistency)
+│   ├── validation/                  # Aggregate quality tracking (CrawlQualityTracker)
 │   ├── discovery/                   # URL discovery (sitemap-based)
 │   ├── shopify/                     # Shopify integration (CSV export, API client, collections, menus)
 │   ├── cleanup/                     # Post-processing (tag normalization, brand export)

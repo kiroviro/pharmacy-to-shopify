@@ -27,16 +27,38 @@ Perfect for understanding what the tool does before diving into real extraction.
 # 1. Discover all product URLs (~9,800 URLs in ~2 seconds)
 python3 scripts/discover_urls.py --site pharmacy.example.com
 
-# 2. Bulk extract all products (with resume support)
-python3 scripts/bulk_extract.py --urls data/pharmacy.example.com/raw/urls.txt --resume --continue-on-error
+# 2. Bulk extract all products (validation runs inline — no extra HTTP)
+#    Prints quality summary every 100 products; FAIL gate at >5% errors.
+#    Add --resume to continue an interrupted crawl.
+python3 scripts/bulk_extract.py \
+  --urls data/pharmacy.example.com/raw/urls.txt \
+  --resume
 
-# 3. Clean up tags
-python3 scripts/cleanup_tags.py --input data/pharmacy.example.com/raw/products.csv --output data/pharmacy.example.com/processed/products_cleaned.csv
+# 3. Post-crawl validation (recommended before export)
+#    Checks duplicates, field coverage, image URLs.
+#    Add --spot-check 100 to also verify 100 random products against the live site.
+python3 scripts/validate_crawl.py --csv data/pharmacy.example.com/raw/products.csv
 
-# 4. Export for Shopify (auto-splits files at 14MB)
-python3 scripts/export_by_brand.py --all-brands --input data/pharmacy.example.com/processed/products_cleaned.csv --output output/pharmacy.example.com/products.csv
+# 4. Clean up tags
+python3 scripts/cleanup_tags.py \
+  --input data/pharmacy.example.com/raw/products.csv \
+  --output data/pharmacy.example.com/processed/products_cleaned.csv
 
-# 5. Import each CSV file to Shopify Admin > Products > Import
+# 5. Export for Shopify (auto-splits files at 14MB)
+python3 scripts/export_by_brand.py \
+  --all-brands \
+  --input data/pharmacy.example.com/processed/products_cleaned.csv \
+  --output output/pharmacy.example.com/products.csv
+
+# 6. Import each CSV file to Shopify Admin > Products > Import
+#    Import in order: products_001.csv, products_002.csv, ...
+
+# 7. Post-import verification (optional)
+#    Spot-checks 100 products against Shopify API.
+python3 scripts/verify_shopify.py \
+  --csv data/pharmacy.example.com/raw/products.csv \
+  --shop YOUR_STORE \
+  --sample 100
 ```
 
 ## Selective Brand Import

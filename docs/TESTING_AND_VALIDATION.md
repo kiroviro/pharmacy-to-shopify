@@ -1,301 +1,237 @@
-# Testing and Validation Framework
-
-**Prevents barcode extraction regressions and ensures data quality**
+# Testing and Validation
 
 ## Overview
 
-This framework ensures that product extraction maintains high quality standards and prevents regressions like the one discovered on Feb 17, 2026, where we initially thought barcode coverage decreased, but it actually improved by correctly rejecting invalid GTINs.
+The project has three layers of validation that run at different points in the pipeline:
 
-## Key Concepts
+| Layer | When | Tool | Scope |
+|-------|------|------|-------|
+| **1. Field validation** | During crawl, per-product | `SpecificationValidator` | Field presence, format, URL safety |
+| **2. Source consistency** | During crawl, per-product | `SourceConsistencyChecker` | Cross-checks Vue vs JSON-LD vs HTML DOM |
+| **3. Aggregate quality** | During crawl, running total | `CrawlQualityTracker` | Stats, duplicate detection, PASS/FAIL gate |
+| **4. Post-crawl** | After crawl, before export | `validate_crawl.py` | CSV coverage rates, duplicate checks, spot-check |
+| **5. Post-import** | After Shopify import | `verify_shopify.py` | Shopify API field verification |
 
-### GTIN vs SKU - Critical Distinction
+Layers 1–3 run automatically inside `bulk_extract.py`. Layers 4–5 are optional CLI scripts.
 
-**GTIN (Global Trade Item Number)** = Barcode
-- Standardized global identifier
-- Must be exactly 8, 12, 13, or 14 digits
-- Required by Google Merchant Center
-- Examples: `3352710009079` (EAN-13), `123456789012` (UPC-A)
+---
 
-**SKU (Stock Keeping Unit)**
-- Internal retailer identifier
-- Can be any length/format
-- NOT accepted by Google Merchant Center
-- Examples: `559` (3 digits), `5909` (4 digits)
+## Running the Test Suite
 
-**The Problem:** benu.bg labels both as "Баркод" (Barcode), but only GTINs are valid for Google Shopping.
-
-**Our Solution:** Validate length and reject SKUs/invalid codes.
-
-## Test Suite Components
-
-### 1. Barcode Validation Tests
-
-**File:** `tests/test_barcode_validation.py`
-
-**Purpose:** Ensures GTIN validation logic is correct
-
-**Tests:**
-- ✓ Accepts valid GTINs (8, 12, 13, 14 digits)
-- ✓ Rejects SKUs (3-7 digits)
-- ✓ Rejects invalid GTINs (9-11 digits)
-- ✓ Rejects internal IDs (15+ digits)
-
-**Run:**
 ```bash
-python3 tests/test_barcode_validation.py
+# Full pytest suite (all unit tests, no network)
+pytest tests/ -v
+
+# Extraction tests only
+pytest tests/extraction/ -v
+
+# Validation tests only
+pytest tests/validation/ -v
 ```
 
-**Expected output:**
+**Expected:** 328 passing, 0 failed (1 pre-existing fixture failure in test_extract_benu_product_prices for
+a specific Vichy Dercos product whose prices changed — this is a known live-data issue, not a logic bug).
+
+---
+
+## Layer 1 — Field Validation (`SpecificationValidator`)
+
+**File:** `src/extraction/validator.py`
+
+Per-product format and presence checks. Called automatically by `BulkExtractor` during crawl.
+
+**Errors (blocking — counted toward FAIL gate):**
+
+| Field | Check |
+|-------|-------|
+| `title` | 5–250 chars, non-empty |
+| `url` | starts with `https://` |
+| `price` | parseable float, > 0 and < 10 000 |
+| `brand` | non-empty |
+| `sku` | non-empty |
+| `category_path` | ≥ 1 element |
+| `handle` | non-empty, matches `[a-z0-9-]+`, ≤ 200 chars |
+| `images` | ≥ 1 image |
+| image URL (each) | starts `https://`, no placeholder domain |
+| `price_eur` consistency | if both set: `abs(price - price_eur × 1.95583) / price ≤ 1%` |
+
+**Warnings (non-blocking — logged but not counted toward FAIL gate):**
+
+| Field | Check |
+|-------|-------|
+| `barcode` | if set: must be 8, 12, 13, or 14 digits (valid GTIN lengths) |
+| `description` | non-empty |
+| `seo_title` | ≤ 70 chars |
+| `seo_description` | ≤ 155 chars |
+
+---
+
+## Layer 2 — Source Consistency (`SourceConsistencyChecker`)
+
+**File:** `src/extraction/consistency_checker.py`
+
+Cross-checks extracted product values against independent data sources within the same already-fetched HTML page. Zero extra HTTP requests.
+
+Three independent data sources on benu.bg:
+- **JSON-LD** (`<script type="application/ld+json">`) — structured data
+- **Vue.js component** (`<add-to-cart :product="...">`) — real-time pricing
+- **BeautifulSoup DOM** — raw HTML selectors
+
+**Checks (all emit warnings, never errors):**
+
+| Check | Source A | Source B | Tolerance |
+|-------|----------|----------|-----------|
+| Price | Vue `discountedPrice` × 1.95583 | JSON-LD `offers.price` × 1.95583 | ≤ 1% |
+| Title | JSON-LD `name` | `<h1>` text | substring match |
+| Brand | JSON-LD `brand.name` | `BrandMatcher.match_from_title()` | exact |
+| Images | Gallery CSS selectors | JSON-LD `image[]` | ≥ 1 URL in common |
+| Category path | JSON-LD `BreadcrumbList` | HTML `.breadcrumb a` | same set |
+| Promo logic | `product.price` | `product.original_price` | price < original |
+| Barcode | JSON-LD `gtin*` / `ean` fields | `"Баркод:"` text pattern | exact |
+| Section: details | header present in page | `product.details` non-empty | presence → content |
+| Section: composition | header present in page | `product.composition` non-empty | presence → content |
+| Section: usage | header present in page | `product.usage` non-empty | presence → content |
+| Section: contraindications | header present in page | `product.contraindications` non-empty | presence → content |
+
+A warning fires **only when both sides have data and they disagree**. If one side is missing, the check is silently skipped.
+
+Warning format: `consistency_price: Vue=13.50 BGN vs JSON-LD=13.49 BGN (0.1% deviation)`
+
+---
+
+## Layer 3 — Aggregate Quality Tracking (`CrawlQualityTracker`)
+
+**File:** `src/validation/crawl_tracker.py`
+
+Accumulates per-product results across the full crawl and prints summaries.
+
+**Periodic summary** (printed every 100 products during crawl):
 ```
-18 passed, 0 failed
+[Progress 1200] Quality: ✅ 97.2% valid | ⚠️  2.1% warnings | ❌ 0.7% errors
+  Top issues: brand (7), consistency_price (4)
 ```
 
-### 2. Regression Test Suite
+**Final report** (printed at end of crawl):
+```
+============================================================
+Quality Report  [PASS]
+============================================================
+  Total products:   9270
+  Valid (no issues):  9012  (97.2%)
+  Warnings only:       195  (2.1%)
+  Errors:               63  (0.7%)
 
-**File:** `tests/test_extraction_regression.py`
+  Per-field failure rates (top 10):
+    brand                          45  (0.5%)
+    consistency_price              32  (0.3%)
+    images                         18  (0.2%)
+    ...
 
-**Purpose:** Prevents quality regressions with real product examples and quality gates
+  Duplicate handles: 0
+  Duplicate SKUs:    3 (e.g. '8825')
 
-**Tests:**
-- Real BOIRON products (valid 13-digit barcodes)
-- Real SOLGAR products (invalid 11-digit codes - should reject)
-- Real Duphalac products (3-digit SKUs - should reject)
-- Overall extraction quality metrics
+  Price range: 0.89 – 312.50 BGN
 
-**Quality Gates:**
-- Barcode coverage ≥ 85%
-- Invalid barcodes ≤ 5
-- Missing required fields = 0
+  Gate (>5% errors = FAIL): PASS
+============================================================
+```
 
-**Run:**
+**FAIL gate:** If the error rate exceeds 5%, `bulk_extract.py` exits with code 1 after printing the report.
+
+**What's counted:**
+- Errors (from `SpecificationValidator`) count toward the error rate and per-field breakdown
+- Warnings (from both `SpecificationValidator` and `SourceConsistencyChecker`) appear in the per-field breakdown but do NOT affect the FAIL gate
+
+---
+
+## Layer 4 — Post-Crawl Validation (`validate_crawl.py`)
+
+**File:** `scripts/validate_crawl.py`
+
+Validates the raw CSV after extraction, before export. Recommended before every import.
+
 ```bash
-# Test real product examples only
-python3 tests/test_extraction_regression.py
+# Basic validation
+python3 scripts/validate_crawl.py --csv data/benu.bg/raw/products.csv
 
-# Test real products + validate CSV extraction
-python3 tests/test_extraction_regression.py data/benu.bg/raw/products.csv
+# With live spot-check (fetches 100 random product pages — takes ~2 minutes)
+python3 scripts/validate_crawl.py \
+  --csv data/benu.bg/raw/products.csv \
+  --spot-check 100
+
+# Save JSON report
+python3 scripts/validate_crawl.py \
+  --csv data/benu.bg/raw/products.csv \
+  --spot-check 100 \
+  --report output/validation_report.json
 ```
 
-**Expected output:**
-```
-✓ ALL QUALITY GATES PASSED
-```
+**What it checks:**
+- Duplicate handles and SKUs across the full CSV
+- Field coverage rates (price, brand, images, barcode, description)
+- Image URL domain validation (flags placeholder domains)
+- Price range outliers
+- Spot-check (live benu.bg): title, price, brand, and HTTP 200 on at least 1 image URL
 
-### 3. Pre-Extraction Validation Script
+**Exit codes:** `0` = PASS (≤5% errors), `1` = FAIL (>5% errors or critical issues)
 
-**File:** `scripts/validate_extraction.sh`
+---
 
-**Purpose:** Run BEFORE each extraction to ensure code is safe
+## Layer 5 — Post-Import Verification (`verify_shopify.py`)
 
-**Checks:**
-1. Barcode validation logic (18 tests)
-2. Real product regression tests (5 tests)
-3. Code review for known issues
+**File:** `scripts/verify_shopify.py`
 
-**Run:**
+After importing the CSV to Shopify, verifies that products landed correctly.
+
 ```bash
-./scripts/validate_extraction.sh
+python3 scripts/verify_shopify.py \
+  --csv data/benu.bg/raw/products.csv \
+  --shop viapharma \
+  --sample 100
 ```
 
-**Expected output:**
-```
-✓ ALL VALIDATION CHECKS PASSED
-✓ Safe to proceed with extraction
-```
+Set `SHOPIFY_ACCESS_TOKEN` in your `.env` or pass `--token`.
 
-## Workflow: How to Prevent Regressions
+**What it checks:** For 100 sampled products:
+- Product exists in Shopify
+- Title matches
+- Vendor (brand) matches
+- Price within 5% tolerance
 
-### Before Making Code Changes
+---
 
-1. **Run validation to establish baseline:**
-   ```bash
-   ./scripts/validate_extraction.sh
-   ```
+## GTIN / Barcode Validation
 
-2. **All tests should pass** before making changes
+benu.bg labels both GTINs and internal SKUs as "Баркод" (Barcode). Only valid GTINs are accepted.
 
-### After Making Code Changes
+**Valid GTIN lengths:** 8, 12, 13, or 14 digits
 
-1. **Run validation again:**
-   ```bash
-   ./scripts/validate_extraction.sh
-   ```
+| Code | Length | Status | Examples |
+|------|--------|--------|---------|
+| EAN-13 | 13 digits | ✅ Valid | `3352710009079` (BOIRON) |
+| UPC-A | 12 digits | ✅ Valid | `012345678901` |
+| EAN-8 | 8 digits | ✅ Valid | `12345678` |
+| GTIN-14 | 14 digits | ✅ Valid | `00012345678905` |
+| SOLGAR codes | 11 digits | ❌ Invalid | `33984007536` |
+| Internal SKUs | 3–7 digits | ❌ Invalid | `559`, `5909` |
 
-2. **If tests fail:**
-   - ✗ DO NOT run extraction
-   - Fix the code until tests pass
-   - Review what changed
+**Known exclusions:**
+- 174 SOLGAR products with 11-digit codes (not valid GTIN length)
+- 43 products with 3–7 digit internal SKUs labeled as barcodes
+- These products will not sync to Google Merchant Center (expected behavior)
 
-3. **If tests pass:**
-   - ✓ Safe to run extraction
-   - Run a test extraction on a small sample first
+---
 
-### After Running Extraction
+## Known Issues
 
-1. **Validate extraction results:**
-   ```bash
-   python3 tests/test_extraction_regression.py data/benu.bg/raw/products.csv
-   ```
+### Vichy Dercos price fixture
 
-2. **Check quality gates:**
-   - Barcode coverage should be ≥ 85%
-   - Should have 0 invalid barcodes
-   - All required fields present
+`tests/extraction/test_extract_benu_product_prices.py` contains a fixture for a specific Vichy Dercos
+product whose live price changed after the fixture was captured. The test is marked as a known failure
+and does not affect CI. Do not update the fixture without re-crawling that URL.
 
-3. **Compare to previous extraction:**
-   ```bash
-   # Create comparison script if needed
-   python3 scripts/compare_extractions.py \
-     output/benu.bg/products_001.csv \
-     data/benu.bg/raw/products.csv
-   ```
+### Near-expiry "Годен до" products
 
-## Known Issues & Solutions
-
-### Issue 1: SOLGAR 11-Digit Codes
-
-**Problem:** SOLGAR products have 11-digit codes like `33984007536`
-**Status:** Invalid GTIN (GTINs are 8/12/13/14 digits only)
-**Solution:** Correctly rejected by validator
-**Impact:** 174 products won't sync to Google Merchant Center (expected)
-
-### Issue 2: SKUs Labeled as Barcodes
-
-**Problem:** benu.bg labels SKUs as "Баркод" (e.g., `559`, `5909`)
-**Status:** Not valid GTINs
-**Solution:** Correctly rejected by validator
-**Impact:** 43 products won't sync to Google Merchant Center (expected)
-
-### Issue 3: 'mpn' Field Contains SKUs
-
-**Problem:** JSON-LD `mpn` field contains SKUs, not GTINs
-**Status:** Fixed - removed from extraction sources
-**Solution:** Only extract from `gtin`, `gtin13`, `gtin8`, `gtin12`, `gtin14`, `ean`
-**Impact:** Prevents extracting SKUs as barcodes
-
-## Continuous Integration
-
-### Add to CI/CD Pipeline
-
-If using GitHub Actions, GitLab CI, etc.:
-
-```yaml
-test:
-  script:
-    - ./scripts/validate_extraction.sh
-  only:
-    - merge_requests
-    - main
-```
-
-### Pre-commit Hook (Optional)
-
-Add to `.git/hooks/pre-commit`:
-```bash
-#!/bin/bash
-./scripts/validate_extraction.sh
-if [ $? -ne 0 ]; then
-    echo "❌ Validation failed - commit rejected"
-    exit 1
-fi
-```
-
-## Metrics to Track
-
-### Current Baseline (Feb 17, 2026)
-
-| Metric | Value | Target |
-|--------|-------|--------|
-| Total products | 9,272 | - |
-| Valid barcode coverage | 88.1% | ≥85% |
-| Invalid barcodes | 0 | ≤5 |
-| Missing required fields | 0 | 0 |
-
-### Track Over Time
-
-Create a metrics log:
-```bash
-# After each extraction
-echo "$(date +%Y-%m-%d),$TOTAL_PRODUCTS,$BARCODE_COVERAGE,$INVALID_BARCODES" \
-  >> metrics/extraction_quality.csv
-```
-
-## Troubleshooting
-
-### Test Failures
-
-**If barcode validation tests fail:**
-```
-✗ FAIL | EAN-13: 13 digits (BOIRON product)
-```
-- Check `src/extraction/pharmacy_extractor.py`
-- Ensure `len(candidate) in [8, 12, 13, 14]` validation exists
-- Review regex patterns
-
-**If regression tests fail:**
-```
-✗ FAIL | SOLGAR product (invalid 11-digit - should reject)
-       Expected: '' | Got: '33984007536'
-```
-- The extractor is NOT rejecting invalid barcodes
-- Check validation logic in `_extract_barcode()`
-- Ensure length validation happens AFTER extraction
-
-**If quality gates fail:**
-```
-✗ FAIL | Barcode coverage >= 85%: 82.3%
-```
-- Extraction quality decreased
-- Review recent code changes
-- Compare with previous extraction
-- Check for new extraction bugs
-
-### Debugging Barcode Extraction
-
-Test extraction on a single URL:
-```bash
-python3 scripts/test_single_url.py "https://benu.bg/some-product"
-```
-
-Add debug logging:
-```python
-# In pharmacy_extractor.py
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logger.debug(f"Barcode extracted: {barcode} (length: {len(barcode)})")
-```
-
-## Adding New Tests
-
-### Add a Real Product Test
-
-Edit `tests/test_extraction_regression.py`:
-
-```python
-REAL_PRODUCT_TESTS.append({
-    "name": "Brand X Product (description)",
-    "html": '<h3>Допълнителна информация</h3><p>Баркод : 1234567890123</p>',
-    "expected_barcode": "1234567890123",
-    "should_extract": True,
-})
-```
-
-### Adjust Quality Gates
-
-Edit `tests/test_extraction_regression.py`:
-
-```python
-# Adjust thresholds if needed
-MIN_BARCODE_COVERAGE = 85.0  # Percentage
-MAX_INVALID_BARCODES = 5     # Count
-```
-
-## Summary
-
-This framework ensures:
-1. ✓ Code changes don't break barcode extraction
-2. ✓ Only valid GTINs are extracted (not SKUs)
-3. ✓ Quality stays above 85% barcode coverage
-4. ✓ Regressions are caught before extraction runs
-
-**Always run `./scripts/validate_extraction.sh` before extracting!**
+benu.bg lists near-expiry products as separate entries with the same base SKU (e.g., SKU `8825` for
+both `АБГ Кардио х30` and `АБГ Кардио х30 Годен до: 30.4.2026 г.`). Both get crawled; `CrawlQualityTracker`
+detects and reports the duplicate SKU. No deduplication is performed — both products are kept in the CSV.
