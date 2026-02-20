@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from ..common.text_utils import remove_source_references
 from .brand_matcher import BrandMatcher
 from .bulk_extractor import BulkExtractor
+from .consistency_checker import SourceConsistencyChecker
 from .pharmacy_extractor import PharmacyExtractor
 from .validator import SpecificationValidator
 
@@ -73,6 +74,8 @@ __all__ = [
     'get_site_from_url',
     # Validator
     'SpecificationValidator',
+    # Consistency checker
+    'SourceConsistencyChecker',
     # Brand matching
     'BrandMatcher',
     # Bulk extraction

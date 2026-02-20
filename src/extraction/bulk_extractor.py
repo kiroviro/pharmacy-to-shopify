@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 from ..models import ExtractedProduct
 from ..shopify import SHOPIFY_FIELDNAMES, ShopifyCSVExporter
+from ..validation import CrawlQualityTracker
+from .consistency_checker import SourceConsistencyChecker
+from .validator import SpecificationValidator
 
 
 class BulkExtractor:
@@ -37,6 +40,7 @@ class BulkExtractor:
         delay: float = 1.0,
         save_failed_html: bool = False,
         source_domain: str = "pharmacy.example.com",
+        validate: bool = True,
     ):
         """
         Initialize the bulk extractor.
@@ -47,11 +51,13 @@ class BulkExtractor:
             delay: Delay between requests in seconds
             save_failed_html: Whether to save HTML of failed pages
             source_domain: Source domain for cleaning references from text
+            validate: Whether to run quality validation on each extracted product
         """
         self.output_csv = output_csv
         self.output_dir = output_dir
         self.delay = delay
         self.save_failed_html = save_failed_html
+        self.validate = validate
 
         # Progress tracking
         self.state_file = os.path.join(output_dir, "extraction_state.json")
@@ -73,6 +79,9 @@ class BulkExtractor:
         # CSV exporter (single source of truth for row generation)
         self._csv_exporter = ShopifyCSVExporter(source_domain=source_domain)
         self.fieldnames = SHOPIFY_FIELDNAMES
+
+        # Quality tracker (only active when validate=True)
+        self._tracker = CrawlQualityTracker() if validate else None
 
     def load_state(self) -> bool:
         """Load previous extraction state for resume."""
@@ -234,6 +243,37 @@ class BulkExtractor:
                             self.processed_urls.add(url)
                             continue
 
+                        # Per-product quality validation
+                        if self.validate and self._tracker is not None:
+                            v = SpecificationValidator(product).validate()
+
+                            # Source consistency check — zero extra HTTP
+                            if extractor is not None and hasattr(extractor, "soup"):
+                                checker = SourceConsistencyChecker(
+                                    soup=extractor.soup,
+                                    json_ld=extractor.json_ld,
+                                    vue_data=extractor._parse_vue_product_data(),
+                                    brand_matcher=extractor.brand_matcher,
+                                )
+                                consistency_warnings = checker.check(product)
+                                if consistency_warnings:
+                                    v["warnings"].extend(consistency_warnings)
+                                    v["issues"].extend(consistency_warnings)
+
+                            self._tracker.record(product, v)
+                            if v["errors"]:
+                                logger.warning(
+                                    "QUALITY ❌ %s: %s",
+                                    product.title[:50],
+                                    "; ".join(v["issues"][:2]),
+                                )
+                            elif v["warnings"]:
+                                logger.debug(
+                                    "QUALITY ⚠️  %s: %s",
+                                    product.title[:50],
+                                    v["warnings"][0],
+                                )
+
                         rows = self.product_to_csv_rows(product)
                         for row in rows:
                             writer.writerow(row)
@@ -268,6 +308,16 @@ class BulkExtractor:
                     if not continue_on_error:
                         logger.error("Stopping due to error (use --continue-on-error to ignore)")
                         break
+
+                # Periodic quality summary (every 100 products)
+                overall_progress = already_processed + i
+                if (
+                    self.validate
+                    and self._tracker is not None
+                    and overall_progress % 100 == 0
+                    and self._tracker.total > 0
+                ):
+                    self._tracker.print_periodic_summary(overall_progress)
 
                 # Save state periodically (every 10 products)
                 if i % 10 == 0:
@@ -339,6 +389,10 @@ class BulkExtractor:
         if self.failed_urls:
             print(f"     Failed: {self.failed_file}")
         print("=" * 60)
+
+        # Quality report (if validation was enabled)
+        if self.validate and self._tracker is not None and self._tracker.total > 0:
+            self._tracker.print_final_report()
 
     def get_stats(self) -> dict:
         """Return extraction statistics."""

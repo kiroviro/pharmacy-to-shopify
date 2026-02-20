@@ -68,8 +68,8 @@ def full_product():
         more_info="Баркод: 3800123456789\nТегло: 250g",
         description="<h3>Описание</h3><p>Витамин С е есенциален.</p>",
         images=[
-            ProductImage(source_url="https://pharmacy.example.com/img1.jpg", position=1, alt_text="Image 1"),
-            ProductImage(source_url="https://pharmacy.example.com/img2.jpg", position=2, alt_text="Image 2"),
+            ProductImage(source_url="https://benu.bg/media/cache/product_view_default/img1.jpg", position=1, alt_text="Image 1"),
+            ProductImage(source_url="https://benu.bg/media/cache/product_view_default/img2.jpg", position=2, alt_text="Image 2"),
         ],
         handle="testbrand-vitamin-c-500mg",
         product_type="Витамини и добавки",
