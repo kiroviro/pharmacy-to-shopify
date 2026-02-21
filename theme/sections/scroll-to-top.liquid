@@ -1,0 +1,142 @@
+{% if section.settings.hide_button == false %}
+
+  <noscript>
+    {{ 'scroll-to-top.css' | asset_url | stylesheet_tag }}
+  </noscript>
+
+  {{ 'scroll-to-top.css' | asset_url | stylesheet_tag }}
+
+	<style>
+		#shopify-section-{{ section.id }} {
+			--btn-clr: {{ section.settings.arrows_btn_color.red }}, {{ section.settings.arrows_btn_color.green }}, {{ section.settings.arrows_btn_color.blue }};
+			--btn-clr-hover: {{ section.settings.arrows_btn_color_hover.red }}, {{ section.settings.arrows_btn_color_hover.green }}, {{ section.settings.arrows_btn_color_hover.blue }};
+			--btn-bg: {{ section.settings.arrows_btn_bg_color.red }}, {{ section.settings.arrows_btn_bg_color.green }}, {{ section.settings.arrows_btn_bg_color.blue }};
+			--btn-bg-hover: {{ section.settings.arrows_btn_bg_color_hover.red }}, {{ section.settings.arrows_btn_bg_color_hover.green }}, {{ section.settings.arrows_btn_bg_color_hover.blue }};
+		}
+		{% if request.design_mode %}
+      #shopify-section-{{ section.id }} .scroll-to-top__button {
+        transform: translateY(0);
+      }
+		{% endif %}
+	</style>
+
+  <script src="{{ 'scroll-to-top.js' | asset_url }}" defer="defer"></script>
+
+  <button class="scrollToTop button-style--{{ section.settings.button_style }} button scroll-to-top__button--{{ section.settings.arrow_style }} scroll-to-top__button" aria-label="scroll To Top button">
+		{%- case section.settings.arrow_style -%}
+			{%- when 'arrow' -%}
+				<style>
+					.scrollToTop svg {
+						transform: rotate(-90deg);
+					}
+				</style>
+				{% render 'icon-arrow-short' %}
+			{%- when 'arrow_long' -%}
+				<style>
+					.scrollToTop svg {
+						transform: rotate(-90deg);
+						width: 2rem;
+					}
+				</style>
+				{% render 'icon-arrow' %}
+					
+			{%- when 'caret' -%}
+				{% render 'icon-caret' %}
+
+			{%- when 'arrow_bold' -%}
+				{% render 'icon-arrow-bold' %}
+
+		{%- endcase -%}
+
+  </button>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Scroll to top",
+  "class": "scroll-to-top",
+  "limit": 1,
+  "enabled_on": {
+    "groups": [
+      "aside"
+    ]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_button",
+      "label": "Disable button",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "round",
+          "label": "Round"
+        }
+      ],
+      "default": "default",
+      "label": "Button style"
+    },
+    {
+      "type": "select",
+      "id": "arrow_style",
+      "options": [
+        {
+          "value": "caret",
+          "label": "Caret"
+        },
+        {
+          "value": "arrow",
+          "label": "Arrow"
+        },
+        {
+          "value": "arrow_long",
+          "label": "Long arrow"
+        },
+        {
+          "value": "arrow_bold",
+          "label": "Bold arrow"
+        }
+      ],
+      "default": "arrow",
+      "label": "Icon"
+    },
+		{
+      "type": "color",
+      "id": "arrows_btn_color",
+      "default": "#FFF",
+      "label": "Button color"
+    },
+    {
+      "type": "color",
+      "id": "arrows_btn_color_hover",
+      "default": "#FFF",
+      "label": "Button color hover"
+    },
+    {
+      "type": "color",
+      "id": "arrows_btn_bg_color",
+      "default": "#e9603f",
+      "label": "Button background"
+    },
+    {
+      "type": "color",
+      "id": "arrows_btn_bg_color_hover",
+      "default": "#ee795b",
+      "label": "Button background hover"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scroll to top"
+    }
+  ]
+}
+{% endschema %}

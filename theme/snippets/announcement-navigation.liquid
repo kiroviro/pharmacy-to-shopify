@@ -1,0 +1,24 @@
+{% comment %}
+  Renders a standard dropdown style menu for the header.
+
+  Accepts:
+  - font_size: {String} Font size
+  - font_weight: {String} Font weight
+
+  Usage:
+  {% render 'announcement-navigation' %}
+{% endcomment %}
+
+<nav class="announcement-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.announcement_menu.links -%}
+      <li>
+          <a id="AnnouncementMenu-{{ link.handle }}" href="{{ link.url }}" class="header__menu-item list-menu__item link link--text focus-inset {% if font_size != blank %}text--{{ font_size }}{% endif %} {% if font_weight != blank %}{{ font_weight }}{% endif %}" {% if link.current %} aria-current="page"{% endif %}>
+            <span {%- if link.current %} class="header__active-menu-item"{% endif %}>
+              {{- link.title | escape -}}
+            </span>
+          </a>
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>

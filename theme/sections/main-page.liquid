@@ -1,0 +1,473 @@
+{{ 'section-main-page.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .main-hero__inner {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+    #shopify-section-{{ section.id }} .main-page-content__wrapp {
+      padding-top: {{ section.settings.content_padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.content_padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    #shopify-section-{{ section.id }} .main-hero__inner {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+    #shopify-section-{{ section.id }} .main-page-content__wrapp {
+      padding-top: {{ section.settings.content_padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.content_padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    #shopify-section-{{ section.id }} .main-hero__inner {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+    #shopify-section-{{ section.id }} .main-page-content__wrapp {
+      padding-top: {{ section.settings.content_padding_top }}px;
+      padding-bottom: {{ section.settings.content_padding_bottom }}px;
+    }
+  }
+
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.section_background }};
+  }
+
+  .main-hero__image-container:after,
+  .main-page__img-wrapper:after {
+    opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+  }
+
+  .main-page__heading-flex {
+    flex-basis: calc((100% - {{ section.settings.image_size }}%) - 1.5rem);
+    width: calc((100% - {{ section.settings.image_size }}%) - 1.5rem);
+    align-self: center;
+  }
+
+  @media screen and (max-width: 749px) {
+    .main-page__heading-flex {
+      flex-basis: 100%;
+      width: 100%;
+    }
+  }
+
+  .main-page__img-wrapper {
+    flex-basis: calc({{ section.settings.image_size }}% - 1.5rem);
+    width: calc({{ section.settings.image_size }}% - 1.5rem);
+  }
+
+  @media screen and (max-width: 749px) {
+    .main-page__img-wrapper  {
+      flex-basis: 100%;
+      width: 100%;
+    }
+  }
+
+{%- endstyle -%}
+
+{%- if section.settings.show_breadcrumbs and section.settings.show_breadcrumbs_top -%}
+  <nav class="page-width main-hero___breadcrumbs{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+    <ul class="breadcrumbs__list breadcrumbs__list-top">
+      <li class="breadcrumbs__item">
+        <a class="breadcrumbs__link" href="{{ routes.root_url }}">
+          Home
+        </a>
+      </li>
+      <li class="breadcrumbs__item">
+        {% render 'icon-caret' %}
+        {{- page.title -}}
+      </li>
+    </ul>
+  </nav>
+{%- endif -%}
+
+{%- if section.settings.section_full_width != true -%}<div class="main-hero">{%- endif -%}
+  <div class="main-hero__inner {% if section.settings.section_full_width != true  %}not-full{% endif %} color-{{ section.settings.color_scheme }} gradient{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %} banner--{{ section.settings.banner_height }} banner--content--{{ section.settings.content_alignment }} banner--mobile--{{ section.settings.banner_mobile_height }} {%- if section.settings.radius_background -%}radius-background{% endif %}">
+    
+    {%- if section.settings.image != blank and section.settings.image_block == false -%}
+      <style>
+        #Image-{{ section.id }} {
+          --focal-point: {{ section.settings.image.presentation.focal_point | default: "50% 50%" }};
+        }
+        </style>
+      <div id="Image-{{ section.id }}" class="main-hero__image-container media gradient">
+        <img srcset=" {%- if section.settings.image.width >= 165 -%}{{ section.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+          {%- if section.settings.image.width >= 360 -%}{{ section.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+          {%- if section.settings.image.width >= 535 -%}{{ section.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+          {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+          {%- if section.settings.image.width >= 1070 -%}{{ section.settings.image | image_url: width: 1070 }} 1070w,{%- endif -%}
+          {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+          {%- if section.settings.image.width >= 1600 -%}{{ section.settings.image | image_url: width: 1600 }} 1600w,{%- endif -%}
+          {%- if section.settings.image.width >= 1700 -%}{{ section.settings.image | image_url: width: 1700 }} 1700w,{%- endif -%}
+          {%- if section.settings.image.width >= 1800 -%}{{ section.settings.image | image_url: width: 1800 }} 1800w,{%- endif -%}
+          {%- if section.settings.image.width >= 1920 -%}{{ section.settings.image | image_url: width: 1920 }} 1920w,{%- endif -%}
+          {{ section.settings.image | image_url }} {{ section.settings.image.width }}w"
+          src="{{ section.settings.image | image_url: width: 1920 }}"
+          sizes="100vw"
+          alt="{{- page.title | escape -}}"
+          loading="eager"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}">
+      </div>
+    {%- endif -%}
+
+    <div class="page-width {% if section.settings.image_block %}flex-container{% endif %}">
+      
+      <div class="main-page__heading align-{{ section.settings.heading_alignment }} {% if section.settings.image_block %}main-page__heading-flex{% endif %}">
+
+        {%- if section.settings.show_breadcrumbs and section.settings.show_breadcrumbs_top == false  -%}
+          <nav class="main-hero___breadcrumbs{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            <ul class="breadcrumbs__list breadcrumbs__list--banner">
+              <li class="breadcrumbs__item">
+                <a class="breadcrumbs__link" href="{{ routes.root_url }}">
+                  Home
+                </a>
+              </li>
+              <li class="breadcrumbs__item">
+                {% render 'icon-caret' %}
+                {{- page.title -}}
+              </li>
+            </ul>
+          </nav>
+        {%- endif -%}
+    
+        <h1 class="main-page-title page-title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+          {% if section.settings.title != blank %}
+            {{ section.settings.title }}
+          {% else %}
+            {{ page.title | escape }}
+          {% endif %}
+        </h1>
+        
+        {% if section.settings.description_text !=blank %}
+          <div class="main-page-description {% if section.settings.text_secondary_color %}secondary-color{% endif %} rte rte-{{ section.settings.text_size_block }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.description_text }}
+          </div>
+        {% endif %}
+      </div>
+
+      {%- if section.settings.image != blank and section.settings.image_block -%}
+        <div class="main-page__img-wrapper">
+            <img src="{{ section.settings.image | image_url }}" loading="lazy" alt="banner image" width="" height="450">
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+{%- if section.settings.section_full_width != true -%}</div>{%- endif -%}
+
+{% if page.content != blank %}
+  {% assign content_text_color = "" %}
+        {% if section.settings.content_text_color == "secondary" %}
+          {% assign content_text_color = 'data-color="secondary"' %}
+        {% endif %}
+  <div class="main-page-content__wrapp color-{{ section.settings.content_color_scheme }}">
+    <div class="page-width">
+      <div class="main-page-content rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}" {{ content_text_color }}>
+        {{ page.content }}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+  {
+    "name": "t:sections.main-page.name",
+    "tag": "section",
+    "class": "section",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:sections.all.learn_more_preset.info"
+      },
+      {
+        "type": "header",
+        "content": "Banner settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_breadcrumbs",
+        "default": true,
+        "label": "Show breadcrumbs"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_breadcrumbs_top",
+        "default": false,
+        "label": "Show breadcrumbs above section",
+		"info": "Doesn't work with transparent header"
+      },
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Background image"
+      },
+	    {
+        "type": "checkbox",
+        "id": "radius_background",
+        "default": false,
+        "label": "Hide banner border radius"
+      },
+	    {
+        "type": "select",
+        "id": "banner_height",
+        "options": [
+          {
+            "value": "default",
+            "label": "Default"
+          },
+          {
+            "value": "small",
+            "label": "Small"
+          },
+          {
+            "value": "medium",
+            "label": "Medium"
+          },
+          {
+            "value": "large",
+            "label": "Large"
+          }
+        ],
+        "default": "default",
+        "label": "Desktop banner height"
+      },
+	    {
+        "type": "select",
+        "id": "banner_mobile_height",
+        "options": [
+          {
+            "value": "default",
+            "label": "Default"
+          },
+          {
+            "value": "small",
+            "label": "Small"
+          },
+          {
+            "value": "medium",
+            "label": "Medium"
+          },
+          {
+            "value": "large",
+            "label": "Large"
+          }
+        ],
+        "default": "default",
+        "label": "Mobile banner height"
+      },
+	    {
+        "type": "select",
+        "id": "content_alignment",
+        "options": [
+          {
+            "value": "top",
+            "label": "Top"
+          },
+          {
+            "value": "center",
+            "label": "Center"
+          },
+          {
+            "value": "bottom",
+            "label": "Bottom"
+          }
+        ],
+        "label": "Content position"
+      },
+      {
+        "type": "checkbox",
+        "id": "image_block",
+        "default": false,
+        "label": "Show image on right side"
+      },
+      {
+        "type": "select",
+        "id": "image_size",
+        "options": [
+          {
+            "value": "50",
+            "label": "Half width"
+          },
+          {
+            "value": "38",
+            "label": "One-third width"
+          },
+          {
+            "value": "60",
+            "label": "Two-third width"
+          }
+        ],
+        "default": "60",
+        "label": "Image block size"
+      },
+      {
+        "type": "range",
+        "id": "image_overlay_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "%",
+        "label": "t:sections.image-banner.settings.image_overlay_opacity.label",
+        "default": 70
+      },
+      {
+        "type": "inline_richtext",
+        "id": "title",
+        "label": "Custom heading"
+      },
+      {
+        "type": "select",
+        "id": "heading_size",
+        "options": [
+          {
+            "value": "h3",
+            "label": "t:sections.all.heading_size.options__1.label"
+          },
+          {
+            "value": "h2",
+            "label": "t:sections.all.heading_size.options__2.label"
+          },
+          {
+            "value": "h1",
+            "label": "t:sections.all.heading_size.options__3.label"
+          },
+          {
+            "value": "h0",
+            "label": "Extra large"
+          }
+        ],
+        "default": "h1",
+        "label": "t:sections.all.heading_size.label"
+      },
+      {
+        "type": "richtext",
+        "id": "description_text",
+        "default": "<p>Our curated collections are meant to inspire your creative side and provide you with product options.</p>",
+        "label": "t:sections.testimonials.blocks.testimonial.settings.text.label"
+      },
+      {
+        "type": "select",
+        "id": "text_size_block",
+        "options": [
+          {
+          "value": "small",
+          "label": "Small"
+          },
+          {
+          "value": "medium",
+          "label": "Medium"
+          },
+          {
+          "value": "large",
+          "label": "Large"
+          }
+          ],
+        "default": "medium",
+        "label": "Text size"
+      },
+      {
+        "type": "text_alignment",
+        "id": "heading_alignment",
+        "label": "Content alignment",
+        "default": "center"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Baner color scheme",
+        "default": "scheme-3"
+      },
+      {
+        "type": "color_scheme",
+        "id": "content_color_scheme",
+        "label": "Content color scheme",
+        "default": "scheme-2"
+      },
+      {
+        "type": "checkbox",
+        "id": "text_secondary_color",
+        "label": "Use secondary color for text",
+        "default": false,
+      },
+      {
+        "type": "checkbox",
+        "id": "section_full_width",
+        "label": "Full width section",
+        "default": true,
+      },
+      {
+        "type": "color",
+        "id": "section_background",
+        "label": "Section background color",
+        "default": "#ffffff",
+        "info": "Sets the color of the section when the block is not full width"
+      },
+      {
+        "type": "select",
+        "id": "content_text_color",
+        "options": [
+          {
+            "value": "main",
+            "label": "Main"
+          },
+          {
+            "value": "secondary",
+            "label": "Secondary"
+          }
+        ],
+        "default": "main",
+        "label": "Page text color"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Banner top padding",
+        "default": 200
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Banner bottom padding",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "content_padding_top",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Content top padding",
+        "default": 100
+      },
+      {
+        "type": "range",
+        "id": "content_padding_bottom",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Content bottom padding",
+        "default": 100
+      }
+    ]
+  }
+{% endschema %}

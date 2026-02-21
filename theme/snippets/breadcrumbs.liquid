@@ -1,0 +1,92 @@
+{{ 'component-breadcrumb.css' | asset_url | stylesheet_tag }}
+
+{%- assign type = template | split: '.' | first -%}
+
+<nav class="breadcrumbs color-{{ color }} quick-add-hidden" aria-label="breadcrumbs" {{ shopify_atributes }}>
+  <ol class="breadcrumbs__list">
+    <li class="breadcrumbs__item">
+      <a class="breadcrumbs__link" href="{{ routes.root_url }}">
+        {{ home }}
+      </a>
+    </li>
+
+    {%- case type -%}
+      {%- when 'product' -%}
+        {%- if product.collections[0] and show_collection -%}
+          <li class="breadcrumbs__item">
+            {% render 'icon-caret' %}
+            <a class="breadcrumbs__link" href="{{ product.collections[0].url }}">
+              {{ product.collections[0].title }}
+            </a>
+          </li>
+        {%- else -%}
+          <li class="breadcrumbs__item">
+            {% render 'icon-caret' %}
+            <a class="breadcrumbs__link" href="/collections/all">
+              {{- 'templates.search.products' | t -}}
+            </a>
+          </li>
+        {%- endif -%}
+
+        <li class="breadcrumbs__item">
+          {% render 'icon-caret' %}
+          <span class="breadcrumbs__link" aria-current="page">
+            {{ product.title }}
+          </span>
+        </li>
+
+    {%- endcase -%}
+  </ol>
+  
+  {%- case type -%}
+    {%- when 'product' -%}
+
+      {%- liquid
+        assign previous_product = collection.previous_product
+        assign next_product = collection.next_product
+        
+        unless previous_product or next_product
+          assign collection_list = product.collections[0].handle
+            assign previous_product = nil
+            assign next_product = nil
+            assign last = collections[collection_list].products_count
+            for prod in collections[collection_list].products
+              if prod.handle == product.handle
+                  assign prev = forloop.index | minus: 2
+                  if prev >= 0
+                    assign previous_product = collections[collection_list].products[prev].handle
+                  endif
+
+                  assign next = forloop.index
+                  if last >= next
+                    assign next_product = collections[collection_list].products[next].handle
+                  endif
+                  break
+                endif
+            endfor
+        endunless
+      -%}
+
+      <div class="breadcrumbs-nav">
+        {%- if previous_product -%}
+          <a class="breadcrumbs__link" href="{{ previous_product }}">
+            {{- 'general.pagination.product_prev' | t -}}
+          </a>
+        {%- endif -%}
+        {%- if next_product -%}
+          <a class="breadcrumbs__link" href="{{ next_product }}">
+            {{- 'general.pagination.product_next' | t -}}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {% if product.collections[0].previous_product %}
+        {{ 'Previous' | link_to: product.collections[0].previous_product.url, 'Previous product' }}
+      {% endif %}
+      
+      {% if product.collections[0].next_product %}
+        {{ 'Next' | link_to: product.collections[0].next_product.url, 'Next product' }}
+      {% endif %}
+
+  {%- endcase -%}
+</nav>

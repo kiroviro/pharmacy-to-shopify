@@ -1,0 +1,450 @@
+{
+  "sections": {
+    "banner": {
+      "type": "main-collection-banner",
+      "settings": {
+        "color_scheme": "scheme-3",
+        "text_secondary_color": false,
+        "show_collection_breadcrumbs": true,
+        "show_breadcrumbs_top": true,
+        "heading_size": "h3",
+        "show_collection_description": false,
+        "description_text": "{{ collection.description }}",
+        "text_size_block": "medium",
+        "heading_alignment": "center",
+        "show_collection_image": true,
+        "banner_height": "small",
+        "image_block": false,
+        "hide_radius": true,
+        "image_size": "60",
+        "image_overlay_opacity": 40,
+        "content_alignment": "bottom",
+        "section_full_width": true,
+        "section_background": "#ffffff",
+        "padding_top": 10,
+        "padding_bottom": 10
+      }
+    },
+    "product-grid": {
+      "type": "main-collection-product-grid",
+      "blocks": {
+        "subcollections_z3DaMJ": {
+          "type": "subcollections",
+          "settings": {
+            "color_scheme": "scheme-3",
+            "menu": "",
+            "show_product_count": true,
+            "image_ratio": "landscape",
+            "overlay": "",
+            "image_overlay_opacity": 50,
+            "collections_desktop": 5,
+            "heading_size": "h5"
+          }
+        },
+        "promo_yaghg4": {
+          "type": "promo",
+          "settings": {
+            "color_scheme": "scheme-3",
+            "position": 3,
+            "image": "shopify:\/\/shop_images\/Promo_card_2.png",
+            "image_overlay_opacity": 50,
+            "title": "Горещи оферти",
+            "description": "Разгледайте нашите продукти с най-добрите оферти",
+            "link_label": "ПАЗАРУВАЙ СЕГА",
+            "button_style": "link_icon",
+            "link": ""
+          }
+        },
+        "promo_zj3gnd": {
+          "type": "promo",
+          "settings": {
+            "color_scheme": "scheme-3",
+            "position": 4,
+            "image": "shopify:\/\/shop_images\/Promo_card_11.png",
+            "image_overlay_opacity": 50,
+            "title": "Горещи оферти",
+            "description": "Разгледайте всички наши продукти и категории",
+            "link_label": "ВИЖ ПОВЕЧЕ",
+            "button_style": "link_icon",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "subcollections_z3DaMJ",
+        "promo_yaghg4",
+        "promo_zj3gnd"
+      ],
+      "settings": {
+        "products_per_page": 10,
+        "columns_desktop": 3,
+        "color_scheme": "scheme-8",
+        "image_ratio": "landscape",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": false,
+        "enable_quick_add": true,
+        "enable_filtering": true,
+        "filter_type": "vertical",
+        "swatch_layout": "default",
+        "filter_color_scheme": "",
+        "enable_sorting": true,
+        "sorting_color_scheme": "",
+        "sorting_inside_color_scheme": "",
+        "show_navigation": true,
+        "navigation_label": "Покажи като",
+        "label_font_size": "text--small",
+        "label_font_weight": "fw-500",
+        "label_font_style": "body",
+        "summary_font_size": "h6",
+        "summary_font_weight": "fw-600",
+        "filter_text_font_size": "b-text-sm",
+        "filter_text_font_weight": "fw-400",
+        "columns_mobile": "2",
+        "padding_top": 20,
+        "padding_bottom": 40
+      }
+    },
+    "collection_discount_banner": {
+      "type": "image-banner",
+      "blocks": {
+        "template--16766664409325__homepage_discount_banner-heading-1": {
+          "type": "heading",
+          "settings": {
+            "heading": "Спестете до 50%",
+            "heading_size": "h2"
+          }
+        },
+        "template--16766664409325__homepage_discount_banner-text-1": {
+          "type": "text",
+          "settings": {
+            "text": "Нашите категории са подбрани за вашето здраве.",
+            "text_style": "body",
+            "text_color": "main"
+          }
+        },
+        "template--16766664409325__homepage_discount_banner-buttons-1": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "ВИЖ КАТЕГОРИИТЕ",
+            "button_link_1": "",
+            "button_style_secondary_1": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": false
+          }
+        }
+      },
+      "block_order": [
+        "template--16766664409325__homepage_discount_banner-heading-1",
+        "template--16766664409325__homepage_discount_banner-text-1",
+        "template--16766664409325__homepage_discount_banner-buttons-1"
+      ],
+      "disabled": true,
+      "settings": {
+        "full_width": false,
+        "image": "shopify:\/\/shop_images\/Discount_banner.png",
+        "image_overlay_opacity": 50,
+        "image_height": "small",
+        "content_width": 400,
+        "desktop_content_position": "middle-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "scheme-6",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "help_and_feedback_mFaiKM": {
+      "type": "help-and-feedback",
+      "blocks": {
+        "collapsible_heading_x6ALmP": {
+          "type": "collapsible_heading",
+          "settings": {
+            "collapsible_heading": "Често задавани въпроси",
+            "button_label": "ВИЖ ВСИЧКИ ВЪПРОСИ",
+            "button_link": "",
+            "button_style_secondary": true
+          }
+        },
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-1": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Какви методи на плащане приемате?",
+            "icon": "none",
+            "row_content": "<p>Приемаме плащане с кредитни и дебитни карти (Visa, Mastercard), банков превод и наложен платеж при доставка.<\/p>",
+            "page": "",
+            "open_collapsible_row": true
+          }
+        },
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-2": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Оригинални ли са продуктите на сайта?",
+            "icon": "none",
+            "row_content": "<p>Да, всички продукти са оригинални и идват директно от официални дистрибутори и лицензирани доставчици.<\/p>",
+            "page": "",
+            "open_collapsible_row": false
+          }
+        },
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-3": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "What if the product I purchased doesn’t meet my expectations?",
+            "icon": "none",
+            "row_content": "<p>Свържете се с нас в рамките на 14 дни. При фабричен дефект или грешна доставка приемаме връщане.<\/p>",
+            "page": "",
+            "open_collapsible_row": false
+          }
+        },
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-4": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Колко време отнема доставката?",
+            "icon": "none",
+            "row_content": "<p>Стандартната доставка е 2-3 работни дни. При поръчки преди 14:00 часа изпращаме в същия ден.<\/p>",
+            "page": "",
+            "open_collapsible_row": false
+          }
+        },
+        "21f3fdcb-3f3e-4608-830d-1c249c644c10": {
+          "type": "collapsible_row",
+          "settings": {
+            "heading": "Нужна ли е рецепта за поръчка?",
+            "icon": "none",
+            "row_content": "<p>Повечето продукти са без рецепта — хранителни добавки, витамини, козметика. За лекарства с рецепта, моля свържете се с нас.<\/p>",
+            "page": "",
+            "open_collapsible_row": false
+          }
+        },
+        "testimonial_heading_gHfR4J": {
+          "type": "testimonial_heading",
+          "settings": {
+            "testimonial_heading": "Отзиви на клиенти"
+          }
+        },
+        "testimonial_h7J3f6": {
+          "type": "testimonial",
+          "settings": {
+            "rating_star": 4,
+            "full_name": "Мария К.",
+            "full_name_size": "h6",
+            "full_name_font_weight": "fw-400",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Много удобно е да си поръчам лекарствата онлайн. Бърза доставка и голям избор от продукти.",
+            "text_color": "foreground"
+          }
+        },
+        "testimonial_QMHXFG": {
+          "type": "testimonial",
+          "settings": {
+            "rating_star": 5,
+            "full_name": "Георги П.",
+            "full_name_size": "h6",
+            "full_name_font_weight": "fw-400",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Намерих витамините, които търсех, на отлична цена. Препоръчвам на всеки, който цени удобството.",
+            "text_color": "foreground"
+          }
+        },
+        "testimonial_GGqzfF": {
+          "type": "testimonial",
+          "settings": {
+            "rating_star": 5,
+            "full_name": "Елена Д.",
+            "full_name_size": "h6",
+            "full_name_font_weight": "fw-400",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Отличен избор от козметика и грижа за кожата. Поръчвам редовно за цялото семейство.",
+            "text_color": "foreground"
+          }
+        }
+      },
+      "block_order": [
+        "collapsible_heading_x6ALmP",
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-1",
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-2",
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-3",
+        "template--16766664605933__213deb17-cc31-4e82-8167-e558eae2a42d-collapsible_row-4",
+        "21f3fdcb-3f3e-4608-830d-1c249c644c10",
+        "testimonial_heading_gHfR4J",
+        "testimonial_h7J3f6",
+        "testimonial_QMHXFG",
+        "testimonial_GGqzfF"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "text": "",
+        "color_scheme": "",
+        "faq_color_scheme": "scheme-7",
+        "reviews_color_scheme": "",
+        "desktop_layout": "image_first",
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "collection_description": {
+      "type": "rich-text",
+      "blocks": {
+        "template--16766665162989__collection_description-text-1": {
+          "type": "text",
+          "settings": {
+            "text": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--16766665162989__collection_description-text-1"
+      ],
+      "disabled": true,
+      "settings": {
+        "desktop_content_position": "center",
+        "content_alignment": "center",
+        "color_scheme": "scheme-2",
+        "padding_top": 70,
+        "padding_bottom": 140
+      }
+    },
+    "multicolumn_xFpxpe": {
+      "type": "multicolumn",
+      "blocks": {
+        "column_tigHL7": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-1",
+            "image": "shopify:\/\/shop_images\/icon-original-medicines.svg",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Оригинални лекарства",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Проверени и качествени лекарства от доказани производители.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_i386HY": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "shopify:\/\/shop_images\/icon-support.svg",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Поддръжка след покупка",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Екип от здравни специалисти, готови да ви помогнат.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_dK764B": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "shopify:\/\/shop_images\/icon-fast-delivery.svg",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Бърза и сигурна доставка",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Безопасна и навременна доставка на лекарства до вашия адрес.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_Q94YKW": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "shopify:\/\/shop_images\/icon-affordable-healthcare.svg",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Достъпно здравеопазване",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Конкурентни цени с отстъпки и спестявания на основни лекарства.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "column_tigHL7",
+        "column_i386HY",
+        "column_dK764B",
+        "column_Q94YKW"
+      ],
+      "settings": {
+        "title": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "fourth",
+        "image_ratio": "landscape",
+        "columns_desktop": 4,
+        "grid_type": "grid",
+        "column_divider": true,
+        "column_alignment": "center",
+        "background_style": "none",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-1",
+        "background_color_full_width": true,
+        "background_border_radius": true,
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "product-grid",
+    "collection_discount_banner",
+    "help_and_feedback_mFaiKM",
+    "collection_description",
+    "multicolumn_xFpxpe"
+  ]
+}

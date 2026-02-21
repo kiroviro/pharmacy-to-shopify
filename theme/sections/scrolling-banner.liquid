@@ -1,0 +1,335 @@
+{{ 'section-scrolling-banner.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+		--items-padding: {{ section.settings.items_padding }}px;
+  }
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  #shopify-section-{{ section.id }} .scrolling-banner.direction-left > div {
+    animation: scroll-left {{ section.settings.scroll_speed }}s linear infinite; 
+  }
+  #shopify-section-{{ section.id }} .scrolling-banner.direction-right > div {
+    animation: scroll-right {{ section.settings.scroll_speed }}s linear infinite; 
+  }
+{%- endstyle -%}
+
+<div class="scrolling-banner section-{{ section.id }}-padding {{ section.settings.scroll_direction }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %} color-{{ section.settings.color_scheme }} gradient"{% if settings.animations_reveal_on_scroll %} data-cascade{% endif %}>
+
+    <div>
+      {%- for block in section.blocks -%}
+        {% case block.type %}
+
+          {%- when 'icon' -%}
+						{%- style -%}
+							#Icon-{{ block.id }}-{{ section.id }} {
+								--icon-height: {{ block.settings.image_height }}px;
+							}
+						{%- endstyle -%}
+            <div id="Icon-{{ block.id }}-{{ section.id }}" class="scrolling-item icon" {{ block.shopify_attributes }}>
+              {% if block.settings.image != blank %}
+                {%- assign widths = '165, 360, 535, 750' -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 500
+                  | image_tag: loading: 'lazy', sizes: '500px', widths: widths
+                }}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+
+          {%- when 'heading' -%}
+            {%- assign notification_text = block.settings.text -%}
+            {%- assign highlight_color = block.settings.highlight_text -%}
+            <div class="scrolling-item rte h0" {{ block.shopify_attributes }}>
+              {%- if notification_text contains '[' and notification_text contains ']' -%}
+                {%- assign before_highlight = notification_text | split: '[' | first -%}
+                {%- assign after_bracket = notification_text | split: '[' | last | split: ']' -%}
+                {%- assign highlighted_word = after_bracket[0] -%}
+                {%- assign after_highlight = after_bracket[1] -%}
+              
+                {{ before_highlight }}<span style="color: {{ highlight_color }};">{{ highlighted_word }}</span>{{ after_highlight }}
+              {%- else -%}
+                {{ notification_text }}
+              {%- endif -%}
+            </div>
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+
+    <div>
+      {%- for block in section.blocks -%}
+        {% case block.type %}
+          {%- when 'icon' -%}
+						{%- style -%}
+							#Icon-{{ block.id }}-{{ section.id }} {
+								--icon-height: {{ block.settings.image_height }}px;
+							}
+						{%- endstyle -%}
+            <div id="Icon-{{ block.id }}-{{ section.id }}" class="scrolling-item icon" {{ block.shopify_attributes }}>
+              {% if block.settings.image != blank %}
+                {%- assign widths = '165, 360, 535, 750' -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 500
+                  | image_tag: loading: 'lazy', sizes: '500px', widths: widths
+                }}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+
+          {%- when 'heading' -%}
+            {%- assign notification_text = block.settings.text -%}
+            {%- assign highlight_color = block.settings.highlight_text -%}
+            <div class="scrolling-item rte h0" {{ block.shopify_attributes }}>
+              {%- if notification_text contains '[' and notification_text contains ']' -%}
+                {%- assign before_highlight = notification_text | split: '[' | first -%}
+                {%- assign after_bracket = notification_text | split: '[' | last | split: ']' -%}
+                {%- assign highlighted_word = after_bracket[0] -%}
+                {%- assign after_highlight = after_bracket[1] -%}
+              
+                {{ before_highlight }}<span style="color: {{ highlight_color }};">{{ highlighted_word }}</span>{{ after_highlight }}
+              {%- else -%}
+                {{ notification_text }}
+              {%- endif -%}
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+    
+    <div>
+      {%- for block in section.blocks -%}
+        {% case block.type %}
+          {%- when 'icon' -%}
+						{%- style -%}
+							#Icon-{{ block.id }}-{{ section.id }} {
+								--icon-height: {{ block.settings.image_height }}px;
+							}
+						{%- endstyle -%}
+            <div id="Icon-{{ block.id }}-{{ section.id }}" class="scrolling-item icon" {{ block.shopify_attributes }}>
+              {% if block.settings.image != blank %}
+                {%- assign widths = '165, 360, 535, 750' -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 500
+                  | image_tag: loading: 'lazy', sizes: '500px', widths: widths
+                }}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+
+          {%- when 'heading' -%}
+            {%- assign notification_text = block.settings.text -%}
+            {%- assign highlight_color = block.settings.highlight_text -%}
+            <div class="scrolling-item rte h0" {{ block.shopify_attributes }}>
+              {%- if notification_text contains '[' and notification_text contains ']' -%}
+                {%- assign before_highlight = notification_text | split: '[' | first -%}
+                {%- assign after_bracket = notification_text | split: '[' | last | split: ']' -%}
+                {%- assign highlighted_word = after_bracket[0] -%}
+                {%- assign after_highlight = after_bracket[1] -%}
+              
+                {{ before_highlight }}<span style="color: {{ highlight_color }};">{{ highlighted_word }}</span>{{ after_highlight }}
+              {%- else -%}
+                {{ notification_text }}
+              {%- endif -%}
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+
+    <div>
+      {%- for block in section.blocks -%}
+        {% case block.type %}
+          {%- when 'icon' -%}
+						{%- style -%}
+							#Icon-{{ block.id }}-{{ section.id }} {
+								--icon-height: {{ block.settings.image_height }}px;
+							}
+						{%- endstyle -%}
+            <div id="Icon-{{ block.id }}-{{ section.id }}" class="scrolling-item icon" {{ block.shopify_attributes }}>
+              {% if block.settings.image != blank %}
+                {%- assign widths = '165, 360, 535, 750' -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 500
+                  | image_tag: loading: 'lazy', sizes: '500px', widths: widths
+                }}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+
+          {%- when 'heading' -%}
+            {%- assign notification_text = block.settings.text -%}
+            {%- assign highlight_color = block.settings.highlight_text -%}
+            <div class="scrolling-item rte h0" {{ block.shopify_attributes }}> 
+              {%- if notification_text contains '[' and notification_text contains ']' -%}
+                {%- assign before_highlight = notification_text | split: '[' | first -%}
+                {%- assign after_bracket = notification_text | split: '[' | last | split: ']' -%}
+                {%- assign highlighted_word = after_bracket[0] -%}
+                {%- assign after_highlight = after_bracket[1] -%}
+              
+                {{ before_highlight }}<span style="color: {{ highlight_color }};">{{ highlighted_word }}</span>{{ after_highlight }}
+              {%- else -%}
+                {{ notification_text }}
+              {%- endif -%}
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+    
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.scrolling-banner.name",
+  "class": "section",
+  "tag": "section",
+  "disabled_on": {
+    "groups": [
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-2"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 5,
+      "max": 45,
+      "step": 1,
+      "unit": "s",
+      "label": "t:sections.scrolling-banner.settings.scroll-speed.label",
+      "default": 15
+    },
+    {
+      "type": "select",
+      "id": "scroll_direction",
+      "options": [
+        {
+          "value": "direction-left",
+          "label": "t:sections.scrolling-banner.settings.direction-left.label"
+        },
+        {
+          "value": "direction-right",
+          "label": "t:sections.scrolling-banner.settings.direction-right.label"
+        }
+      ],
+      "default": "direction-left",
+      "label": "t:sections.scrolling-banner.settings.scroll-direction.label"
+    },
+		{
+      "type": "range",
+      "id": "items_padding",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Items padding",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 180,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 180,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 70
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "t:sections.scrolling-banner.blocks.text.name",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Add campaign or promotional text here</p>",
+          "label": "t:sections.scrolling-banner.blocks.text.settings.text-item.label"
+        },
+        {
+          "type": "color",
+          "id": "highlight_text",
+          "label": "Heading highlight color",
+          "info": "To change the color of a word, use '[]'. For example '[shop]'"
+        },
+      ]
+    },
+    {
+      "type": "icon",
+      "name": "t:sections.scrolling-banner.blocks.icon.name",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.multicolumn.blocks.column.settings.image.label"
+        },
+				{
+					"type": "range",
+					"id": "image_height",
+					"min": 10,
+					"max": 120,
+					"step": 2,
+					"unit": "px",
+					"default": 50,
+					"label": "Image height"
+				}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.scrolling-banner.name",
+      "blocks": [
+        {
+          "type": "heading"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

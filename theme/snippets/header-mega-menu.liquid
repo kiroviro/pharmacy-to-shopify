@@ -1,0 +1,93 @@
+{% comment %}
+  Renders a megamenu for the header.
+
+  Usage:
+  {% render 'header-mega-menu' %}
+{% endcomment %}
+
+{% assign menu_icon_blocks = section.blocks | where: "type", "item_icon" %}
+
+<header-menu>
+	<details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
+		<summary id="HeaderMenu-{{ link.handle }}" class="header__menu-item list-menu__item link focus-inset">
+
+			{% if menu_icon_blocks != blank %}
+				{% for block in menu_icon_blocks %}
+					{%- case block.type -%}
+						{%- when 'item_icon' -%}
+							{% if block.settings.menu_icon_title == link.title and block.settings.icon != blank %}
+								{% assign matching_icon = block.settings.icon %}
+									<span class="menu-item-icon icon-{{ block.settings.icon_position }}">
+										<img src="{{ matching_icon | image_url: width: block.settings.icon_width }}" alt="{{ matching_icon.alt | escape }}"
+											width="{{ block.settings.icon_width }}" height="{{ block.settings.icon_width | divided_by: matching_icon.aspect_ratio | ceil }}" loading="lazy">
+									</span>
+							{% endif %}
+						{%- endcase -%}
+				{% endfor %}
+			{% endif %}
+
+			<span {% if link.child_active %} class="header__active-menu-item" {% endif %}>
+				{{- link.title | escape -}}
+			</span>
+			{% render 'icon-caret' %}
+		</summary>
+		<div id="MegaMenu-Content-{{ forloop.index }}" class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup" tabindex="-1">
+			<div class="mega-menu__wrap page-width">
+
+			<ul class="mega-menu__list {% if link.levels == 1 %} mega-menu__list--condensed{% endif %}" role="list">
+				{%- for childlink in link.links -%}
+					<li>
+						<a id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}" href="{{ childlink.url }}" class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
+							{% if childlink.current %} aria-current="page" {% endif %}>
+							{{ childlink.title | escape }}
+						</a>
+
+						{%- if childlink.links != blank -%}
+							<ul class="list-unstyled" role="list">
+								{%- for grandchildlink in childlink.links -%}
+									{%- liquid
+										if childlink.object.image != blank
+											assign menu_image_2 = grandchildlink.object.image
+										else
+											assign menu_image_2 = grandchildlink.object.featured_image
+										endif
+									%}
+									<li>
+										<a id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}" href="{{ grandchildlink.url }}"
+											class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
+											{% if menu_image_2 != blank %} data-image="{{ menu_image_2 | image_url: width: 600 }}"{% endif %}
+											{% if grandchildlink.current %} aria-current="page" {% endif %}>
+											{{ grandchildlink.title | escape }}
+										</a>
+									</li>
+								{%- endfor -%}
+							</ul>
+						{%- endif -%}
+					</li>
+				{%- endfor -%}
+			</ul>
+			{% if section.settings.show_mm_image %}
+				<variant-megamenu-img class="{{ section.settings.image_ratio }} js-megaMenuImgWrp">
+					{% if section.settings.mega_menu_image != blank %}
+						<img srcset="{%- if section.settings.mega_menu_image.width >= 535 -%}{{ section.settings.mega_menu_image | image_url: width: 535 }} 535w, {%- endif -%}
+								{%- if section.settings.mega_menu_image.width >= 750 -%}{{ section.settings.mega_menu_image | image_url: width: 750 }} 750w, {%- endif -%}
+								{{ section.settings.mega_menu_image | image_url }} {{ section.settings.mega_menu_image.width }}w"
+							src="{{ section.settings.mega_menu_image | image_url: width: 700 }}"
+							sizes="
+								{% comment %} (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: columns }}px, {% endcomment %}
+								{% comment %} (min-width: 750px) {% if columns > 1 %}calc((100vw - 10rem) / 2){% else %}calc(100vw - 10rem){% endif %}, {% endcomment %}
+								calc(100vw - 3rem)"
+							alt="{{ section.settings.mega_menu_image.alt | escape }}"
+							width="{{ section.settings.mega_menu_image.width }}"
+							height="{{ section.settings.mega_menu_image.height }}"
+							loading="lazy"
+							class="motion-reduce mm-featured-image">
+					{% else %}
+						{{ 'product-1' | placeholder_svg_tag }}
+					{% endif %}
+				</variant-megamenu-img>
+			{% endif %}
+			</div>
+		</div>
+	</details>
+</header-menu>

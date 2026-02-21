@@ -1,0 +1,495 @@
+slider-component {
+  --desktop-margin-left-first-item: max(
+    5rem,
+    calc((100vw - var(--page-width) + 9.9rem - var(--grid-desktop-horizontal-spacing)) / 2)
+  );
+  position: relative;
+  display: block;
+}
+
+slider-component.slider-component-full-width {
+  --desktop-margin-left-first-item: 1.5rem;
+}
+
+@media screen and (max-width: 749px) {
+  slider-component.page-width {
+    padding: 0 1.5rem;
+  }
+  
+  .collection slider-component.page-width {
+    padding: 0;
+  }
+}
+
+@media screen and (min-width: 749px) and (max-width: 990px) {
+  slider-component.page-width {
+    padding: 0 3rem;
+  }
+
+  .collection-wrapp slider-component.page-width {
+    padding: 0;
+  }
+
+}
+
+@media screen and (max-width: 989px) {
+  .no-js slider-component .slider {
+    padding-bottom: 3rem;
+  }
+}
+
+.slider__slide {
+  --focus-outline-padding: 0.5rem;
+  --shadow-padding-top: calc((var(--shadow-vertical-offset) * -1 + var(--shadow-blur-radius)) * var(--shadow-visible));
+  --shadow-padding-bottom: calc((var(--shadow-vertical-offset) + var(--shadow-blur-radius)) * var(--shadow-visible));
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  padding-bottom: 0;
+}
+
+@media screen and (max-width: 749px) {
+  .slider.slider--mobile {
+    position: relative;
+    flex-wrap: inherit;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-padding-left: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+  }
+
+  .product .slider.slider--mobile {
+    margin-bottom: 0;
+  }
+  .product .slider.slider--mobile.product__media-list {
+    scroll-padding-left: 0;
+    column-gap: calc(var(--grid-mobile-horizontal-spacing) / 2);
+  }
+
+  /* Fix to show some space at the end of our sliders in all browsers */
+  .slider--mobile:after {
+    content: '';
+    width: 0;
+    padding-left: 1.5rem;
+  }
+
+  .slider.slider--mobile .slider__slide {
+    margin-bottom: 0;
+    padding-top: max(var(--focus-outline-padding), var(--shadow-padding-top));
+    padding-bottom: max(var(--focus-outline-padding), var(--shadow-padding-bottom));
+  }
+
+  .slider.slider--mobile.contains-card--standard .slider__slide:not(.collection-list__item--no-media) {
+    padding-bottom: var(--focus-outline-padding);
+  }
+
+  .slider.slider--mobile.contains-content-container .slider__slide {
+    --focus-outline-padding: 0rem;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .slider.slider--tablet-up {
+    position: relative;
+    flex-wrap: inherit;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-padding-left: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slider.slider--tablet-up .slider__slide {
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (max-width: 989px) {
+  .slider.slider--tablet {
+    position: relative;
+    flex-wrap: inherit;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-padding-left: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 2.5rem;
+  }
+
+  .multicolumn.background-primary .slider.slider--tablet,
+  .multicolumn.background-none:has(.without-space) .slider.slider--tablet {
+    margin-bottom: 2.5rem;
+    scroll-padding-left: 0;
+  }
+
+  /* Fix to show some space at the end of our sliders in all browsers */
+  .slider--tablet:after {
+    content: '';
+    width: 0;
+    padding-left: 1.5rem;
+    margin-left: calc(-1 * var(--grid-desktop-horizontal-spacing));
+  }
+
+  .slider.slider--tablet .slider__slide {
+    margin-bottom: 0;
+    padding-top: max(var(--focus-outline-padding), var(--shadow-padding-top));
+    padding-bottom: max(var(--focus-outline-padding), var(--shadow-padding-bottom));
+  }
+
+  .slider.slider--tablet.contains-card--standard .slider__slide:not(.collection-list__item--no-media) {
+    padding-bottom: var(--focus-outline-padding);
+  }
+
+  .slider.slider--tablet.contains-content-container .slider__slide {
+    --focus-outline-padding: 0rem;
+  }
+}
+
+.slider--everywhere {
+  position: relative;
+  flex-wrap: inherit;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+.slider.slider--everywhere .slider__slide {
+  margin-bottom: 0;
+  scroll-snap-align: center;
+}
+
+@media screen and (min-width: 990px) {
+  .slider-component-desktop.page-width {
+    max-width: none;
+  }
+
+  .slider--desktop {
+    position: relative;
+    flex-wrap: inherit;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    scroll-padding-left: var(--desktop-margin-left-first-item);
+  }
+
+  .collection .slider--desktop:has(.quick-add) {
+    padding-bottom: 2rem;
+  }
+
+  .collection .page-width-desktop {
+    padding: 0;
+  }
+
+  .collection slider-component:has( + .collection__view-all) {
+    position: relative;
+    z-index: 2;
+  }
+  .collection slider-component + .collection__view-all {
+    position: relative;
+    z-index: 1;
+  }
+
+  .collection .slider--desktop:has(.quick-add) .card-wrapper .quick-add,
+  .collection .slider--desktop:has(.quick-add) .quick-add {
+    transform: translateY(0);
+    position: static;
+    opacity: 1;
+  }
+
+  .collection .slider--desktop .product-card-wrapper:has(.card--card .quick-add):hover .card--card, 
+  .collection .slider--desktop .product-card-wrapper:has(.card--card .quick-add):hover {
+    border-radius: calc(var(--border-radius));
+  }
+
+  /* Fix to show some space at the end of our sliders in all browsers */
+  .slider--desktop:after {
+    content: '';
+    width: 0;
+    padding-left: 5rem;
+    margin-left: calc(-1 * var(--grid-desktop-horizontal-spacing));
+  }
+
+  .slider.slider--desktop .slider__slide {
+    margin-bottom: 0;
+    padding-top: max(var(--focus-outline-padding), var(--shadow-padding-top));
+    padding-bottom: max(var(--focus-outline-padding), var(--shadow-padding-bottom));
+  }
+
+  .collection .slider.slider--desktop .slider__slide {
+    padding-top: calc(max(var(--focus-outline-padding), var(--shadow-padding-top)) + .8rem);
+  }
+
+  .slider--desktop .slider__slide:first-child {
+    margin-left: var(--desktop-margin-left-first-item);
+    scroll-margin-left: var(--desktop-margin-left-first-item);
+  }
+
+  .collection .slider--desktop .slider__slide:first-child {
+    margin-left: 0;
+  }
+
+  .slider-component-full-width .slider--desktop {
+    scroll-padding-left: 1.5rem;
+  }
+
+  .slider-component-full-width .slider--desktop .slider__slide:first-child {
+    margin-left: 1.5rem;
+    scroll-margin-left: 1.5rem;
+  }
+
+  /* Fix to show some space at the end of our sliders in all browsers */
+  .slider-component-full-width .slider--desktop:after {
+    padding-left: 1.5rem;
+  }
+
+  .slider--desktop.grid--5-col-desktop .grid__item {
+    width: calc(100% / 5 - var(--grid-desktop-horizontal-spacing) * 1.5);
+  }
+
+  .slider--desktop.grid--4-col-desktop .grid__item {
+    width: calc(100% / 4 - var(--grid-desktop-horizontal-spacing) * 2);
+  }
+
+  .slider--desktop.grid--3-col-desktop .grid__item {
+    width: calc(100% / 3 - var(--grid-desktop-horizontal-spacing) * 3);
+  }
+
+  .slider--desktop.grid--2-col-desktop .grid__item {
+    width: calc(100% / 2 - var(--grid-desktop-horizontal-spacing) * 4);
+  }
+
+  .slider--desktop.grid--1-col-desktop .grid__item {
+    width: calc(100% - var(--grid-desktop-horizontal-spacing) * 9);
+  }
+
+  .slider.slider--desktop.contains-card--standard .slider__slide:not(.collection-list__item--no-media) {
+    padding-bottom: var(--focus-outline-padding);
+  }
+
+  .slider.slider--desktop.contains-content-container .slider__slide {
+    --focus-outline-padding: 0rem;
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .slider {
+    scroll-behavior: auto;
+  }
+}
+
+/* Scrollbar */
+
+.slider {
+  scrollbar-color: rgb(var(--color-foreground)) rgba(var(--color-foreground), 0.04);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.slider::-webkit-scrollbar {
+  height: 0.4rem;
+  width: 0.4rem;
+  display: none;
+}
+
+.no-js .slider {
+  -ms-overflow-style: auto;
+  scrollbar-width: auto;
+}
+
+.no-js .slider::-webkit-scrollbar {
+  display: initial;
+}
+
+.slider::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-foreground));
+  border-radius: 0.4rem;
+  border: 0;
+}
+
+.slider::-webkit-scrollbar-track {
+  background: rgba(var(--color-foreground), 0.04);
+  border-radius: 0.4rem;
+}
+
+.slider-counter {
+  display: flex;
+  justify-content: center;
+  min-width: 5.8rem;
+  font-size: 1.6rem;
+}
+
+@media screen and (min-width: 750px) {
+  .slider-counter--dots {
+    margin: 0 1.2rem;
+  }
+}
+
+.slider-counter__link {
+  padding: 1rem;
+}
+
+@media screen and (max-width: 749px) {
+  .slider-counter__link {
+    padding: 0.7rem;
+  }
+}
+
+.slider-counter__link--dots .dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.5);
+  padding: 0;
+  display: block;
+}
+
+.slider-counter__link--active.slider-counter__link--dots .dot {
+  background-color: rgb(var(--color-foreground));
+}
+
+@media screen and (forced-colors: active) {
+  .slider-counter__link--active.slider-counter__link--dots .dot {
+    background-color: CanvasText;
+  }
+}
+
+.slider-counter__link--dots:not(.slider-counter__link--active):hover .dot {
+  border-color: rgb(var(--color-foreground));
+}
+
+.slider-counter__link--dots .dot,
+.slider-counter__link--numbers {
+  transition: transform 0.2s ease-in-out;
+}
+
+.slider-counter__link--active.slider-counter__link--numbers,
+.slider-counter__link--dots:not(.slider-counter__link--active):hover .dot,
+.slider-counter__link--numbers:hover {
+  transform: scale(1.1);
+}
+
+.slider-counter__link--numbers {
+  color: rgba(var(--color-foreground), 0.5);
+  text-decoration: none;
+}
+
+.slider-counter__link--numbers:hover {
+  color: rgb(var(--color-foreground));
+}
+
+.slider-counter__link--active.slider-counter__link--numbers {
+  text-decoration: underline;
+  color: rgb(var(--color-foreground));
+}
+
+.slider-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+}
+
+.collection .slider-buttons {
+  margin-top: 2rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.slideshow__controls.slider-buttons {
+  width: 100%;
+  border: transparent;
+  padding-top: .5rem;
+}
+
+@media screen and (min-width: 990px) {
+  .collection .slider-buttons {
+    margin-top: 3rem;
+  }
+
+  .slider:not(.slider--everywhere):not(.slider--desktop) + .slider-buttons {
+    display: none;
+  }
+}
+@media screen and (max-width: 989px) {
+  .slider--desktop:not(.slider--tablet) + .slider-buttons {
+    display: none;
+  }
+}
+@media screen and (min-width: 750px) {
+  .slider--mobile + .slider-buttons {
+    display: none;
+  }
+}
+
+.slider-button {
+	--_clr-bg: var(--color-slider-btn);
+	--_clr-text: var(--color-slider-btn-text);
+	--_clr-outline: var(--_clr-text);
+
+  color: rgb(var(--_clr-text));
+  border: .1rem solid rgb(var(--_clr-outline));
+  background-color: rgba(var(--_clr-bg), 1);
+  cursor: pointer;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s ease;
+  flex-shrink: 0;
+}
+.slider-button + .slider-button {
+  margin-left: 1rem;
+}
+
+@media (hover: hover) {
+	.slider-button:not([disabled]):hover {
+		--_clr-bg: var(--color-slider-btn-hover);
+		--_clr-text: var(--color-slider-btn-text-hover);
+		--_clr-outline: var(--_clr-bg);
+	}
+}
+
+.slider-button[disabled] {
+	pointer-events: none;
+}
+
+.slider-button .icon {
+  height: 1.6rem;
+}
+.slider-button[disabled] {
+  cursor: not-allowed;
+  border-color: rgba(var(--color-foreground), 0.3);
+}
+.slider-button[disabled] .icon {
+  color: rgba(var(--color-foreground), 0.3);
+}
+.slider-button--next .icon {
+  transform: rotate(0deg);
+}
+.slider-button--prev .icon {
+  transform: rotate(180deg);
+}
+
+@media (min-width: 1025px) {
+  .thumbnail-slider.vertical-scroll .slider-button--prev {
+    margin-bottom: .6rem;
+  }
+  .thumbnail-slider.vertical-scroll .slider-button--next {
+    margin-top: .6rem;
+  }
+
+  .thumbnail-slider.vertical-scroll .slider-button--prev .icon {
+    transform: rotate(-90deg);
+  }
+
+  .thumbnail-slider.vertical-scroll .slider-button--next .icon {
+    transform: rotate(90deg);
+  }
+}

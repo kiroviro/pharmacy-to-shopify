@@ -1,0 +1,30 @@
+.discounts {
+  font-size: 1.2rem;
+}
+
+.discounts__discount {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.discounts__discount svg {
+  color: rgba(var(--color-button), var(--alpha-button-background));
+}
+
+.discounts__discount--position {
+  justify-content: flex-start;
+  font-size: 1.6rem;
+}
+
+.discounts__discount--position span {
+  padding-left: .5rem;
+  margin-left: auto;
+}
+
+.discounts__discount > .icon {
+  color: rgb(var(--color-foreground));
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.7rem;
+}

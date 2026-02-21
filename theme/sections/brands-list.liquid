@@ -1,0 +1,192 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
+
+<style>
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .brands-list-content {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    #shopify-section-{{ section.id }} .brands-list-content {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 1200px) {
+    #shopify-section-{{ section.id }} .brands-list-content {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+</style>
+
+<div class="brands-list-content collection-list-content color-{{ section.settings.color_scheme }}">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <h1 class="{{ section.settings.heading_size }} section-{{ section.id }}-heading{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}" style="text-align: {{ section.settings.heading_alignment }};">
+        {{ section.settings.title }}
+      </h1>
+    {%- endif -%}
+
+    {%- liquid
+      assign brand_collections = collections | sort: 'title'
+    -%}
+
+    <ul class="collection-list grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down" role="list">
+        {%- for collection in brand_collections -%}
+          {%- if collection.handle contains 'brand-' -%}
+            <li class="collection-list__item grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}" {% if settings.animations_reveal_on_scroll %} data-cascade style="--animation-order: {{ forloop.index }};"{% endif %}>
+              {% render 'card-collection',
+                card_collection: collection,
+                media_aspect_ratio: section.settings.image_ratio,
+                image_type: section.settings.image_type,
+                show_description: false,
+                link_label: section.settings.link_label,
+                button_style: section.settings.button_style,
+                cover_color_scheme: section.settings.cover_color_scheme,
+                forloop: forloop,
+                columns: section.settings.columns_desktop,
+                card_heading_size: section.settings.card_heading_size
+              %}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Brands list",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "Всички марки"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        { "value": "h2", "label": "Small" },
+        { "value": "h1", "label": "Medium" },
+        { "value": "h0", "label": "Large" }
+      ],
+      "default": "h1",
+      "label": "Heading size"
+    },
+    {
+      "type": "text_alignment",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "square",
+      "label": "Image ratio"
+    },
+    {
+      "type": "select",
+      "id": "image_type",
+      "options": [
+        { "value": "standart", "label": "Standard" },
+        { "value": "cover", "label": "Card" }
+      ],
+      "default": "cover",
+      "label": "Card style"
+    },
+    {
+      "type": "color_scheme",
+      "id": "cover_color_scheme",
+      "label": "Cover card color scheme",
+      "default": "scheme-4"
+    },
+    {
+      "type": "select",
+      "id": "card_heading_size",
+      "options": [
+        { "value": "h6", "label": "Small" },
+        { "value": "h5", "label": "Medium" },
+        { "value": "h4", "label": "Large" }
+      ],
+      "default": "h5",
+      "label": "Card heading size"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        { "value": "link", "label": "Inline button" },
+        { "value": "link_icon", "label": "Inline button with icon" }
+      ],
+      "default": "link_icon"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4,
+      "label": "Columns desktop"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2",
+      "label": "Columns mobile"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brands list"
+    }
+  ]
+}
+{% endschema %}

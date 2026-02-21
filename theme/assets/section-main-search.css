@@ -1,0 +1,49 @@
+.search__main-hero .main-hero__inner {
+	display: flex;
+}
+
+.template-search .article-card .badge {
+	pointer-events: none;
+}
+
+.main-hero {
+	margin: 0 3rem;
+ }
+ 
+ @media screen and (max-width: 749px) {
+	.main-hero {
+	  margin: 0 1.5rem;
+	}
+ }
+
+@media screen and (max-width: 749px) {
+	.search__main-hero .main-hero__inner {
+		align-items: center;
+	}
+
+	.banner--small {
+    min-height: 28rem;
+  }
+
+  .banner--medium {
+    min-height: 34rem;
+  }
+
+  .banner--large {
+    min-height: 56rem;
+  }
+}
+
+@media screen and (min-width: 750px) {
+	.banner--content-align-top {
+		align-items: start;
+	}
+
+	.banner--content-align-center {
+		align-items: center;
+	}
+
+	.banner--content-align-bottom {
+		align-items: end;
+	}
+}

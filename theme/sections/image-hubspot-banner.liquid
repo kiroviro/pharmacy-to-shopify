@@ -1,0 +1,760 @@
+{{ 'section-hutspot-image.css' | asset_url | stylesheet_tag }}
+{{ 'section-hotspot-item.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  {% if section.settings.hide_scroll_mobile %}
+    .section-{{ section.id }}-padding .indicator__wrapper {
+      display: none;
+    }
+  {% endif %}
+
+{% endstyle %}
+
+{{ 'quick-add.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'line-indicator.js' | asset_url }}" defer="defer"></script>
+
+<div class="image-hotspot-wrapper section-{{ section.id }}-padding color-{{ section.settings.color_scheme }} gradient">
+
+  {%- if section.settings.heading != blank or section.settings.text != blank -%}
+    <div class="page-width">
+      <div class="section-heading align-{{ section.settings.heading_alignment }}">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="section-title inline-richtext {{ section.settings.heading_size }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.text != blank -%}
+          <div class="section-description rte-{{ section.settings.text_size_block }} rte {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.text }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="{% if section.settings.section_full_width %}full-width{% else %}page-width{% endif %}">
+
+    <div class="image-hotspot {% if section.settings.section_container_width %}container-width{% else %}page-width{% endif %}">
+
+      <div id="box" class="image-hotspot--inner__wrapper {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        <div class="image-hotspot--inner">
+          {%- if section.settings.image != blank -%}
+            {%- capture sizes -%}
+              (min-width: {{ settings.page_width }}px) 1700px, (min-width: 750px) calc((100vw - 130px) / 2), calc((100vw - 50px) / 2)
+            {%- endcapture -%}
+
+            {{
+              section.settings.image
+              | image_url: width: 1200
+              | image_tag: 
+                loading: 'lazy', 
+                width: section.settings.image.width,
+                sizes: sizes,
+                widths: '320, 360, 375, 400, 420, 450, 550, 650, 750, 850, 950, 1024, 1100, 1300, 1440, 1650, 1800, 1920, 2000, 2400, 2600, 3000, 3200'
+            }}
+
+          {%- else -%}
+              {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+
+            {%- when 'item' -%}
+							<style>
+								#shopify-section-{{ section.id }} .hotspot-item.item-{{ forloop.index }} {
+									{% if block.settings.bullet_bg != blank and block.settings.bullet_bg != 'rgba(0,0,0,0)' %}
+										--bullet-bg: {{ block.settings.bullet_bg.red }}, {{ block.settings.bullet_bg.green }}, {{ block.settings.bullet_bg.blue }};
+									{% endif %}
+
+									{% if block.settings.bullet_color != blank and block.settings.bullet_color != 'rgba(0,0,0,0)' %}
+										--bullet-color: {{ block.settings.bullet_color.red }}, {{ block.settings.bullet_color.green }}, {{ block.settings.bullet_color.blue }};
+									{% endif %}
+
+									top: {{ block.settings.vertical_position }}%;
+									left: {{ block.settings.horizontal_position }}%;
+								}
+								@media screen and (max-width: 749px) {
+									#shopify-section-{{ section.id }} .hotspot-item.active.item-{{ forloop.index }} {
+										top: 50%;
+										left: 50%;
+									}
+								}
+							</style>						
+
+              <div class="hotspot-item hotspot-item--{{ block.settings.style }} item-{{ forloop.index }} color-{{ block.settings.color_scheme }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in-long{% endif %}{% if block.settings.hide_mobile %} small-hide{% endif %}" {{ block.shopify_attributes }}{% if settings.animations_reveal_on_scroll %} data-cascade style="--animation-order: {{ forloop.index }};"{% endif %} tabindex="0">
+
+                {% if block.settings.vertical_position_mobile != 30 or block.settings.horizontal_position_mobile != 30 %}
+                  <style>
+                    @media screen and (max-width: 749px) {
+                      #shopify-section-{{ section.id }} .hotspot-item.item-{{ forloop.index }} {
+                        top: {{ block.settings.vertical_position_mobile }}%;
+                        left: {{ block.settings.horizontal_position_mobile }}%;
+                      }
+                    }
+                  </style>
+                {% endif %}
+
+                {% if block.settings.bullet_icon != blank %}
+                  <div class="hotspot-item-icon with-icon">
+                    <span>
+                      {{ block.settings.bullet_icon | image_url: width: 35
+                        | image_tag: 
+                          loading: 'lazy', 
+                          width: block.settings.bullet_icon.width,
+                          height: block.settings.bullet_icon.height
+                      }}
+                    </span>
+                  </div>
+                {% else %}
+                  <div class="hotspot-item-icon">
+                    <span> </span>
+                  </div>
+                {% endif %} 
+
+                <div class="hotspot-bubble {{ block.settings.bubble_position }}">
+                  <div class="hotspot-bubble--info">
+
+                    <span class="bubble-close">x</span>
+
+                    {% if block.settings.product.featured_image != blank %}
+                      <a class="bubble-image" href="{{ block.settings.product.url }}">
+                        <img src="{{ block.settings.product.featured_image | image_url: width: 200 }}" 
+                        alt="{{ block.settings.product.featured_image.alt | escape }}"
+                        loading="lazy" width="80" height="100">
+
+                        {%- if block.settings.product.media[1] != null -%}
+                          <img src="{{ block.settings.product.media[1] | image_url: width: 200 }}" 
+                          alt="{{ block.settings.product.media[1].alt | escape }}"
+                          loading="lazy" width="80" height="100">
+                        {%- endif -%}
+                      </a>
+                    {% endif %}
+
+                    <div class="bubble-content">
+                      <a class="link link-no-underline" href="{{ block.settings.product.url }}">
+                        <h3 class="bubble-title">
+                          {% if block.settings.product.title != blank %}
+                            {{- block.settings.product.title | escape -}}
+                          {% else %}
+                            {{- 'onboarding.product_title' | t -}}
+                          {% endif %} 
+                        </h3>
+                      </a>
+
+											{% if block.settings.style == 'detailed' %}
+												{% if block.settings.product.price != blank  %}
+													{% render 'price', 
+														product: block.settings.product, 
+														price_class: 'small-hide medium-hide', 
+														show_compare_at_price: true 
+													%}
+												{% endif %}
+
+												<div class="quick-add no-js-hidden small-hide medium-hide">
+													{%- liquid
+														assign card_product = block.settings.product
+														assign section_id = section.id
+														assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id
+														assign qty_rules = false
+														if card_product.selected_or_first_available_variant.quantity_rule.min > 1 or card_product.selected_or_first_available_variant.quantity_rule.max != null or card_product.selected_or_first_available_variant.quantity_rule.increment > 1
+															assign qty_rules = true
+														endif
+													-%}
+													{%- if card_product.variants.size > 1 or qty_rules -%}
+														<modal-opener data-modal="#QuickAdd-{{ card_product.id }}">
+															<button id="{{ product_form_id }}-submit" type="submit" name="add" class="quick-add__submit button button--full-width" aria-haspopup="dialog" aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}" data-product-url="{{ card_product.url }}" tabindex="0">
+																<span>
+																	{{ 'products.product.choose_options' | t }}
+																</span>
+			
+																<div class="loading-overlay__spinner hidden">
+																	<svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+																		<circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+																	</svg>
+																</div>
+															</button>
+														</modal-opener>
+														<quick-add-modal id="QuickAdd-{{ card_product.id }}" class="quick-add-modal">
+															<div role="dialog" aria-label="{{ 'products.product.choose_product_options' | t: product_name: card_product.title | escape }}" aria-modal="true" class="quick-add-modal__content global-settings-popup" tabindex="-1">
+																<button id="ModalClose-{{ card_product.id }}" type="button" class="quick-add-modal__toggle" aria-label="{{ 'accessibility.close' | t }}">
+																	{% render 'icon-close' %}
+																</button>
+																<div id="QuickAddInfo-{{ card_product.id }}" class="quick-add-modal__content-info"></div>
+															</div>
+														</quick-add-modal>
+													{%- else -%}
+														<product-form>
+															{%- form 'product',
+																card_product,
+																id: product_form_id,
+																class: 'form',
+																novalidate: 'novalidate',
+																data-type: 'add-to-cart-form'
+															-%}
+																<input type="hidden" name="id" value="{{ card_product.selected_or_first_available_variant.id }}" disabled>
+																<button id="{{ product_form_id }}-submit" type="submit" name="add" class="quick-add__submit button button--full-width"
+																	aria-haspopup="dialog" aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}" aria-live="polite" data-sold-out-message="true"
+																	{% if card_product.selected_or_first_available_variant.available == false %}
+																		disabled
+																	{% else %}
+																		tabindex="0"
+																	{% endif %}
+																>
+																	<span>
+																		{%- if card_product.selected_or_first_available_variant.available -%}
+																			{{ 'products.product.add_to_cart' | t }}
+																		{%- else -%}
+																			{{ 'products.product.sold_out' | t }}
+																		{%- endif -%}
+																	</span>
+																	<span class="sold-out-message hidden">
+																		{{ 'products.product.sold_out' | t }}
+																	</span>
+																	<div class="loading-overlay__spinner hidden">
+																		<svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+																			<circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+																		</svg>
+																	</div>
+																</button>
+															{%- endform -%}
+														</product-form>
+													{%- endif -%}
+												</div>
+											{% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            {%- when 'hotspot_item' -%}
+				<style>
+					#shopify-section-{{ section.id }} .hotspot-item.item-{{ forloop.index }} {
+										  {% if block.settings.bullet_bg != blank and block.settings.bullet_bg != 'rgba(0,0,0,0)' %}
+											  --bullet-bg: {{ block.settings.bullet_bg.red }}, {{ block.settings.bullet_bg.green }}, {{ block.settings.bullet_bg.blue }};
+										  {% endif %}
+  
+										  {% if block.settings.bullet_color != blank and block.settings.bullet_color != 'rgba(0,0,0,0)' %}
+											  --bullet-color: {{ block.settings.bullet_color.red }}, {{ block.settings.bullet_color.green }}, {{ block.settings.bullet_color.blue }};
+										  {% endif %}
+  
+					  top: {{ block.settings.vertical_position }}%;
+					  left: {{ block.settings.horizontal_position }}%;
+					}
+					@media screen and (max-width: 749px) {
+					  #shopify-section-{{ section.id }} .hotspot-item.active.item-{{ forloop.index }} {
+						top: 50%;
+						left: 50%;
+					  }
+					}
+				  </style>
+  
+				  {% if block.settings.vertical_position_mobile != 30 or block.settings.horizontal_position_mobile != 30 %}
+					<style>
+					  @media screen and (max-width: 749px) {
+						#shopify-section-{{ section.id }} .hotspot-item.item-{{ forloop.index }} {
+						  top: {{ block.settings.vertical_position_mobile }}%;
+						  left: {{ block.settings.horizontal_position_mobile }}%;
+						}
+					  }
+					</style>
+				  {% endif %}
+              <div class="hotspot-item item-{{ forloop.index }} color-{{ block.settings.color_scheme }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in-long{% endif %}{% if block.settings.hide_mobile %} small-hide{% endif %}"{% if settings.animations_reveal_on_scroll %} data-cascade style="--animation-order: {{ forloop.index }};"{% endif %} {{ block.shopify_attributes }} tabindex="0">
+
+                {% if block.settings.bullet_icon != blank %}
+                  <div class="hotspot-item-icon with-icon">
+                    <span>
+                      {{ block.settings.bullet_icon | image_url: width: 35
+                        | image_tag: 
+                          loading: 'lazy', 
+                          width: block.settings.bullet_icon.width,
+                          height: block.settings.bullet_icon.height
+                      }}
+                    </span>
+                  </div>
+                {% else %}
+                  <div class="hotspot-item-icon">
+                    <span> </span>
+                  </div>
+                {% endif %}
+
+                <div class="hotspot-bubble {{ block.settings.bubble_position }} color-{{ block.settings.color_scheme }}">
+                  <div class="hotspot-bubble--info">
+
+                    <span class="bubble-close">x</span>
+
+                    {% if block.settings.image != blank %}
+                      {{ block.settings.image | image_url: width: 80 | image_tag: loading: 'lazy' }}
+                    {% endif %}
+
+                    <h3 class="bubble-title inline-richtext h6">
+                      {{ block.settings.heading }}
+                    </h3>
+                      
+                  </div>
+                </div>
+              </div>
+
+            {%- endcase -%}
+          {%- endfor -%}
+
+          <span class="image-hotspot-overlay medium-hide large-up-hide"></span>
+
+        </div>
+      </div>
+
+      <div class="indicator__wrapper">
+        <div class="indicator" id="indicator"> </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Hotspot banner",
+  "tag": "section",
+  "class": "spaced-section",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "Hotspot banner",
+      "label": "t:sections.rich-text.blocks.heading.settings.heading.label"
+    },
+    {
+      "type": "text_alignment",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h3",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h2",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "default": "<p>Share information about your brand with your customers.</p>",
+      "label": "t:sections.rich-text.blocks.text.settings.text.label"
+    },
+    {
+      "type": "select",
+      "id": "text_size_block",
+      "options": [
+        {
+        "value": "small",
+        "label": "Small"
+        },
+        {
+        "value": "medium",
+        "label": "Medium"
+        },
+        {
+        "value": "large",
+        "label": "Large"
+        }
+        ],
+      "default": "medium",
+      "label": "Description font size"
+    },
+    {
+      "type": "header",
+      "content": "Media settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.image-with-text.settings.image.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_full_width",
+      "default": false,
+      "label": "Make image full width"
+    },
+	{
+      "type": "checkbox",
+      "id": "section_container_width",
+      "default": false,
+      "label": "Make image container width"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_scroll_mobile",
+      "default": false,
+      "label": "Hide scroll on mobile",
+      "info": "Hide the scroll under the image"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 180,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 180,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 70
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Hotspot product",
+      "limit": 7,
+      "settings": [
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "t:sections.all.colors.label",
+          "default": "scheme-1"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "t:sections.featured-product.settings.product.label"
+        },
+				{
+					"type": "select",
+					"id": "style",
+					"label": "Product style",
+					"options": [
+						{
+							"value": "default",
+							"label": "Default",
+						},
+						{
+							"value": "detailed",
+							"label": "Detailed"
+						}
+					],
+					"default": "default",
+				},
+        {
+          "type": "image_picker",
+          "id": "bullet_icon",
+          "label": "Custom bullet icon"
+        },
+				{
+					"type": "color",
+					"id": "bullet_color",
+					"label": "Bullet color"
+				},
+				{
+					"type": "color",
+					"id": "bullet_bg",
+					"label": "Bullet background"
+				},
+        {
+          "type": "range",
+          "id": "horizontal_position",
+          "min": 3,
+          "max": 98,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position",
+          "min": 3,
+          "max": 98,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position mobile",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position mobile",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "bubble_position",
+          "label": "Bubble position",
+          "options": [
+            {
+              "value": "bubble-left",
+              "label": "Left"
+            },
+            {
+              "value": "bubble-right",
+              "label": "Right"
+            },
+            {
+              "value": "bubble-top",
+              "label": "Top"
+            },
+            {
+              "value": "bubble-bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "bubble-bottom"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "default": false,
+          "label": "Hide item mobile"
+        }
+      ]
+    },
+    {
+      "type": "hotspot_item",
+      "name": "Hotspot item",
+      "limit": 7,
+      "settings": [
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "t:sections.all.colors.label",
+          "default": "scheme-1"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "default": "Hotspot item",
+          "label": "Heading"
+        },
+        {
+          "type": "image_picker",
+          "id": "bullet_icon",
+          "label": "Custom bullet icon"
+        },
+				{
+					"type": "color",
+					"id": "bullet_color",
+					"label": "Bullet color"
+				},
+				{
+					"type": "color",
+					"id": "bullet_bg",
+					"label": "Bullet background"
+				},
+        {
+          "type": "range",
+          "id": "horizontal_position",
+          "min": 3,
+          "max": 98,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position",
+          "min": 3,
+          "max": 98,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position mobile",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position mobile",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "bubble_position",
+          "label": "Bubble position",
+          "options": [
+            {
+              "value": "bubble-left",
+              "label": "Left"
+            },
+            {
+              "value": "bubble-right",
+              "label": "Right"
+            },
+            {
+              "value": "bubble-top",
+              "label": "Top"
+            },
+            {
+              "value": "bubble-bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "bubble-bottom"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "default": false,
+          "label": "Hide item mobile"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hotspot banner",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 7,
+            "vertical_position": 43,
+            "bubble_position": "bubble-right"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 5,
+            "vertical_position": 68,
+            "bubble_position": "bubble-right"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 38,
+            "vertical_position": 30,
+            "bubble_position": "bubble-right"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 56,
+            "vertical_position": 38,
+            "bubble_position": "bubble-right"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 80,
+            "vertical_position": 73,
+            "bubble_position": "bubble-top"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "product": "",
+            "horizontal_position": 95,
+            "vertical_position": 45,
+            "bubble_position": "bubble-left"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

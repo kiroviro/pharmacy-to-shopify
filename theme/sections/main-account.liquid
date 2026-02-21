@@ -1,0 +1,287 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+		assign button_style = 'button button--secondary'
+
+		if section.settings.button_style == 'link'
+			assign button_style = 'link underlined-link'
+		elsif section.settings.button_style == 'solid'
+			assign button_style = 'button'
+		elsif section.settings.button_style == 'link_icon'
+			assign button_style = 'link-with-arrow'
+		elsif section.settings.button_style == 'link_hover'
+			assign button_style = 'link link-hover'
+		endif
+	-%}	
+
+<div class="color-{{ section.settings.section_color_scheme }}">
+  <div class="customer account customer-account section-{{ section.id }}-padding">
+    <div class="customer-account__sidebar">
+      <div class="customer-account__sidebar-items">
+        <div class="customer-account__sidebar-item {% if request.path == '/account' %}active-order-history{% endif %} color-{{ section.settings.color_scheme }}">
+          <a class="h5" href="{{ routes.account_url }}">
+            {{ 'customer.orders.order_history' | t }}
+            {% render 'icon-caret' %}
+          </a>
+        </div>
+        <div class="customer-account__sidebar-item color-{{ section.settings.color_scheme }}">
+          <a class="h5" href="{{ routes.account_addresses_url }}">
+            {{ 'customer.account.view_addresses' | t }}
+            {% render 'icon-caret' %}
+          </a>
+        </div>
+      </div>
+	  <a href="{{ routes.account_logout_url }}" class="customer-account__logout {{ button_style }}">
+		{%- if section.settings.button_style != 'link_icon' -%}
+			<span> {{ 'customer.log_out' | t }}</span>
+			{%- else -%}
+			{{ 'customer.log_out' | t }}
+			{%- render 'icon-caret' -%}
+		{%- endif -%}
+	 </a>
+    </div>
+
+    <div class="customer-account__orders">
+      <div class="customer-account__orders-header">
+        <h3 class="customer-account__orders-title">{{ 'customer.orders.title' | t }}</h3>
+      </div>
+
+      {% paginate customer.orders by 20 %}
+        {%- if customer.orders.size > 0 -%}
+          <table role="table" class="order-history">
+            <caption class="visually-hidden">
+              {{ 'customer.orders.title' | t }}
+            </caption>
+
+            <thead role="rowgroup">
+              <tr role="row">
+                <th
+                  id="ColumnOrder"
+                  scope="col"
+                  role="columnheader">{{ 'customer.orders.order_number' | t }}</th>
+                <th
+                  id="ColumnDate"
+                  scope="col"
+                  role="columnheader">{{ 'customer.orders.date' | t }}</th>
+                <th
+                  id="ColumnPayment"
+                  scope="col"
+                  role="columnheader">{{ 'customer.orders.payment_status' | t }}</th>
+                <th
+                  id="ColumnFulfillment"
+                  scope="col"
+                  role="columnheader">
+                  {{ 'customer.orders.fulfillment_status' | t }}
+                </th>
+                <th
+                  id="ColumnTotal"
+                  scope="col"
+                  role="columnheader">{{ 'customer.orders.total' | t }}</th>
+              </tr>
+            </thead>
+
+            <tbody role="rowgroup">
+              {%- for order in customer.orders -%}
+                <tr role="row">
+                  <td
+                    id="RowOrder"
+                    role="cell"
+                    headers="ColumnOrder"
+                    data-label="{{ 'customer.orders.order_number' | t }}">
+                    <a href="{{ order.customer_url }}" aria-label="{{ 'customer.orders.order_number_link' | t: number: order.name }}">
+                      {{ order.name }}
+                    </a>
+                  </td>
+                  <td
+                    headers="RowOrder ColumnDate"
+                    role="cell"
+                    data-label="{{ 'customer.orders.date' | t }}">
+                    {% comment %} {{ order.created_at | time_tag: format: 'date' }} {% endcomment %}
+                    {{ order.created_at | date: "%b %d, %Y" }}
+                  </td>
+                  <td
+                    headers="RowOrder ColumnPayment"
+                    role="cell"
+                    data-label="{{ 'customer.orders.payment_status' | t }}">
+                    <span style="color: {{ settings.sale_color_text }}; background-color: {{ settings.sale_color_bg }};">
+                      {{ order.financial_status_label }}
+                    </span>
+                  </td>
+                  <td
+                    headers="RowOrder ColumnFulfillment"
+                    role="cell"
+                    data-label="{{ 'customer.orders.fulfillment_status' | t }}">
+                    {{ order.fulfillment_status_label }}
+                  </td>
+                  <td
+                    headers="RowOrder ColumnTotal"
+                    role="cell"
+                    data-label="{{ 'customer.orders.total' | t }}">
+                    {{ order.total_net_amount | money }}
+                  </td>
+                </tr>
+              {%- endfor -%}
+            </tbody>
+          </table>
+        {%- else -%}
+          <div class="customer-account__orders-empty color-{{ section.settings.color_scheme }}">
+            <div class="customer-account__orders-empty__icon">
+              {%- render 'icon-cart' -%}
+            </div>
+            <h3>{{ 'customer.orders.none' | t }}</h3>
+          </div>
+        {%- endif -%}
+  
+        {%- if paginate.pages > 1 -%}
+          {%- if paginate.parts.size > 0 -%}
+            <nav
+              class="pagination"
+              role="navigation"
+              aria-label="{{ 'general.pagination.label' | t }}">
+              <ul role="list">
+                {%- if paginate.previous -%}
+                  <li>
+                    <a href="{{ paginate.previous.url }}" aria-label="{{ 'general.pagination.previous' | t }}">
+                      <svg
+                        aria-hidden="true"
+                        focusable="false"
+                        viewBox="0 0 10 6">
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z"
+                          fill="currentColor">
+                      </svg>
+                    </a>
+                  </li>
+                {%- endif -%}
+  
+                {%- for part in paginate.parts -%}
+                  <li>
+                    {%- if part.is_link -%}
+                      <a href="{{ part.url }}" aria-label="{{ 'general.pagination.page' | t: number: part.title }}">
+                        {{- part.title -}}
+                      </a>
+                    {%- else -%}
+                      {%- if part.title == paginate.current_page -%}
+                        <span aria-current="page" aria-label="{{ 'general.pagination.page' | t: number: part.title }}">
+                          {{- part.title -}}
+                        </span>
+                      {%- else -%}
+                        <span>{{ part.title }}</span>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+  
+                {%- if paginate.next -%}
+                  <li>
+                    <a href="{{ paginate.next.url }}" aria-label="{{ 'general.pagination.next' | t }}">
+                      <svg
+                        aria-hidden="true"
+                        focusable="false"
+                        viewBox="0 0 10 6">
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 00-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z"
+                          fill="currentColor">
+                      </svg>
+                    </a>
+                  </li>
+                {%- endif -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+        {%- endif -%}
+      {% endpaginate %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "t:sections.main-account.name",
+    "settings": [
+      {
+        "type": "color_scheme",
+        "id": "section_color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Container color scheme",
+        "default": "scheme-1"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 80
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 140
+      },
+	  {
+		"type": "select",
+		"id": "button_style",
+		"label": "Button style",
+			"options": [
+			{
+		    	"value": "link",
+				"label": "Inline button"
+			},
+			{
+				"value": "link_hover",
+				"label": "Inline button with underline on hover"
+			},
+			{
+				"value": "link_icon",
+				"label": "Inline button with icon"
+			}
+			],
+				"default": "link_icon"
+		}
+    ]
+  }
+{% endschema %}

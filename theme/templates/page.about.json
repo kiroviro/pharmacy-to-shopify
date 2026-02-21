@@ -1,0 +1,549 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "show_breadcrumbs_top": false,
+        "image": "",
+        "radius_background": true,
+        "banner_height": "medium",
+        "banner_mobile_height": "medium",
+        "content_alignment": "bottom",
+        "image_block": false,
+        "image_size": "60",
+        "image_overlay_opacity": 50,
+        "title": "За нас",
+        "heading_size": "h1",
+        "description_text": "",
+        "text_size_block": "medium",
+        "heading_alignment": "center",
+        "color_scheme": "scheme-3",
+        "content_color_scheme": "",
+        "text_secondary_color": false,
+        "section_full_width": true,
+        "section_background": "#ffffff",
+        "content_text_color": "main",
+        "padding_top": 200,
+        "padding_bottom": 100,
+        "content_padding_top": 0,
+        "content_padding_bottom": 0
+      }
+    },
+    "56f51a45-be4b-41f4-a07c-51ce2cd92df0": {
+      "type": "multicolumn",
+      "blocks": {
+        "template--16766847615213__56f51a45-be4b-41f4-a07c-51ce2cd92df0-column-1": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Our Story",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link_icon",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "ce1e13bd-4688-49b5-944f-bed01c8a1d3a": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "",
+            "title": "",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Във ВИА Фарма вярваме, че грижата за здравето не трябва да бъде сложна. Затова предлагаме над 9000 продукта от доказани марки — лекарства, витамини, козметика и медицински изделия — на едно удобно място.<\/p>",
+            "text_size_block": "",
+            "text_color": "foreground-secondary",
+            "button_style": "link_icon",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "template--16766847615213__56f51a45-be4b-41f4-a07c-51ce2cd92df0-column-2": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "",
+            "title": "",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>To make it easier and not so confusing, we have curated a clean, honest, and effective line of supplements for everyday health goals. Every Mediva product is selected with care, guided by transparency and a belief in better living through natural support.<\/p>",
+            "text_size_block": "",
+            "text_color": "foreground-secondary",
+            "button_style": "link_icon",
+            "link_label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--16766847615213__56f51a45-be4b-41f4-a07c-51ce2cd92df0-column-1",
+        "ce1e13bd-4688-49b5-944f-bed01c8a1d3a",
+        "template--16766847615213__56f51a45-be4b-41f4-a07c-51ce2cd92df0-column-2"
+      ],
+      "settings": {
+        "title": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "full",
+        "image_ratio": "adapt",
+        "columns_desktop": 3,
+        "grid_type": "grid",
+        "column_divider": false,
+        "column_alignment": "left",
+        "background_style": "none",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-2",
+        "background_color_full_width": true,
+        "background_border_radius": false,
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 80
+      }
+    },
+    "multicolumn_VpWaBt": {
+      "type": "multicolumn",
+      "blocks": {
+        "column_tigHL7": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-1",
+            "image": "",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Оригинални лекарства",
+            "heading_size_block": "h6",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Проверени и качествени лекарства от доказани производители.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_i386HY": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Поддръжка след покупка",
+            "heading_size_block": "h6",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Екип от здравни специалисти, готови да ви помогнат.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_dK764B": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Бърза и сигурна доставка",
+            "heading_size_block": "h6",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Безопасна и навременна доставка на лекарства до вашия адрес.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column_Q94YKW": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "",
+            "image": "",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Достъпно здравеопазване",
+            "heading_size_block": "h6",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Конкурентни цени с отстъпки и спестявания на основни лекарства.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground-secondary",
+            "button_style": "solid",
+            "link_label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "column_tigHL7",
+        "column_i386HY",
+        "column_dK764B",
+        "column_Q94YKW"
+      ],
+      "settings": {
+        "title": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "fourth",
+        "image_ratio": "landscape",
+        "columns_desktop": 4,
+        "grid_type": "grid",
+        "column_divider": true,
+        "column_alignment": "center",
+        "background_style": "none",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-1",
+        "background_color_full_width": false,
+        "background_border_radius": true,
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "07449294-71f9-4bfe-b9de-a7c3b680c9b0": {
+      "type": "multicolumn",
+      "blocks": {
+        "template--16766847615213__07449294-71f9-4bfe-b9de-a7c3b680c9b0-column-1": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-3",
+            "image": "",
+            "image_cover": true,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Our Wellness Vision",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Вярваме в свят, в който грижата за здравето е лесна, достъпна и удобна за всеки. Нашата цел е да свържем малките аптеки с дигиталния свят.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground",
+            "button_style": "link_hover",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "template--16766847615213__07449294-71f9-4bfe-b9de-a7c3b680c9b0-column-2": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-3",
+            "image": "",
+            "image_cover": true,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "The Mediva Approach",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "<p>Подходът ни е прост — предлагаме качествени продукти на достъпни цени с бърза и сигурна доставка. Без излишни усложнения.<\/p>",
+            "text_size_block": "small",
+            "text_color": "foreground",
+            "button_style": "link_hover",
+            "link_label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--16766847615213__07449294-71f9-4bfe-b9de-a7c3b680c9b0-column-1",
+        "template--16766847615213__07449294-71f9-4bfe-b9de-a7c3b680c9b0-column-2"
+      ],
+      "settings": {
+        "title": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "full",
+        "image_ratio": "landscape",
+        "columns_desktop": 2,
+        "grid_type": "grid",
+        "column_divider": false,
+        "column_alignment": "left",
+        "background_style": "primary",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-2",
+        "background_color_full_width": true,
+        "background_border_radius": false,
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "900a647f-3405-4ab7-8dcb-ce6d1e10a997": {
+      "type": "scrolling-banner",
+      "blocks": {
+        "template--16766664409325__fee2a82b-1a9b-41ec-8ac2-d9d964c70db6-heading-1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>Инвестирайте в [Здравето]<\/p>",
+            "highlight_text": "#003e52"
+          }
+        }
+      },
+      "block_order": [
+        "template--16766664409325__fee2a82b-1a9b-41ec-8ac2-d9d964c70db6-heading-1"
+      ],
+      "settings": {
+        "color_scheme": "",
+        "scroll_speed": 15,
+        "scroll_direction": "direction-left",
+        "items_padding": 30,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "f4a0ffb0-5844-46fd-9277-50cebfc43e64": {
+      "type": "team-member",
+      "blocks": {
+        "employee_main_tAB9x6": {
+          "type": "Employee_main",
+          "settings": {
+            "color_scheme_item": "scheme-7",
+            "image": "",
+            "fullname": "John Doe",
+            "description": "<h2>Mind Behind Mediva<\/h2><p>Mediva began as a personal goal. Our founder and CEO, John Doe, spent years learning about health and wellness to navigate the purpose of curating natural and easily accessible supplements. <\/p><p>With a background in health and medicine, John Doe had his personal attention and involvement in the process of building clean, effective supplements accessible to everyone.<\/p>",
+            "text_size_block": "small",
+            "job_title": "Founder and CEO at Mediva",
+            "job_title_color": "foreground",
+            "card_content_alignment": "left",
+            "link_label": "",
+            "link": "https:\/\/shopify.com"
+          }
+        },
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-2": {
+          "type": "Employee",
+          "settings": {
+            "color_scheme_item": "",
+            "image": "",
+            "fullname": "Emily Carter",
+            "description": "",
+            "text_size_block": "large",
+            "job_title": "Head of Product & Innovation",
+            "job_title_color": "foreground-secondary",
+            "card_content_alignment": "center",
+            "link_label": "",
+            "link": "https:\/\/shopify.com"
+          }
+        },
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-9": {
+          "type": "Employee",
+          "settings": {
+            "color_scheme_item": "scheme-1",
+            "image": "",
+            "fullname": "Daniel Moore",
+            "description": "",
+            "text_size_block": "medium",
+            "job_title": "Brand & Marketing Lead",
+            "job_title_color": "foreground-secondary",
+            "card_content_alignment": "center",
+            "link_label": "",
+            "link": "https:\/\/shopify.com"
+          }
+        },
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-3": {
+          "type": "Employee",
+          "settings": {
+            "color_scheme_item": "",
+            "image": "",
+            "fullname": "Sophie Reynolds",
+            "description": "",
+            "text_size_block": "medium",
+            "job_title": "Nutrition & Wellness Advisor",
+            "job_title_color": "foreground-secondary",
+            "card_content_alignment": "center",
+            "link_label": "",
+            "link": "https:\/\/shopify.com"
+          }
+        },
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-4": {
+          "type": "Employee",
+          "settings": {
+            "color_scheme_item": "",
+            "image": "",
+            "fullname": "James Walker",
+            "description": "",
+            "text_size_block": "medium",
+            "job_title": "Supply Chain Manager",
+            "job_title_color": "foreground-secondary",
+            "card_content_alignment": "center",
+            "link_label": "",
+            "link": "https:\/\/shopify.com"
+          }
+        }
+      },
+      "block_order": [
+        "employee_main_tAB9x6",
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-2",
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-9",
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-3",
+        "template--16766847615213__f4a0ffb0-5844-46fd-9277-50cebfc43e64-Employee-4"
+      ],
+      "settings": {
+        "title": "Our Perfect Team",
+        "heading_size": "h2",
+        "description": "",
+        "heading_alignment": "center",
+        "color_scheme": "",
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "44fced79-5236-4ca0-898f-58fd1f5fbf8a": {
+      "type": "testimonials",
+      "blocks": {
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-1": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 5,
+            "image": "",
+            "full_name": "Мария К.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Много удобно е да си поръчам лекарствата онлайн. Бърза доставка и голям избор от продукти.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        },
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-2": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 4,
+            "image": "",
+            "full_name": "Георги П.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Намерих витамините, които търсех, на отлична цена. Препоръчвам на всеки.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        },
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-3": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 5,
+            "image": "",
+            "full_name": "Елена Д.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Отличен избор от козметика и грижа за кожата. Поръчвам редовно.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        }
+      },
+      "block_order": [
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-1",
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-2",
+        "template--16766664409325__bff1f354-16f7-4be2-a816-44e694d864e4-testimonial-3"
+      ],
+      "settings": {
+        "title": "Mediva Made a Difference",
+        "heading_width": 660,
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "color_scheme": "scheme-1",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "foreground",
+        "scrolling_speed": 60,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "9e51d928-9f0c-4670-a0bc-503d78480cd9": {
+      "type": "featured-blog",
+      "settings": {
+        "heading": "Здравни съвети",
+        "heading_size": "h2",
+        "blog": "news",
+        "read_more_title": "ПРОЧЕТИ ПОВЕЧЕ",
+        "post_limit": 3,
+        "columns_desktop": 3,
+        "color_scheme": "scheme-1",
+        "show_image": true,
+        "show_date": true,
+        "show_author": false,
+        "show_comment": false,
+        "all_button_style": "solid",
+        "show_view_all": true,
+        "swipe_on_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 130
+      }
+    }
+  },
+  "order": [
+    "main",
+    "56f51a45-be4b-41f4-a07c-51ce2cd92df0",
+    "multicolumn_VpWaBt",
+    "07449294-71f9-4bfe-b9de-a7c3b680c9b0",
+    "900a647f-3405-4ab7-8dcb-ce6d1e10a997",
+    "f4a0ffb0-5844-46fd-9277-50cebfc43e64",
+    "44fced79-5236-4ca0-898f-58fd1f5fbf8a",
+    "9e51d928-9f0c-4670-a0bc-503d78480cd9"
+  ]
+}

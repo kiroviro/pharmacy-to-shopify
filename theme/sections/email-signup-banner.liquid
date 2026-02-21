@@ -1,0 +1,376 @@
+{{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
+{{ 'component-newsletter.css' | asset_url | stylesheet_tag }}
+{{ 'newsletter-section.css' | asset_url | stylesheet_tag }}
+{{ 'section-email-signup-banner.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  {%- if section.settings.image_position == 'image-cover' -%}
+    #Banner-{{ section.id }}::after {
+      opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+    }
+  {% else %}
+    #Banner-{{ section.id }}::after {
+      display: none;
+    }
+    #Banner-{{ section.id }} .banner__media::after {
+      opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+    }
+  {%- endif -%}
+
+  {%- if section.settings.image_height == 'adapt-image' and section.settings.image != blank -%}
+    @media screen and (max-width: 749px) {
+      #Banner-{{ section.id }}:not(.banner--mobile-bottom) .banner__content::before {
+        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        content: '';
+        display: block;
+      }
+    }
+
+    #Banner-{{ section.id }}::before,
+    #Banner-{{ section.id }} .banner__media::before {
+      padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+      content: '';
+      display: block;
+    }
+  {%- endif -%}
+{%- endstyle -%}
+
+<div id="Banner-{{ section.id }}" class="email-signup-banner banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--{{ section.settings.image_position }} color-{{ section.settings.color_scheme }}">
+
+  {%- if section.settings.show_background_image -%}
+    <div class="banner__media media">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1200 | image_tag: sizes: '100vw', alt: section.settings.image.alt,
+          widths: '320, 360, 375, 420, 480, 768, 950, 1024, 1200, 1360, 1440 1600, 1920, 2560'
+        }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag }}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="banner__content page-width">
+    <div class="email-signup-banner__box banner__box newsletter newsletter__wrapper isolate{% if section.settings.show_background_image == false %} email-signup-banner__box--no-image{% endif %} content-container color-{{ section.settings.color_scheme }} gradient content-container--full-width-mobile">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'heading' -%}
+            <h2 class="email-signup-banner__heading {{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+              {{ block.settings.heading | escape }}
+            </h2>
+
+          {%- when 'paragraph' -%}
+            <div class="newsletter__subheading rte clr-{{ block.settings.text_color }}" {{ block.shopify_attributes }}>
+              {{ block.settings.text }}
+            </div>
+
+          {%- when 'countdown' -%}
+            {% render 'countdown-bar',
+              block: block,
+              color_scheme: block.settings.color_scheme,
+              countdown_date: block.settings.countdown_date,
+              countdown_end: block.settings.countdown_end,
+              countdown_label: block.settings.countdown_label,
+              days_label: block.settings.days_label,
+              hours_label: block.settings.hours_label,
+              mins_label: block.settings.mins_label,
+              secs_label: block.settings.secs_label,
+              block_shopify_attributes: block.shopify_attributes,
+            %}
+
+          {%- when 'email_form' -%}
+            <div {{ block.shopify_attributes }}>
+              {% form 'customer', class: 'newsletter-form' %}
+
+                <input type="hidden" name="contact[tags]" value="newsletter">
+
+                <div class="newsletter-form__field-wrapper">
+                  <div class="field">
+
+                    <input id="NewsletterForm--{{ section.id }}" class="field__input"
+                      type="email" name="contact[email]"  value="{{ form.email }}"
+                      aria-required="true" autocorrect="off" autocapitalize="off" autocomplete="email"
+                      {% if form.errors %}
+                        autofocus aria-invalid="true" aria-describedby="Newsletter-error--{{ section.id }}"
+                      {% elsif form.posted_successfully? %}
+                        aria-describedby="Newsletter-success--{{ section.id }}"
+                      {% endif %}
+                      placeholder="{{ 'newsletter.label' | t }}" required>
+
+                    <label class="field__label" for="NewsletterForm--{{ section.id }}">
+                      {{ 'newsletter.label' | t }}
+                    </label>
+
+                    <button type="submit" class="newsletter-form__button field__button" name="commit" id="Subscribe" aria-label="{{ 'newsletter.button_label' | t }}">
+                      {% render 'icon-arrow' %}
+                    </button>
+                  </div>
+
+                  {%- if form.errors -%}
+                    <small class="newsletter-form__message form__message" id="Newsletter-error--{{ section.id }}">
+                      {%- render 'icon-error' -%}
+                      {{- form.errors.translated_fields.email | capitalize }}
+                      {{ form.errors.messages.email -}}
+                    </small>
+                  {%- endif -%}
+              
+                </div>
+
+                {%- if form.posted_successfully? -%}
+                  <h3 class="newsletter-form__message newsletter-form__message--success form__message" id="Newsletter-success--{{ section.id }}" tabindex="-1" autofocus>
+                    {% render 'icon-success' -%}
+                    {{- 'newsletter.success' | t }}
+                  </h3>
+                {%- endif -%}
+
+              {% endform %}
+            </div>
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.email-signup-banner.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.email-signup-banner.settings.paragraph.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.email-signup-banner.settings.image.label"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:sections.email-signup-banner.settings.image_overlay_opacity.label",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "show_background_image",
+      "label": "t:sections.email-signup-banner.settings.show_background_image.label",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left",
+      "label": "Image position"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.email-signup-banner.settings.desktop_content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.email-signup-banner.settings.desktop_content_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.email-signup-banner.settings.desktop_content_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.email-signup-banner.settings.desktop_content_alignment.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "info": "t:sections.email-signup-banner.settings.color_scheme.info",
+      "default": "scheme-1"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "t:sections.email-signup-banner.blocks.heading.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Opening soon",
+          "label": "t:sections.email-signup-banner.blocks.heading.settings.heading.label"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "t:sections.all.heading_size.options__1.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size.options__2.label"
+            },
+            {
+              "value": "h1",
+              "label": "t:sections.all.heading_size.options__3.label"
+            }
+          ],
+          "default": "h2",
+          "label": "t:sections.all.heading_size.label"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "name": "t:sections.email-signup-banner.blocks.paragraph.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Be the first to know when we launch.</p>",
+          "label": "t:sections.email-signup-banner.blocks.paragraph.settings.paragraph.label"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "options": [
+          {
+            "value": "foreground",
+            "label": "t:settings_schema.colors.settings.text.label"
+          },
+          {
+            "value": "foreground-secondary",
+            "label": "t:settings_schema.colors.settings.text_secondary.label"
+          },
+          {
+            "value": "accent",
+            "label": "t:settings_schema.colors.settings.accent_color.label"
+          }
+          ],
+          "default": "foreground",
+          "label": "Color"
+        }
+      ]
+    },
+    {
+      "type": "countdown",
+      "name": "Countdown",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "t:sections.all.colors.label",
+          "default": "scheme-1"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "countdown_label",
+          "label": "Countdown label"
+        },
+        {
+          "type": "text",
+          "id": "countdown_date",
+          "default": "Dec 31, 2024",
+          "label": "End date",
+          "info": "Example: Dec 31, 2024 or Dec 31, 2024 20:00"
+        },
+        {
+          "type": "select",
+          "id": "countdown_end",
+          "options": [
+            {
+              "value": "show_zeroes",
+              "label": "Show zeroes"
+            },
+            {
+              "value": "hide_countdown",
+              "label": "Hide countdown"
+            },
+            {
+              "value": "cycle",
+              "label": "Loop"
+            }
+          ],
+          "default": "cycle",
+          "label": "When date has passed"
+        },
+        {
+          "type": "text",
+          "id": "days_label",
+          "default": "Days",
+          "label": "Days label"
+        },
+        {
+          "type": "text",
+          "id": "hours_label",
+          "default": "Hours",
+          "label": "Hours label"
+        },
+        {
+          "type": "text",
+          "id": "mins_label",
+          "default": "Minutes",
+          "label": "Minutes label"
+        },
+        {
+          "type": "text",
+          "id": "secs_label",
+          "default": "Seconds",
+          "label": "Seconds label"
+        }
+      ]
+    },
+    {
+      "type": "email_form",
+      "name": "t:sections.email-signup-banner.blocks.email_form.name",
+      "limit": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.email-signup-banner.presets.name",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "paragraph"
+        },
+        {
+          "type": "email_form"
+        }
+      ]
+    }
+  ],
+  "templates": [
+    "password"
+  ]
+}
+{% endschema %}

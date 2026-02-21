@@ -1,0 +1,246 @@
+{%- for block in section.blocks -%}
+
+  {% case block.type %}
+
+    {%- when 'product' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal compare-product-header" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}">
+        <div class="product-media">
+          <div class="product-image">
+            {% if product.featured_media != blank %}
+              <img src="{{ product.featured_media | image_url: width: 340 }}" alt="compare product {{ product.title }}" width="340" height="280" loading="lazy" fetchpriority="low">
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="product-info">
+          <h3 class="compare-product-title h6">
+            {{ product.title }}
+          </h3>
+
+          <div class="compare-product-price">
+            {%- render 'price',
+              product: product,
+              use_variant: true,
+              show_badges: false,
+              price_class: ''
+            -%}
+          </div>
+          
+          <a href="{{ product.url }}" class="button">
+            <span>
+              View Product
+            </span>
+          </a>
+        </div>
+
+        <span class="remove-compare-product" data-product-id="{{ product.id }}"> </span>
+      </div>
+
+    {%- when 'vendor' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+        <span>
+          {% if product.vendor != blank %}
+            {{ product.vendor }}
+          {% else %}
+            N/A
+          {% endif %}
+        </span>
+      </div>
+
+    {%- when 'type' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+        <span>
+          {% if product.type != blank %}
+            {{ product.type }}
+          {% else %}
+            N/A
+          {% endif %}
+        </span>
+      </div>
+
+    {%- when 'description' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+        <div class="rte">
+          {% if product.description != blank %}
+            {{ product.description }}
+          {% else %}
+            N/A
+          {% endif %}
+        </div>
+      </div>
+
+    {%- when 'sku' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+        <span>
+          {% if product.selected_or_first_available_variant.sku != blank %}
+            {{ product.selected_or_first_available_variant.sku }}
+          {% else %}
+            N/A
+          {% endif %}
+        </span>
+      </div>
+
+    {%- when 'variant_option' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}-{{ forloop.index }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+
+        <span>
+          {%- for option in product.options_with_values -%}
+            {% if option.name == block.settings.variant_name %}
+              {%- for value in option.values -%}
+                {{ value }}{% unless forloop.last %},{% endunless %}
+              {%- endfor -%}
+            {% endif %}
+          {%- endfor -%}
+        </span>
+      </div>
+
+    {%- when 'metafield' -%}
+      <div class="compare-product color-scheme-1 compare-product-modal" data-product-id="{{ product.id }}" data-compare-key="compare-{{ block.type }}-{{ forloop.index }}">
+        <div class="inline-richtext compare-label">
+          {{ block.settings.label }}
+        </div>
+
+        <div class="rte">
+          {% liquid
+            assign metafieldValue = block.settings.metafield
+          %}
+          {% if metafieldValue != blank %}
+            {{ metafieldValue }}
+          {% else %}
+            N/A
+          {% endif %}
+        </div>
+      </div>
+
+  {% endcase %}
+
+{%- endfor -%}
+
+{% schema %}
+  {
+    "name": "Compare",
+    "class": "section-compare hidden",
+    "tag": "section",
+    "enabled_on": {
+      "templates": [
+        "product"
+      ]
+    },
+    "blocks": [
+      {
+        "type": "product",
+        "name": "Header",
+        "limit": 1
+      },
+      {
+        "type": "vendor",
+        "name": "Vendor",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "id": "label",
+            "default": "Vendor",
+            "label": "Row title"
+          }
+        ]
+      },
+      {
+        "type": "type",
+        "name": "Product type",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "id": "label",
+            "default": "Product type",
+            "label": "Row title"
+          }
+        ]
+      },
+      {
+        "type": "description",
+        "name": "Product description",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "inline_richtext",
+            "id": "label",
+            "default": "Product description",
+            "label": "Row title"
+          }
+        ]
+      },
+      {
+        "type": "sku",
+        "name": "Product SKU",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "id": "label",
+            "default": "Product SKU",
+            "label": "Row title"
+          }
+        ]
+      },
+      {
+        "type": "variant_option",
+        "name": "Variant option",
+        "limit": 3,
+        "settings": [
+          {
+            "type": "text",
+            "id": "label",
+            "default": "Product option",
+            "label": "Row title"
+          },
+          {
+            "type": "text",
+            "id": "variant_name",
+            "default": "Size",
+            "label": "Option name"
+          }
+        ]
+      },
+      {
+        "type": "metafield",
+        "name": "Metafield",
+        "limit": 10,
+        "settings": [
+          {
+            "type": "text",
+            "id": "label",
+            "default": "Metafield",
+            "label": "Row title"
+          },
+          {
+            "type": "richtext",
+            "id": "metafield",
+            "label": "Custom content"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Compare"
+      }
+    ]
+  }
+{% endschema %}

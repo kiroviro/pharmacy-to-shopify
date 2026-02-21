@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-article",
+      "blocks": {
+        "navigation_iCDdcQ": {
+          "type": "navigation",
+          "settings": {
+            "show_progress_line": true,
+            "sticky_title": true,
+            "share_label": "Сподели",
+            "color_scheme": "scheme-1"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "show_tags": true,
+            "blog_show_date": true
+          }
+        },
+        "featured_image": {
+          "type": "featured_image",
+          "settings": {
+            "image_height": "medium"
+          }
+        },
+        "content": {
+          "type": "content",
+          "settings": {
+            "text_color": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "navigation_iCDdcQ",
+        "title",
+        "featured_image",
+        "content"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1"
+      }
+    },
+    "featured_blog_YjpWtN": {
+      "type": "featured-blog",
+      "settings": {
+        "heading": "От нашия блог",
+        "heading_size": "h2",
+        "blog": "news",
+        "read_more_title": "ПРОЧЕТИ ПОВЕЧЕ",
+        "post_limit": 3,
+        "columns_desktop": 3,
+        "color_scheme": "scheme-1",
+        "show_image": true,
+        "show_date": true,
+        "show_author": false,
+        "show_comment": false,
+        "all_button_style": "solid",
+        "show_view_all": true,
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 130
+      },
+      "disabled": true
+    }
+  },
+  "order": [
+    "main",
+    "featured_blog_YjpWtN"
+  ]
+}

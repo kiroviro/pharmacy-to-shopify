@@ -1,0 +1,80 @@
+.countdown-bar {
+  position: relative;
+  display: flex;
+	flex-wrap: wrap;
+  column-gap: 3.6rem;
+  width: fit-content;
+  padding: 2rem 2.5rem 1.5rem;
+  border-radius: var(--text-boxes-radius);
+  box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), .3);
+  background-color: rgba(var(--color-background), 0.6);
+}
+
+.countdown-bar[data-color="secondary"] .countdown-bar__title {
+  color: rgb(var(--color-foreground-secondary));
+}
+
+.countdown-bar[data-color="secondary"] {
+  box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground-secondary), 1);
+}
+
+.coundown-label {
+  position: absolute;
+  top: 0;
+  transform: translateY(-50%);
+  left: 2rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  color: rgb(var(--color-button-text));
+  background-color: rgba(var(--color-button), var(--alpha-button-background));
+  border-radius: var(--badge-corner-radius);
+  letter-spacing: .02rem;
+}
+
+.coundown-label.inline-richtext a:hover {
+  color: rgb(var(--color-button-text));
+}
+
+.countdown-bar__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.countdown-bar__sec .countdown-bar__number {
+  display: flex;
+}
+
+.countdown-bar__item:not(:last-child)::after {
+  content: ':';
+  position: absolute;
+  top: 0.3rem;
+  right: -2.1rem;
+  color: rgba(var(--color-foreground), 1);
+  font-weight: bold;
+}
+
+.countdown-bar__title {
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 1);
+}
+
+@media screen and (max-width: 989px) {
+  .countdown-bar {
+    column-gap: 2rem;
+    width: fit-content;
+    justify-content: center;
+  }
+  .countdown-bar__item:not(:last-child)::after {
+    right: -1.3rem;
+  }
+}
+
+/* @media screen and (max-width: 750px) {
+  .countdown-bar {
+    width: 100%;
+  }
+} */

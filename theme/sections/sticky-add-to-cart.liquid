@@ -1,0 +1,184 @@
+{{ 'sticky-add-to-cart.css' | asset_url | stylesheet_tag }}
+
+<style>
+  .sticky-atc-bar {
+    --sticky-width: {{ section.settings.sticky_width }}rem;
+    --font-weight: {{ section.settings.title_font_weight }}
+  }
+
+</style>
+
+<div class="sticky-atc-bar {{ section.settings.style }} gradient color-{{ section.settings.color_scheme }}" data-style="{{section.settings.style}}">
+  <div class="page-width">
+    <sticky-atc-bar class="atc-bar-product" data-url="{{ product.url }}">
+      <div class="atc-product-media">
+        {% if product.selected_or_first_available_variant.featured_media != nil %}
+          <img id="atc-{{ section.id }}" class="atc-bar-product__img" src="{{ product.selected_or_first_available_variant.featured_media | image_url: width: 80 }}" alt="{{ product.selected_or_first_available_variant.featured_media.alt | escape }}" height="80" width="80" loading="lazy">
+        {% elsif product.featured_media != nil %}
+          <img id="atc-{{ section.id }}" class="atc-bar-product__img" src="{{ product.featured_media | image_url: width: 80 }}" alt="{{ product.featured_media.alt | escape }}" height="80" width="80" loading="lazy">
+        {% endif %}
+      </div>
+
+      <div class="atc-product-info">
+        <p class="atc-product-title">
+          {{ product.title | escape }}
+        </p>
+
+        {% render 'price', 
+          product: product, 
+          use_variant: true, 
+          show_prices: true, 
+          show_badges: false,
+        %}
+      </div>
+
+	  
+      <div class="atc-product-form">
+        <product-form class="product-form">
+          {%- assign product_form_id = 'product-form-' | append: product.id -%}
+
+          <div class="product-form__error-message-wrapper" role="alert" hidden>
+            <svg aria-hidden="true" focusable="false" class="icon icon-error" viewBox="0 0 13 13">
+              <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+              <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+              <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+              <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+            </svg>
+            <span class="product-form__error-message"></span>
+          </div>
+
+          {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+              {%- if product.has_only_default_variant == false -%}
+                <div class="select small-hide{% if section.settings.style != 'default' %} medium-hide large-up-hide{% endif %}">
+                  <select name="id" class="atc-bar-product__select select__select" aria-label="Select variant">
+                    {% for variant in product.variants %}
+                      <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %} data-price="{{ variant.price | money }}" {% if variant.featured_image != blank %}data-media="{{ variant.featured_image | image_url: width: 80 }}"{% endif %}>
+                        {{- variant.title -}}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% render 'icon-caret' %}
+                </div>
+              {%- endif -%}
+
+              {% if section.settings.style == 'default' %}
+                <quantity-input class="quantity">
+
+                  <button class="quantity__button no-js-hidden" name="minus" type="button">
+                    <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}</span>
+                    {% render 'icon-minus' %}
+                  </button>
+
+                  <input class="quantity__input" type="number" name="quantity" id="Quantity-{{ section.id }}-sticky"
+                      min="1" value="1" form="{{ product_form_id }}" 
+                      product-price="{{ product.selected_or_first_available_variant.price }}">
+
+                  <button class="quantity__button no-js-hidden" name="plus" type="button">
+                    <span class="visually-hidden">
+                      {{ 'products.product.quantity.increase' | t: product: product.title | escape }}
+                    </span>
+                    {% render 'icon-plus' %}
+                  </button>
+
+                </quantity-input>
+              {% endif %}
+
+            <button type="submit" name="add" class="button button-add-card" {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %} tabindex="0">
+              <span>
+                {%- if product.selected_or_first_available_variant.available -%}
+                  {{ 'products.product.add_to_cart' | t }}
+                {%- else -%}
+                  {{ 'products.product.sold_out' | t }}
+                {%- endif -%}
+              </span>
+            </button>
+
+          {%- endform -%}
+        </product-form>
+      </div>
+	  <span class="sticky-close-button"></span>
+    </sticky-atc-bar>
+  </div>
+
+</div>
+
+<script src="{{ 'sticky-add-to-cart.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Sticky add to cart",
+  "tag": "section",
+  "class": "section section-sticky-atc-bar",
+  "templates": [
+    "product"
+  ],
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "info": "t:sections.all.colors.has_cards_info",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "right-side",
+          "label": "Right side"
+        }
+      ],
+      "default": "right-side",
+      "label": "Section style"
+    },
+    {
+      "type": "select",
+      "id": "sticky_width",
+      "options": [
+        {
+          "value": "48",
+          "label": "Small"
+        },
+        {
+          "value": "56",
+          "label": "Large"
+        }
+      ],
+      "default": "56",
+      "label": "Sticky width",
+      "info": "Works when the right side option is active"
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        {
+        "value": "400",
+        "label": "Regular"
+        },
+        {
+        "value": "500",
+        "label": "Medium"
+        },
+        {
+        "value": "600",
+        "label": "Semi Bold"
+        }
+    ],
+      "default": "600"
+     }
+  ],
+  "presets": [
+    {
+      "name": "Sticky add to cart"
+    }
+  ]
+}
+{% endschema %}

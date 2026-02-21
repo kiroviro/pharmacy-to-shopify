@@ -1,0 +1,449 @@
+.video-with-text .grid {
+  margin-bottom: 0;
+}
+
+.video-with-text .grid__item {
+  position: relative;
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text__grid--reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+.video-with-text__media {
+  min-height: 100%;
+  overflow: visible;
+}
+
+.video-with-text__media--small {
+  height: 19.4rem;
+}
+
+.video-with-text__media--medium {
+  height: 29.6rem;
+}
+
+.video-with-text__media--large {
+  height: 43.5rem;
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text__media--small {
+    height: 31.4rem;
+  }
+
+  .video-with-text__media--medium {
+    height: 46rem;
+  }
+
+  .video-with-text__media--large {
+    height: 69.5rem;
+  }
+}
+
+.video-with-text__media--placeholder {
+  position: relative;
+  overflow: hidden;
+}
+
+.video-with-text__media--placeholder:after {
+  content: '';
+  position: absolute;
+  background: rgba(var(--color-foreground), 0.04);
+}
+
+.video-with-text__media--placeholder.video-with-text__media--adapt {
+  height: 20rem;
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text__media--placeholder.video-with-text__media--adapt {
+    height: 30rem;
+  }
+}
+
+.video-with-text__media--placeholder > svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.video-with-text__media--placeholder:is(.animate--ambient, .animate--zoom-in) > svg {
+  top: 0;
+  left: 0;
+  transform: translate(0);
+}
+
+.video-with-text__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  align-self: center;
+  height: 100%;
+  padding: 4rem 3rem 4rem;
+  position: relative;
+  z-index: 1;
+  border-radius: var(--text-boxes-radius);
+}
+
+@media screen and (max-width: 749px) {
+  .video-with-text__content.background-transparent {
+    padding: 3rem 0 0;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text--overlap .video-with-text__content {
+    padding: 4rem 4rem 5rem;
+  }
+}
+
+.video-with-text .grid__item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.video-with-text:not(.video-with-text--overlap) .video-with-text__media-item:after {
+  border-radius: var(--media-radius);
+  box-shadow: var(--media-shadow-horizontal-offset) var(--media-shadow-vertical-offset) var(--media-shadow-blur-radius)
+    rgba(var(--color-shadow), var(--media-shadow-opacity));
+}
+
+.video-with-text:not(.video-with-text--overlap) .video-with-text__text-item:after {
+  border-radius: var(--text-boxes-radius);
+  box-shadow: var(--text-boxes-shadow-horizontal-offset) var(--text-boxes-shadow-vertical-offset)
+    var(--text-boxes-shadow-blur-radius) rgba(var(--color-shadow), var(--text-boxes-shadow-opacity));
+}
+
+.video-with-text .video-with-text__media-item > * {
+  border-radius: var(--media-radius);
+  overflow: hidden;
+  box-shadow: var(--media-shadow-horizontal-offset) var(--media-shadow-vertical-offset) var(--media-shadow-blur-radius)
+    rgba(var(--color-shadow), var(--media-shadow-opacity));
+}
+
+.video-with-text .global-media-settings {
+  overflow: hidden !important;
+  border: none;
+}
+
+.video-with-text .video-with-text__text-item > * {
+  overflow: hidden;
+  box-shadow: var(--text-boxes-shadow-horizontal-offset) var(--text-boxes-shadow-vertical-offset)
+    var(--text-boxes-shadow-blur-radius) rgba(var(--color-shadow), var(--text-boxes-shadow-opacity));
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text .video-with-text__text-item > * {
+    border-radius: var(--text-boxes-radius);
+  }
+}
+
+.video-with-text:not(.video-with-text--overlap) .video-with-text__media-item > *,
+.video-with-text:not(.video-with-text--overlap) .video-with-text__text-item > * {
+  box-shadow: none;
+}
+
+@media screen and (max-width: 749px) {
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .video-with-text__media-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .grid__item .video-with-text__media,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .video-with-text__media img,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .video-with-text__media .placeholder-svg {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .video-with-text__text-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap) .grid__item .video-with-text__content {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .video-with-text.collapse-borders:not(.video-with-text--overlap) .video-with-text__content {
+    border-top: 0;
+  }
+}
+
+.video-with-text__content--mobile-right > * {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.video-with-text__content--mobile-center > * {
+  align-self: center;
+  text-align: center;
+}
+
+.video-with-text--overlap .video-with-text__content {
+  width: 90%;
+  margin: -3rem auto 0;
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text__grid--reverse .video-with-text__content {
+    margin-left: auto;
+  }
+
+  .video-with-text__content--bottom {
+    justify-content: flex-end;
+    align-self: flex-end;
+  }
+
+  .video-with-text__content--top {
+    justify-content: flex-start;
+    align-self: flex-start;
+  }
+
+  .video-with-text__content--desktop-right > * {
+    align-self: flex-end;
+    text-align: right;
+  }
+
+  .video-with-text__content--desktop-left > * {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .video-with-text__content--desktop-center > * {
+    align-self: center;
+    text-align: center;
+  }
+
+  .video-with-text--overlap .video-with-text__text-item {
+    display: flex;
+    padding: 3rem 0;
+  }
+
+  .video-with-text--overlap .video-with-text__content {
+    height: auto;
+    width: calc(100% + 4rem);
+    min-width: calc(100% + 4rem);
+    margin-top: 0;
+    margin-left: -4rem;
+  }
+
+  .video-with-text--overlap .video-with-text__grid--reverse .video-with-text__content {
+    margin-left: 0;
+    margin-right: -4rem;
+  }
+
+  .video-with-text--overlap .video-with-text__grid--reverse .video-with-text__text-item {
+    justify-content: flex-end;
+  }
+
+  .video-with-text--overlap .video-with-text__media-item--top {
+    align-self: flex-start;
+  }
+
+  .video-with-text--overlap .video-with-text__media-item--middle {
+    align-self: center;
+  }
+
+  .video-with-text--overlap .video-with-text__media-item--bottom {
+    align-self: flex-end;
+  }
+
+  .video-with-text__media-item--e-small,
+  .video-with-text__media-item--e-large + .video-with-text__text-item {
+    flex-grow: 0;
+  }
+
+  .video-with-text__media-item--small,
+  .video-with-text__media-item--large + .video-with-text__text-item {
+    flex-grow: 0.5;
+  }
+
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__media-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__media,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__media img,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__media .placeholder-svg,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__text-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__content,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__content:after {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__text-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__content,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__content:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__media-item:after,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__media,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__media img,
+  .video-with-text.collapse-corners:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__media .placeholder-svg {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .video-with-text.collapse-borders:not(.video-with-text--overlap)
+    .grid:not(.video-with-text__grid--reverse)
+    .video-with-text__content {
+    border-left: 0;
+  }
+
+  .video-with-text.collapse-borders:not(.video-with-text--overlap)
+    .video-with-text__grid--reverse
+    .video-with-text__content {
+    border-right: 0;
+  }
+}
+
+.video-with-text:not(.collapse-corners, .video-with-text--overlap) .video-with-text__media-item {
+  z-index: 2;
+}
+
+/* Needed for gradient continuity with or without animation so that transparent PNG images come up as we would expect */
+.video-with-text.video-with-text--overlap .backround-transparent,
+.video-with-text:not(.video-with-text--overlap) .background-transparent {
+  /* background: transparent; */
+}
+
+/* Needed for gradient continuity with or without animation, the transform scopes the gradient to its container which happens already when animation are turned on */
+.video-with-text .gradient {
+  transform: perspective(0);
+}
+
+.video-with-text__content {
+  box-shadow: var(--text-boxes-shadow-horizontal-offset) var(--text-boxes-shadow-vertical-offset)
+    var(--text-boxes-shadow-blur-radius) rgba(var(--color-shadow), var(--text-boxes-shadow-opacity));
+  word-break: break-word;
+}
+
+@media screen and (min-width: 750px) {
+  .video-with-text__content {
+    border-radius: var(--text-boxes-radius);
+    padding: 4rem 4rem 5rem;
+  }
+}
+@media screen and (min-width: 990px) {
+  .video-with-text__content {
+    padding: 6rem 7rem 7rem;
+  }
+}
+
+.video-with-text__content > * + * {
+  margin-top: 2rem;
+}
+
+.video-with-text__content > .video-with-text__text:empty ~ a {
+  margin-top: 2rem;
+}
+
+.video-with-text__content > :first-child:is(.video-with-text__heading),
+.video-with-text__text--caption + .video-with-text__heading,
+.video-with-text__text--caption:first-child {
+  margin-top: 0;
+}
+
+.video-with-text__content :last-child:is(.video-with-text__heading),
+.video-with-text__text--caption {
+  margin-bottom: 0;
+}
+
+.video-with-text__content .button + .video-with-text__text {
+  margin-top: 2rem;
+}
+
+.video-with-text__content .video-with-text__text + .button {
+  margin-top: 3rem;
+}
+
+.video-with-text__heading {
+  margin-bottom: 0;
+}
+
+.video-with-text__text p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 749px) {
+  .collapse-padding .video-with-text__grid .video-with-text__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .collapse-padding
+    .video-with-text__grid:not(.video-with-text__grid--reverse)
+    .video-with-text__content:not(.video-with-text__content--desktop-center) {
+    padding-right: 0;
+  }
+
+  .collapse-padding
+    .video-with-text__grid--reverse
+    .video-with-text__content:not(.video-with-text__content--desktop-center) {
+    padding-left: 0;
+  }
+}
+
+/* check for flexbox gap in older Safari versions */
+@supports not (inset: 10px) {
+  .video-with-text .grid {
+    margin-left: 0;
+  }
+}
+
+/*
+  Multirow
+  note: consider removing from this stylesheet if multirow-specific styles increase signficantly
+*/
+.multirow__inner {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--grid-mobile-vertical-spacing);
+}
+
+@media screen and (min-width: 750px) {
+  .multirow__inner {
+    row-gap: var(--grid-desktop-vertical-spacing);
+  }
+}
+
+@media screen and (max-width: 949px) {
+  .video-with-text .video-section__media .deferred-media__poster-button {
+    width: 7rem;
+    height: 7rem;
+  }
+}

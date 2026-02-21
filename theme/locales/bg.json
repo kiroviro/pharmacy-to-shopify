@@ -1,0 +1,47 @@
+{
+  "products": {
+    "facets": {
+      "availability_label": "Наличност",
+      "price_label": "Цена",
+      "product_type_label": "Категория",
+      "vendor_label": "Марка",
+      "filter_button": "Филтриране",
+      "reset_button": "Изчистване",
+      "clear_all": "Изчисти всички",
+      "from": "От",
+      "to": "До",
+      "max_price": "Най-висока цена е {{price}}",
+      "filter_and_sort": "Филтриране и сортиране",
+      "filter_by_label": "Филтриране по:",
+      "sort_by_label": "Сортиране по:",
+      "sort_button": "Сортиране",
+      "apply": "Приложи",
+      "0_results_with_count": "Няма резултати",
+      "results_with_count": {
+        "one": "{{ count }} резултат",
+        "other": "{{ count }} резултата"
+      },
+      "product_count": {
+        "one": "{{ product_count }} продукт",
+        "other": "{{ product_count }} продукта"
+      },
+      "product_count_simple": {
+        "one": "{{ count }} продукт",
+        "other": "{{ count }} продукта"
+      }
+    }
+  },
+  "collections": {
+    "sorting": {
+      "title": "Сортиране по",
+      "featured": "Най-продавани",
+      "best_selling": "Най-продавани",
+      "title_ascending": "Азбучен ред, А-Я",
+      "title_descending": "Азбучен ред, Я-А",
+      "price_ascending": "Цена, ниска към висока",
+      "price_descending": "Цена, висока към ниска",
+      "created_ascending": "Дата, стари към нови",
+      "created_descending": "Дата, нови към стари"
+    }
+  }
+}

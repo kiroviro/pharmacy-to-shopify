@@ -1,0 +1,37 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "show_breadcrumbs_top": false,
+        "image": "",
+        "radius_background": true,
+        "banner_height": "medium",
+        "banner_mobile_height": "medium",
+        "content_alignment": "bottom",
+        "image_block": false,
+        "image_size": "60",
+        "image_overlay_opacity": 50,
+        "title": "",
+        "heading_size": "h1",
+        "description_text": "",
+        "text_size_block": "medium",
+        "heading_alignment": "center",
+        "color_scheme": "scheme-3",
+        "content_color_scheme": "",
+        "text_secondary_color": false,
+        "section_full_width": true,
+        "section_background": "#ffffff",
+        "content_text_color": "secondary",
+        "padding_top": 200,
+        "padding_bottom": 100,
+        "content_padding_top": 130,
+        "content_padding_bottom": 130
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

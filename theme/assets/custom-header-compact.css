@@ -1,0 +1,96 @@
+/* Compact header overrides */
+
+/* ===== MOBILE: aggressive compactness ===== */
+@media screen and (max-width: 989px) {
+  /* Eliminate gap between header rows */
+  .header.inline-header-search {
+    gap: 0;
+  }
+
+  /* Shrink header padding to near zero on mobile */
+  .header {
+    padding-top: 0px !important;
+    padding-bottom: 2px !important;
+  }
+
+  /* Smaller logo on mobile */
+  .header__heading-logo-wrapper {
+    max-width: 85px;
+  }
+
+  /* Tighter heading link */
+  .header__heading-link {
+    padding: 0.2rem;
+  }
+
+  /* Compact search bar on mobile */
+  .search__input.field__input {
+    height: 3rem;
+    min-height: 3rem;
+    font-size: 1.3rem;
+  }
+  .search__button.field__button {
+    height: 3rem;
+    width: 3rem;
+  }
+  .search-collections .field {
+    margin: 0;
+  }
+
+  /* Smaller header icons on mobile */
+  .header__icon {
+    padding: 0.4rem;
+  }
+}
+
+/* ===== Announcement bar: compact on all devices ===== */
+.announcement-bar__message {
+  padding: 0.3rem 0;
+  min-height: 0;
+  font-size: 1.2rem;
+}
+
+/* Even tighter on mobile */
+@media screen and (max-width: 989px) {
+  .announcement-bar__message {
+    padding: 0.2rem 0;
+  }
+  .announcement-bar .slider-button {
+    padding: 0.2rem;
+  }
+  .utility-bar-wrapper {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* ===== DESKTOP: moderate compactness ===== */
+@media screen and (min-width: 990px) {
+  .header__heading-link {
+    padding: 0.4rem;
+  }
+}
+
+
+/* ===== COLLECTION BANNER: compact ===== */
+/* Override the massive min-height on collection banners */
+.collection-hero__inner.banner--small,
+.collection-hero__inner.banner--medium,
+.collection-hero__inner.banner--large {
+  min-height: auto !important;
+}
+
+/* Breadcrumbs above banner: tighten */
+.collection-hero___breadcrumbs {
+  padding: 0;
+}
+.breadcrumbs__list-top {
+  padding: 0.6rem 0;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* Product grid: reduce top padding */
+.main-collection-product-grid {
+  padding-top: 2rem !important;
+}

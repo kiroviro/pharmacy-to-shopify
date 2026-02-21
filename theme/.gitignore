@@ -1,0 +1,16 @@
+# Binary assets — not worth tracking in git (no meaningful diffs)
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.gif
+assets/*.webp
+assets/*.ico
+assets/*.woff
+assets/*.woff2
+assets/*.ttf
+assets/*.otf
+assets/*.eot
+
+# Shopify CDN-compiled files (auto-generated, changes with every deploy)
+assets/compiled-*.css
+assets/compiled-*.js

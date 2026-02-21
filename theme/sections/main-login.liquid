@@ -1,0 +1,324 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+		assign button_style = 'button button--secondary'
+
+		if section.settings.button_style == 'link'
+			assign button_style = 'link underlined-link'
+		elsif section.settings.button_style == 'solid'
+			assign button_style = 'button'
+		elsif section.settings.button_style == 'link_icon'
+			assign button_style = 'link-with-arrow'
+		elsif section.settings.button_style == 'link_hover'
+			assign button_style = 'link link-hover'
+		endif
+	-%}	
+
+<div class="color-{{ section.settings.section_color_scheme }}">
+
+  <div class="customer login section-{{ section.id }}-padding">
+    {% comment %} RECOVERY  {% endcomment %}
+    <h1 id="recover" tabindex="-1" class="{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {{ 'customer.recover_password.title' | t }}
+    </h1>
+  
+    <div class="recover__form-wrapper">
+  
+      <div class="recover__form-description clr-{{ section.settings.text_color }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{ 'customer.recover_password.subtext' | t }}
+      </div>
+  
+      <div class="recover__form-inner color-{{ section.settings.color_scheme }}">
+        {%- form 'recover_customer_password' -%}
+          {% assign recover_success = form.posted_successfully? %}
+          <div class="field">
+            <label for="RecoverEmail">
+              {{ 'customer.login_page.email' | t }}
+            </label>
+  
+            <input type="email" value="" name="email" id="RecoverEmail" autocorrect="off" autocapitalize="off" autocomplete="email"
+              {% if form.errors %}
+               aria-invalid="true" aria-describedby="RecoverEmail-email-error" autofocus
+              {% endif %}
+               placeholder="{{ 'customer.login_page.placeholder.email' | t }}">
+          </div>
+  
+          {%- if form.errors -%}
+            <small id="RecoverEmail-email-error" class="form__message">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 13 13">
+                <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2" />
+                <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7" />
+                <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white" />
+                <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+              </svg>
+              {{ form.errors.messages.form }}
+            </small>
+          {%- endif -%}
+  
+          <button class="button">
+            <span>
+              {{ 'customer.login_page.submit' | t }}
+            </span>
+          </button>
+  
+		  <a href="#login" class="{{ button_style }}">
+			{%- if section.settings.button_style != 'link_icon' -%}
+				<span>{{ 'customer.login_page.cancel' | t }}</span>
+				{%- else -%}
+				{{ 'customer.login_page.cancel' | t }}
+				{%- render 'icon-caret' -%}
+			{%- endif -%}
+		 </a>
+        {%- endform -%}
+      </div>
+    </div>
+  
+    {% comment %} LOGIN FORM {% endcomment %}
+    <h1 id="login" tabindex="-1" class="{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {{ 'customer.login_page.title' | t }}
+    </h1>
+  
+    <div class="login-form-wrapper">
+      <div class="login-description clr-{{ section.settings.text_color }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{ 'customer.login_page.description' | t }}
+      </div>
+  
+      <div class="login-form-inner color-{{ section.settings.color_scheme }}">
+        
+      {% comment %} LOGIN {% endcomment %}
+      
+        {% if section.settings.image != blank %}
+          <div class="form-wrapper__img">
+            {%- capture sizes -%}
+              400px
+            {%- endcapture -%}
+    
+            {{ section.settings.image | image_url: width: 1200 | image_tag: sizes: sizes, alt: section.settings.image.alt,
+              widths: '320, 360, 375, 420, 480, 768, 950, 1024, 1200'
+            }}
+          </div>
+        {% endif %}
+
+        {%- form 'customer_login', novalidate: 'novalidate' -%}
+          {%- if recover_success == true -%}
+            <h3 class="form__message" tabindex="-1" autofocus>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 13 13">
+                <path d="M6.5 12.35C9.73087 12.35 12.35 9.73086 12.35 6.5C12.35 3.26913 9.73087 0.65 6.5 0.65C3.26913 0.65 0.65 3.26913 0.65 6.5C0.65 9.73086 3.26913 12.35 6.5 12.35Z" fill="#428445" stroke="white" stroke-width="0.7" />
+                <path d="M5.53271 8.66357L9.25213 4.68197" stroke="white" />
+                <path d="M4.10645 6.7688L6.13766 8.62553" stroke="white">
+              </svg>
+              {{ 'customer.recover_password.success' | t }}
+            </h3>
+          {%- endif -%}
+          {%- if form.errors -%}
+            <h2 class="form__message" tabindex="-1" autofocus>
+              <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 13 13">
+                <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2" />
+                <circle
+                  cx="6.5"
+                  cy="6.5"
+                  r="5.5"
+                  fill="#EB001B"
+                  stroke="#EB001B"
+                  stroke-width="0.7" />
+                <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white" />
+                <path
+                  d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z"
+                  fill="white"
+                  stroke="#EB001B"
+                  stroke-width="0.7">
+              </svg>
+              {{ 'templates.contact.form.error_heading' | t }}
+            </h2>
+            {{ form.errors | default_errors }}
+          {%- endif -%}
+  
+          <div class="field">
+            <label for="CustomerEmail">
+              {{ 'customer.login_page.email' | t }}
+            </label>
+  
+            <input type="email" name="customer[email]" id="CustomerEmail" required autocomplete="email" autocorrect="off" autocapitalize="off"
+              {% if form.errors contains 'form' %}
+               aria-invalid="true"
+              {% endif %}
+              placeholder="{{ 'customer.login_page.placeholder.email' | t }}">
+          </div>
+  
+          {%- if form.password_needed -%}
+            <div class="field">
+
+              <label for="CustomerPassword">
+                {{ 'customer.login_page.password' | t }}
+              </label>
+
+              <input type="password" required value="" name="customer[password]" id="CustomerPassword" autocomplete="current-password" {% if form.errors contains 'form' %}  {% endif %} placeholder="{{ 'customer.login_page.placeholder.password' | t }}">
+
+            </div>
+          {%- endif -%}
+  
+          <button class="button">
+            <span>
+              {{ 'customer.login_page.sign_in' | t }}
+            </span>
+          </button>
+
+		  <a href="#recover"  class="{{ button_style }}">
+			{%- if section.settings.button_style != 'link_icon' -%}
+				<span> {{ 'customer.login_page.forgot_password' | t }}</span>
+				{%- else -%}
+				{{ 'customer.login_page.forgot_password' | t }}
+				{%- render 'icon-caret' -%}
+			{%- endif -%}
+		 </a>
+
+        {%- endform -%}
+ 
+      </div>
+
+      <div class="login-form__register-link__wrapper">
+        <div class="login-form__register-link-text">
+          {{ 'customer.login_page.create_account_text' | t }}
+        </div>
+		<a href="{{ routes.account_register_url }}"  class=" login-form__register-link {{ button_style }}">
+			{%- if section.settings.button_style != 'link_icon' -%}
+				<span>  {{ 'customer.login_page.create_account' | t }}</span>
+				{%- else -%}
+				{{ 'customer.login_page.create_account' | t }}
+				{%- render 'icon-caret' -%}
+			{%- endif -%}
+		 </a>
+      </div>
+    </div>
+  
+    {%- if shop.checkout.guest_login -%}
+      <div><hr>
+        <h2>
+          {{ 'customer.login_page.guest_title' | t }}
+        </h2>
+  
+        {%- form 'guest_login' -%}
+          <button class="button">
+            <span>
+              {{ 'customer.login_page.guest_continue' | t }}
+            </span>
+          </button>
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+</div>
+
+{% schema %}
+  {
+    "name": "t:sections.main-login.name",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Image"
+      },
+      {
+        "type": "color_scheme",
+        "id": "section_color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Container color scheme",
+        "default": "scheme-1"
+      },
+	  {
+		"type": "select",
+		"id": "button_style",
+		"label": "Button style",
+			"options": [
+			{
+		    	"value": "link",
+				"label": "Inline button"
+			},
+			{
+				"value": "link_hover",
+				"label": "Inline button with underline on hover"
+			},
+			{
+				"value": "link_icon",
+				"label": "Inline button with icon"
+			}
+			],
+				"default": "link_icon"
+		},
+    {
+      "type": "select",
+      "id": "text_color",
+      "options": [
+      {
+        "value": "foreground",
+        "label": "t:settings_schema.colors.settings.text.label"
+      },
+      {
+        "value": "foreground-secondary",
+        "label": "t:settings_schema.colors.settings.text_secondary.label"
+      },
+      {
+        "value": "accent",
+        "label": "t:settings_schema.colors.settings.accent_color.label"
+      }
+      ],
+      "default": "foreground",
+      "label": "Description color"
+    },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 70
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 70
+      }
+    ]
+  }
+{% endschema %}

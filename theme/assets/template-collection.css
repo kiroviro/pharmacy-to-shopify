@@ -1,0 +1,406 @@
+@media screen and (max-width: 749px) {
+  .collection .grid__item:only-child {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 989px) {
+  .collection .slider.slider--tablet {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.collection .loading-overlay {
+  position: absolute;
+  z-index: 1;
+  width: 1.8rem;
+}
+
+aside + .product-grid-container,
+.facets-vertical .facets-vertical-sort + .collection {
+  margin-top: 4rem;
+}
+
+.facets-vertical aside + .product-grid-container {
+  margin-top: 0;
+}
+
+@media screen and (max-width: 1199px) {
+  aside + .product-grid-container,
+  .facets-vertical .facets-vertical-sort + .collection {
+    margin-top: 3rem;
+  }
+}
+@media screen and (max-width: 949px) {
+  aside + .product-grid-container,
+  .facets-vertical .facets-vertical-sort + .collection {
+    margin-top: 2rem;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .collection .loading-overlay {
+    top: 0;
+    right: 0;
+  }
+
+  aside + .product-grid-container,
+  .facets-vertical .facets-vertical-sort + .collection {
+    margin-top: 1rem;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .collection .loading-overlay {
+    left: 0;
+  }
+}
+
+.collection .loading-overlay {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
+  width: 100%;
+  padding: 0 1.5rem;
+  opacity: 0.7;
+}
+
+@media screen and (min-width: 750px) {
+  .collection .loading-overlay {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+.collection.loading .loading-overlay {
+  display: block;
+}
+
+.collection--empty .title-wrapper {
+  margin-top: 10rem;
+  margin-bottom: 15rem;
+}
+
+@media screen and (max-width: 989px) {
+  .collection .slider--tablet.product-grid {
+    scroll-padding-left: 0;
+  }
+
+  .collection .grid--peek.slider:after {
+    display: none;
+  }
+}
+
+.section-heading.with-countdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3.5rem;
+  gap: 3rem;
+}
+
+.with-countdown .countdown-bar {
+	--_countdown-radius: var(--countdown-border-radius, var(--text-boxes-radius));
+  position: relative;
+  display: flex;
+  column-gap: 3.6rem;
+  padding: 1.5rem 2.5rem;
+  border-radius: var(--_countdown-radius);
+  box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), .3);
+  background-color: rgba(var(--color-background), 0.6);
+}
+
+.with-countdown .countdown-bar:has(.coundown-label) {
+  padding: 2rem 2.5rem 1.5rem;
+}
+
+.with-countdown .coundown-label {
+	--_countdown-label-bg: var(--countdown-label-bg, var(--color-button));
+  position: absolute;
+  top: 0;
+  transform: translateY(-50%);
+  left: 2rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  color: rgb(var(--color-button-text));
+  background-color: rgba(var(--_countdown-label-bg), var(--alpha-button-background));
+  border-radius: var(--badge-corner-radius);
+}
+
+.with-countdown .coundown-label a,
+.with-countdown .coundown-label a:hover {
+  color: rgb(var(--color-button-text));
+}
+
+.with-countdown .countdown-bar__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.with-countdown .countdown-bar__sec .countdown-bar__number {
+  display: flex;
+}
+
+.with-countdown .countdown-bar__item:not(:last-child)::after {
+  content: ':';
+  position: absolute;
+  top: 0.3rem;
+  right: -2.1rem;
+  color: rgba(var(--color-foreground), 1);
+  font-weight: bold;
+}
+
+.collection .section-heading:not(.with-countdown) {
+  text-align: center;
+}
+
+@media screen and (max-width: 989px) {
+  .with-countdown .countdown-bar {
+    column-gap: 2rem;
+    width: fit-content;
+    justify-content: center;
+    min-width: fit-content;
+  }
+  .with-countdown .countdown-bar__item:not(:last-child)::after {
+    right: -1.3rem;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .section-heading.with-countdown {
+    flex-direction: column;
+    margin-bottom: 2rem;
+  }
+  .with-countdown .coundown-label {
+    font-size: 1.2rem;
+  }
+  .with-countdown .countdown-bar__item:not(:last-child)::after {
+    top: .1rem;
+  }
+}
+
+.with-countdown .countdown-bar__title {
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 1);
+}
+
+slider-component + .collection__view-all a {
+  margin-top: 2.5rem;
+}
+
+@media screen and (min-width: 990px) {
+  .collection__title--desktop-slider .title {
+    margin-bottom: 2.5rem;
+  }
+
+  .collection__title.title-wrapper--self-padded-tablet-down {
+    padding: 0 5rem;
+  }
+
+  .collection slider-component:not(.page-width-desktop) {
+    padding: 0;
+  }
+
+  .collection--full-width slider-component:not(.slider-component-desktop) {
+    padding: 0 1.5rem;
+    max-width: none;
+  }
+  
+  slider-component + .collection__view-all a {
+    margin-top: 4rem;
+  }
+}
+
+.grid.subcollections-list {
+  margin: 0;
+  padding-bottom: 1rem;
+  margin-bottom: 7rem;
+}
+.grid.subcollections-list .grid__item {
+  border-radius: var(--product-card-corner-radius);
+  overflow: hidden;
+}
+.subcollection {
+  display: inline-block;
+  text-decoration: none;
+  margin-top: auto;
+}
+.subcollection-image {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.subcollection-image:after {
+	--_overlay: var(--subcollections-overlay, rgba(var(--color-background), 1));
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--_overlay);
+  opacity: var(--image_opacity);
+}
+.image-portrait {
+  padding-bottom: 120%;
+}
+.image-square {
+  padding-bottom: 100%;
+}
+.image-landscape {
+  padding-bottom: 80%;
+}
+
+.subcollection:hover img {
+  transform: scale(1.05);
+}
+
+.subcollection-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all .3s ease;
+}
+.subcollection-image span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 1;
+  line-height: 1.1;
+}
+.subcollection span {
+  padding: 2rem 2.5rem;
+  display: inline-block;
+}
+
+.subcollection sup {
+  position: absolute;
+  flex-shrink: 0;
+  font-size: 1.4rem;
+}
+
+@media screen and (max-width: 1199px) {
+  .grid.subcollections-list {
+    padding-bottom: 1rem;
+    margin-bottom: 3rem;
+  }
+  .subcollection span {
+    padding: 1.5rem 1.5rem;
+  }
+}
+@media screen and (max-width: 949px) {
+  .subcollections-list {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+  }
+  .subcollections-list .grid__item {
+    width: 24%;
+  }
+}
+@media screen and (max-width: 749px) {
+  .grid.subcollections-list {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .subcollections-list .grid__item {
+    width: 38%;
+  }
+  .subcollection span {
+    font-size: 1.4rem;
+    padding: 1.5rem 1.2rem;
+  }
+  .subcollection sup {
+    font-size: 1rem;
+  }
+}
+
+/* promo block */
+
+.promo-card {
+  height: 100%;
+  padding: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  border-radius: var(--product-card-corner-radius);
+  overflow: hidden;
+}
+
+.promo-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: rgba(var(--color-background), var(--overlay-opacity));
+}
+
+.grid-list .promo-card {
+  min-height: 35rem;
+  /* aspect-ratio: var(--ratio-percent) */
+}
+
+.promo-card img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-information {
+  margin-top: auto;
+  position: relative;
+}
+
+.promo-card .card-information {
+	z-index: 2;
+}
+
+.promo-card span {
+  text-align: var(--product-card-text-alignment);
+  display: inline-block;
+  width: 100%;
+}
+
+.promo-card span + span {
+  margin-top: 2rem;
+  font-size: 1.6rem;
+}
+
+@media screen and (max-width: 749px) {
+  .promo-card {
+    padding: 1.8rem 1.2rem;
+  }
+  .promo-card span + span {
+    font-size: 1.4rem;
+  }
+}
+
+.section-description[data-color="secondary"],
+.section-description[data-color="secondary"] * {
+  color: rgb(var(--color-foreground-secondary));
+}
+
+.collection .countdown-bar[data-color="secondary"] .countdown-bar__title {
+  color: rgb(var(--color-foreground-secondary));
+}
+
+.collection .countdown-bar[data-color="secondary"] {
+  box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground-secondary), 1);
+}

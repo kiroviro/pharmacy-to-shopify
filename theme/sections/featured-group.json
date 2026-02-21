@@ -1,0 +1,77 @@
+{
+  "type": "aside",
+  "name": "Features",
+  "sections": {
+    "notification_f8xtxd": {
+      "type": "notification",
+      "disabled": true,
+      "settings": {
+        "enable_in_customizer": true,
+        "color_scheme": "",
+        "show_notifications_times": 1,
+        "notification": "Отстъпка за добре дошли 10%",
+        "custom_text_color": "#003e52",
+        "highlight_text": "10%",
+        "custom_highlight_text_color": "#088599"
+      }
+    },
+    "scroll_to_top_CLiYUy": {
+      "type": "scroll-to-top",
+      "name": "Scroll to top",
+      "settings": {
+        "hide_button": false,
+        "button_style": "round",
+        "arrow_style": "arrow",
+        "arrows_btn_color": "#ffffff",
+        "arrows_btn_color_hover": "#ffffff",
+        "arrows_btn_bg_color": "#088599",
+        "arrows_btn_bg_color_hover": "#067182"
+      }
+    },
+    "social_share_gk7dxC": {
+      "type": "social-share",
+      "disabled": true,
+      "name": "Social share",
+      "settings": {
+        "color_scheme": "",
+        "social_label": "Сподели",
+        "show_linkedin_share": true,
+        "show_fb_share": true,
+        "show_twitter_share": true,
+        "show_pinterest_share": false,
+        "show_telegram_share": false,
+        "show_snapchat_share": false,
+        "show_tumblr_share": false,
+        "show_mobile": false
+      }
+    },
+    "promo_popup_dFMQcL": {
+      "type": "promo-popup",
+      "disabled": true,
+      "name": "Promo popup",
+      "settings": {
+        "enable_in_customizer": false,
+        "popup_type": "popup_discount",
+        "enable_promo_popup": true,
+        "color_scheme": "",
+        "popup_text": "<h3>Добре дошли във ВИА Фарма!<\/h3><p>Абонирайте се за нашия бюлетин за ексклузивни новини и оферти.<\/p>",
+        "popup_description": "<h6>Получете 10% отстъпка при първата си поръчка<\/h6>",
+        "text_alignment": "left",
+        "popup_tag": "Код за отстъпка.",
+        "popup_timeout": 15,
+        "popup_times": 1,
+        "discount_popup_heading": "Поздравления! Успешно се абонирахте",
+        "discount_popup_description": "<p>Получете 10% отстъпка при първата си поръчка с регистрация. Важат общи условия. Кодът за отстъпка е валиден 30 дни.<\/p>",
+        "text_color": "foreground-secondary",
+        "discount_promocode": "Промо",
+        "text_alignment_promo": "left"
+      }
+    }
+  },
+  "order": [
+    "notification_f8xtxd",
+    "scroll_to_top_CLiYUy",
+    "social_share_gk7dxC",
+    "promo_popup_dFMQcL"
+  ]
+}

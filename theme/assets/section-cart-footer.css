@@ -1,0 +1,113 @@
+.cart__footer {
+  display: flex;
+  gap: 6rem;
+}
+
+@media screen and (max-width: 1200px) {
+  .cart__footer {
+    gap: 3rem;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .cart__footer {
+    flex-direction: column;
+  }
+}
+
+.cart__footer .recommendations-slider-container {
+  background-color: transparent;
+}
+
+.cart__footer .recommendations-header {
+  padding-right: 0;
+}
+
+.cart__footer .recommendations-navigation button {
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+}
+
+.cart__footer .recommendations-navigation {
+  gap: 1rem;
+}
+
+.cart__footer .recommendations-navigation button .icon {
+  width: 100%;
+  height: 100%;
+}
+
+.cart__footer .recommendations-slider {
+  align-items: stretch;
+  column-gap: 1.5rem;
+}
+
+.cart__footer .recommendations-slide {
+  width: 100%;
+  max-width: 40.1rem;
+  flex-basis: 40.1rem;
+  padding-right: 0;
+}
+
+@media screen and (max-width: 989px) {
+  .cart__footer .recommendations-slide {
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+@media screen and (max-width: 589px) {
+  .cart__footer .recommendations-slide {
+    max-width: 30.1rem;
+    flex-basis: 30.1rem;
+  }
+}
+
+.cart__footer .recommendations-slide .card-wrapper {
+  background-color: rgb(var(--color-background));
+}
+
+.cart__footer .recommendations-slider-container .card__information,
+.cart__footer .recommendations-slide .card--card.card--horizontal {
+  padding: 0;
+}
+
+.cart__footer .underlined-link {
+	text-decoration: underline;
+	text-decoration-thickness: 0.1rem;
+    transition: text-decoration-thickness ease 100ms;
+  }
+
+  .cart__footer .underlined-link:hover {
+	color: rgb(var(--color-link));
+	text-decoration-thickness: 0.2rem;
+  }
+
+.cart__footer .link-hover:hover {
+	text-decoration: underline;
+	color: rgb(var(--color-foreground));
+  }
+  
+
+
+.cart-item + .cart-item .cart-item__remove,
+.cart-item + .cart-item .cart-item__media {
+  border-radius: 0;
+}
+.cart-item:first-child:has( + .cart-item) .cart-item__media {
+  border-bottom-left-radius: 0;
+}
+.cart-item:first-child:has( + .cart-item) .cart-item__remove {
+  border-bottom-right-radius: 0;
+}
+.cart-item + .cart-item:last-of-type .cart-item__media {
+  border-bottom-left-radius: var(--text-boxes-radius);
+}
+.cart-item + .cart-item:last-of-type .cart-item__remove {
+  border-bottom-right-radius: var(--text-boxes-radius);
+}
+
+.cart-recommendations {
+	width: 100%;
+}

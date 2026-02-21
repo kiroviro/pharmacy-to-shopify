@@ -1,0 +1,299 @@
+{{ 'customer.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+		assign button_style = 'button button--secondary'
+
+		if section.settings.button_style == 'link'
+			assign button_style = 'link underlined-link'
+		elsif section.settings.button_style == 'solid'
+			assign button_style = 'button'
+		elsif section.settings.button_style == 'link_icon'
+			assign button_style = 'link-with-arrow'
+		elsif section.settings.button_style == 'link_hover'
+			assign button_style = 'link link-hover'
+		endif
+-%}	
+
+<div class="color-{{ section.settings.section_color_scheme }}">
+  <div class="customer register section-{{ section.id }}-padding">
+    <svg style="display: none">
+      <symbol id="icon-error" viewBox="0 0 13 13">
+        <circle
+          cx="6.5"
+          cy="6.50049"
+          r="5.5"
+          stroke="white"
+          stroke-width="2" />
+        <circle
+          cx="6.5"
+          cy="6.5"
+          r="5.5"
+          fill="#EB001B"
+          stroke="#EB001B"
+          stroke-width="0.7" />
+        <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white" />
+        <path
+          d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z"
+          fill="white"
+          stroke="#EB001B"
+          stroke-width="0.7">
+      </symbol>
+    </svg>
+
+    <h1 class="{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {{ 'customer.register.title' | t }}
+    </h1>
+
+    <div class="register-description clr-{{ section.settings.text_color }} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {{ 'customer.register.description' | t }}
+    </div>
+    
+    {% comment %} FORM {% endcomment %}
+    <div class="register-form-wrapper">
+      <div class="register-form-inner color-{{ section.settings.color_scheme }}">
+        {%- form 'create_customer'
+          , novalidate: 'novalidate' -%}
+          {%- if form.errors -%}
+            <h2
+              class="form__message"
+              tabindex="-1"
+              autofocus>
+              <svg aria-hidden="true" focusable="false">
+                <use href="#icon-error" />
+              </svg>
+              {{ 'templates.contact.form.error_heading' | t }}
+            </h2>
+            <ul>
+              {%- for field in form.errors -%}
+                <li>
+                  {%- if field == 'form' -%}
+                    {{ form.errors.messages[field] }}
+                  {%- else -%}
+                    <a href="#RegisterForm-{{ field }}">
+                      {{ form.errors.translated_fields[field] | capitalize }}
+                      {{ form.errors.messages[field] }}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+          <div class="field">
+            <label for="RegisterForm-FirstName">
+              {{ 'customer.register.first_name' | t }}
+            </label>
+  
+            <input
+              type="text"
+              name="customer[first_name]"
+              id="RegisterForm-FirstName"
+              {% if form.first_name %}
+              value="{{ form.first_name }}"
+              {% endif %}
+              autocomplete="given-name"
+              placeholder="{{ 'customer.register.placeholder.first_name' | t }}"
+              required>
+          </div>
+          <div class="field">
+            <label for="RegisterForm-LastName">
+              {{ 'customer.register.last_name' | t }}
+            </label>
+            <input
+              type="text"
+              name="customer[last_name]"
+              id="RegisterForm-LastName"
+              {% if form.last_name %}
+              value="{{ form.last_name }}"
+              {% endif %}
+              autocomplete="family-name"
+              placeholder="{{ 'customer.register.placeholder.last_name' | t }}"
+              required>
+          </div>
+          <div class="field">
+            <label for="RegisterForm-email">
+              {{ 'customer.register.email' | t }}
+            </label>
+            <input
+              type="email"
+              name="customer[email]"
+              id="RegisterForm-email"
+              {% if form.email %}
+              value="{{ form.email }}"
+              {% endif %}
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="email"
+              aria-required="true"
+              {% if form.errors contains 'email' %}
+              aria-invalid="true"
+              aria-describedby="RegisterForm-email-error"
+              {% endif %}
+              placeholder="{{ 'customer.register.placeholder.email' | t }}"
+              required>
+          </div>
+          {%- if form.errors contains 'email' -%}
+            <span id="RegisterForm-email-error" class="form__message">
+              <svg aria-hidden="true" focusable="false">
+                <use href="#icon-error" />
+              </svg>
+              {{ form.errors.translated_fields.email | capitalize }}
+              {{ form.errors.messages.email }}.
+            </span>
+          {%- endif -%}
+          <div class="field">
+            <label for="RegisterForm-password">
+              {{ 'customer.register.password' | t }}
+            </label>
+            <input
+              type="password"
+              name="customer[password]"
+              id="RegisterForm-password"
+              aria-required="true"
+              {% if form.errors contains 'password' %}
+              aria-invalid="true"
+              aria-describedby="RegisterForm-password-error"
+              {% endif %}
+              placeholder="{{ 'customer.register.placeholder.password' | t }}"
+              required>
+          </div>
+          {%- if form.errors contains 'password' -%}
+            <span id="RegisterForm-password-error" class="form__message">
+              <svg aria-hidden="true" focusable="false">
+                <use href="#icon-error" />
+              </svg>
+              {{ form.errors.translated_fields.password | capitalize }}
+              {{ form.errors.messages.password }}.
+            </span>
+          {%- endif -%}
+
+          <button class="button">
+            <span>
+              {{ 'customer.register.submit' | t }}
+            </span>
+          </button>
+          
+        {%- endform -%}
+      </div>
+      <div class="register-form__register-link__wrapper">
+        <div class="register-form__register-link-text">
+          {{ 'customer.register.log_in_account_text' | t }}
+        </div>
+		<a href="{{ routes.account_login_url }}"  class="register-form__register-link {{ button_style }}">
+			{%- if section.settings.button_style != 'link_icon' -%}
+				<span> {{ 'customer.register.log_in_account' | t }}</span>
+				{%- else -%}
+				{{ 'customer.register.log_in_account' | t }}
+				{%- render 'icon-caret' -%}
+			{%- endif -%}
+		 </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "t:sections.main-register.name",
+    "settings": [
+      {
+        "type": "color_scheme",
+        "id": "section_color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Container color scheme",
+        "default": "scheme-1"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "options": [
+        {
+          "value": "foreground",
+          "label": "t:settings_schema.colors.settings.text.label"
+        },
+        {
+          "value": "foreground-secondary",
+          "label": "t:settings_schema.colors.settings.text_secondary.label"
+        },
+        {
+          "value": "accent",
+          "label": "t:settings_schema.colors.settings.accent_color.label"
+        }
+        ],
+        "default": "foreground",
+        "label": "Description color"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 80
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 140
+      },
+	  {
+		"type": "select",
+		"id": "button_style",
+		"label": "Button style",
+			"options": [
+			{
+		    	"value": "link",
+				"label": "Inline button"
+			},
+			{
+				"value": "link_hover",
+				"label": "Inline button with underline on hover"
+			},
+			{
+				"value": "link_icon",
+				"label": "Inline button with icon"
+			}
+			],
+				"default": "link_icon"
+		}
+    ]
+  }
+{% endschema %}

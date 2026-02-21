@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-login",
+      "settings": {
+        "image": "",
+        "section_color_scheme": "scheme-2",
+        "color_scheme": "",
+        "padding_top": 80,
+        "padding_bottom": 140
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

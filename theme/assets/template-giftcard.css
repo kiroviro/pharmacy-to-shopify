@@ -1,0 +1,505 @@
+/* Base */
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+a:empty,
+ul:empty,
+dl:empty,
+div:empty,
+section:empty,
+article:empty,
+p:empty,
+h1:empty,
+h2:empty,
+h3:empty,
+h4:empty,
+h5:empty,
+h6:empty {
+  display: none;
+}
+
+html {
+  font-size: 62.5%;  
+  box-sizing: border-box;
+  height: 100%;
+}
+
+body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  letter-spacing: 0.07rem;
+  line-height: 1.8;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  flex: 1 0 auto;
+  font-family: var(--font-body-family);
+  font-style: var(--font-body-style);
+  font-weight: var(--font-body-weight);
+}
+
+@media only screen and (min-width: 750px) {
+  body {
+    line-height: 1.8;
+  }
+}
+
+::selection {
+  background-color: rgba(var(--color-foreground), 0.2);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h0,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: var(--font-heading-family);
+  font-style: var(--font-heading-style);
+  font-weight: var(--font-heading-weight);
+  letter-spacing: normal;
+  color: rgb(var(--color-foreground));
+  word-break: break-word;
+}
+
+.rte h1 {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+.rte h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+}
+.rte h3,
+.rte h4,
+.rte h5,
+.rte h6 {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+@media only screen and (min-width: 1025px) {
+  .rte h1 {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+  }
+  .rte h2,
+  .rte h3 {
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+  }
+  .rte h4,
+  .rte h5 {
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  .rte h6 {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+}
+.rte h1:first-child,
+.rte h2:first-child,
+.rte h3:first-child,
+.rte h4:first-child,
+.rte h5:first-child,
+.rte h6:first-child {
+  margin-top: 0;
+}
+.rte h1:only-child,
+.rte h2:only-child,
+.rte h3:only-child,
+.rte h4:only-child,
+.rte h5:only-child,
+.rte h6:only-child {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.h0 {
+  font-size: var(--font-heading-hero-size-mb);
+  line-height: 1.2;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  .h0 {
+    font-size: calc((var(--font-heading-hero-size) + var(--font-heading-hero-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  .h0 {
+    font-size: var(--font-heading-hero-size);
+  }
+}
+
+h1,
+.h1 {
+  font-size: var(--font-heading-1-size-mb);
+  line-height: 1.2;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h1,
+  .h1 {
+    font-size: calc((var(--font-heading-1-size) + var(--font-heading-1-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h1,
+  .h1 {
+    font-size: var(--font-heading-1-size);
+  }
+}
+
+h2,
+.h2 {
+  font-size: var(--font-heading-2-size-mb);
+  line-height: 1.24;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h2,
+  .h2 {
+    font-size: calc((var(--font-heading-2-size) + var(--font-heading-2-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h2,
+  .h2 {
+    font-size: var(--font-heading-2-size);
+  }
+}
+
+h3,
+.h3 {
+  font-size: var(--font-heading-3-size-mb);
+  line-height: 1.3;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h3,
+  .h3 {
+    font-size: calc((var(--font-heading-3-size) + var(--font-heading-3-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h3,
+  .h3 {
+    font-size: var(--font-heading-3-size);
+  }
+}
+
+h4,
+.h4 {
+  font-size: var(--font-heading-4-size-mb);
+  line-height: 1.3;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h4,
+  .h4 {
+    font-size: calc((var(--font-heading-4-size) + var(--font-heading-4-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h4,
+  .h4 {
+    font-size: var(--font-heading-4-size);
+  }
+}
+
+h5,
+.h5 {
+  font-size: var(--font-heading-5-size-mb);
+  line-height: 1.36;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h5,
+  .h5 {
+    font-size: calc((var(--font-heading-5-size) + var(--font-heading-5-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h5,
+  .h5 {
+    font-size: var(--font-heading-5-size);
+  }
+}
+
+h6,
+.h6 {
+  font-size: var(--font-heading-6-size-mb);
+  line-height: 1.4;
+}
+@media only screen and (min-width: 750px) and (max-width: 1024px) {
+  h6,
+  .h6 {
+    font-size: calc((var(--font-heading-6-size) + var(--font-heading-6-size-mb)) / 2);
+  }
+}
+@media only screen and (min-width: 1025px) {
+  h6,
+  .h6 {
+    font-size: var(--font-heading-6-size);
+  }
+}
+
+.button {
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: none;
+  padding: 1.5rem 3rem;
+  text-decoration: none;
+  background-color: rgb(var(--color-button));
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-button));
+  color: rgb(var(--color-button-label));
+  min-width: 12rem;
+  height: auto;
+  font-size: 1.5rem;
+  letter-spacing: 0.1rem;
+  line-height: 1.2;
+}
+
+.button::selection {
+  background-color: rgba(var(--color-button-label), 0.3);
+}
+
+.button:hover {
+  box-shadow: 0 0 0 0.2rem rgb(var(--color-button));
+}
+
+.button--secondary {
+  color: rgb(var(--color-secondary-button-label));
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-secondary-button-label));
+  background-color: transparent;
+}
+
+.button--secondary::selection {
+  background-color: rgba(var(--color-secondary-button-label), 0.3);
+}
+
+.button--secondary:hover {
+  box-shadow: 0 0 0 0.2rem rgb(var(--color-secondary-button-label));
+}
+
+@media (forced-colors: active) {
+  .button {
+    border: transparent solid 1px;
+  }
+}
+
+.gift-card {
+  padding: 6rem 3rem;
+}
+
+@media only screen and (min-width: 750px) {
+  .gift-card {
+    padding: 10rem 5rem 10rem;
+  }
+}
+
+.gift-card__image-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  margin: 2rem auto 3rem;
+  max-width: 40rem;
+}
+
+.gift-card__image {
+  max-width: 100%;
+  height: auto;
+  object-fit: scale-down;
+  max-height: 26rem;
+}
+
+@media only screen and (min-width: 750px) {
+  .gift-card__image {
+    padding: 0;
+  }
+  .gift-card__image-wrapper {
+    margin: 3rem auto;
+  }
+}
+
+.gift-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0rem 1rem;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+}
+
+.gift-card__price h1 {
+  margin: 0;
+}
+
+.gift-card-logo {
+  text-align: center;
+}
+
+.gift-card__number {
+  color: rgb(var(--color-foreground));
+  font-size: 2rem;
+  line-height: 1.6;
+  text-align: center;
+  letter-spacing: 0.25rem;
+  margin: 2.5rem 0 3rem;
+}
+
+@media only screen and (min-width: 750px) {
+  .gift-card__number {
+    margin: 3rem 0;
+  }
+}
+
+.gift-card__text-wrapper {
+  max-width: 30rem;
+  margin: 0 auto;
+}
+
+.gift-card__text {
+  color: rgba(var(--color-foreground), 0.75);
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.badge {
+  border: 1px solid transparent;
+  border-radius: 4rem;
+  display: inline-block;
+  font-size: 1.2rem;
+  letter-spacing: 0.1rem;
+  line-height: 1;
+  padding: 0.6rem 1.3rem;
+  text-align: center;
+  background-color: rgb(var(--color-background));
+  border-color: rgb(var(--color-background));
+	text-decoration: var(--badges-text-style);
+  color: rgb(var(--color-foreground));
+}
+
+.badge--expired {
+  background-color: rgb(var(--color-soldout-badge));
+  color: rgb(var(--color-soldout-badge-label));
+  border-color: rgba(var(--color-soldout-badge-label), 0.04);
+}
+
+.gift-card__qr-code {
+  margin: 3rem 0;
+}
+
+.gift-card__qr-code img {
+  margin: 0 auto;
+}
+
+.gift_card__apple-wallet {
+  line-height: 0;
+  display: block;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.gift-card__buttons {
+  display: flex;
+  flex-direction: column;
+  max-width: 25rem;
+  flex-wrap: wrap;
+  margin: 0 auto;
+}
+
+.gift-card__buttons > .button {
+  display: block;
+  margin: 1rem 0;
+}
+
+/*
+  Focus ring - default (with offset)
+*/
+
+/* Fallback - for browsers that don't support :focus-visible, a fallback is set for :focus */
+*:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+*:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+  outline-offset: 0.3rem;
+  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)), 0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+/* Fallback - for browsers that don't support :focus-visible, a fallback is set for :focus */
+.focused,
+.no-js *:focus {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+  outline-offset: 0.3rem;
+  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)), 0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-button)), 0 0 0 0.3rem rgb(var(--color-background)),
+    0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+/* Negate the fallback side-effect for browsers that support :focus-visible */
+.no-js *:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.button:focus {
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-button)), 0 0 0 0.3rem rgb(var(--color-background)),
+    0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+.button--secondary:focus-visible {
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-secondary-button-label)), 0 0 0 0.3rem rgb(var(--color-background)),
+    0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+.button--secondary:focus {
+  box-shadow: 0 0 0 0.1rem rgb(var(--color-secondary-button-label)), 0 0 0 0.3rem rgb(var(--color-background)),
+    0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
+}
+
+.form__message {
+  align-items: center;
+  display: flex;
+  font-size: 1.2rem;
+  line-height: 1.5rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+}
+
+.form__message .icon {
+  flex-shrink: 0;
+  height: 1.3rem;
+  margin-right: 0.5rem;
+  width: 1.3rem;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+
+.gradient {
+  background: rgb(var(--color-background));
+  background: var(--gradient-background);
+  background-attachment: fixed;
+}

@@ -1,0 +1,962 @@
+{
+  "sections": {
+    "image_banner_8fBx8p": {
+      "type": "image-banner",
+      "blocks": {
+        "heading_9gMPLj": {
+          "type": "heading",
+          "settings": {
+            "heading": "Вашата онлайн аптека",
+            "heading_size": "h1"
+          }
+        },
+        "buttons_9QBfM6": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "РАЗГЛЕДАЙ ПРОДУКТИТЕ",
+            "button_link_1": "shopify:\/\/collections\/all",
+            "button_style_secondary_1": false,
+            "button_label_2": "НАШИТЕ КАТЕГОРИИ",
+            "button_link_2": "shopify:\/\/collections",
+            "button_style_secondary_2": true
+          }
+        }
+      },
+      "block_order": [
+        "heading_9gMPLj",
+        "buttons_9QBfM6"
+      ],
+      "settings": {
+        "full_width": true,
+        "image_2": "shopify:\/\/shop_images\/calendula_flowers_vitamin_E_capsules_png.png",
+        "image_overlay_opacity": 30,
+        "image_height": "large",
+        "content_width": 740,
+        "desktop_content_position": "bottom-left",
+        "show_text_box": false,
+        "desktop_content_alignment": "left",
+        "color_scheme": "scheme-3",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": true,
+        "show_text_below": true,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "collection_list_yY9iXL": {
+      "type": "collection-list",
+      "blocks": {
+        "cat_1": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "lechenie-i-zdrave"
+          }
+        },
+        "cat_2": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "kozmetika"
+          }
+        },
+        "cat_3": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "mayka-i-dete"
+          }
+        },
+        "cat_4": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "meditsinski-izdeliya-i-konsumativi"
+          }
+        },
+        "cat_5": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "sport"
+          }
+        },
+        "cat_6": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "zdravoslovno-hranene-chayove-i-bilki"
+          }
+        }
+      },
+      "block_order": [
+        "cat_1",
+        "cat_2",
+        "cat_3",
+        "cat_4",
+        "cat_5",
+        "cat_6"
+      ],
+      "settings": {
+        "title": "Категории",
+        "heading_size": "h2",
+        "heading_alignment": "center",
+        "image_ratio": "square",
+        "image_type": "cover_style_2",
+        "cover_overlay": "linear-gradient(\n  to top,\n  #000F11 0%,\n  #000F11cc 20%,\n  #000F1180 40%,\n  #000F1140 60%,\n  #000F111a 80%,\n  transparent 100%\n)",
+        "card_heading_size": "h5",
+        "cover_color_scheme": "",
+        "show_description": false,
+        "link_label": "",
+        "columns_desktop": 3,
+        "color_scheme": "scheme-2",
+        "show_view_all": false,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Грип и настинка",
+        "heading_size": "h2",
+        "description": "<p>Лекарства и добавки за сезона на грипа<\/p>",
+        "text_size_block": "medium",
+        "text_color": "secondary",
+        "show_description": true,
+        "countdown_label": "",
+        "countdown_font_weight": "400",
+        "numbers_size": "h5",
+        "countdown_date": "",
+        "countdown_end": "cycle",
+        "days_label": "",
+        "hours_label": "",
+        "mins_label": "",
+        "secs_label": "",
+        "countdown_label_bg": "#003e52",
+        "label_text_color": "secondary",
+        "collection": "grip-i-nastinka",
+        "products_to_show": 8,
+        "columns_desktop": 4,
+        "full_width": false,
+        "show_view_all": true,
+        "view_all_style": "solid",
+        "enable_desktop_slider": false,
+        "color_scheme": "scheme-1",
+        "image_ratio": "portrait",
+        "show_secondary_image": true,
+        "show_vendor": true,
+        "show_rating": false,
+        "enable_quick_add": true,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "d9c67ae0-02b4-4b54-a01f-6f10449397c1": {
+      "type": "multicolumn",
+      "blocks": {
+        "col_1": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-4",
+            "image": "shopify:\/\/shop_images\/promo-vitamini_bd0e0d7c-a9ec-4c30-a284-6ba2861e34df.png",
+            "image_cover": true,
+            "image_overlay_opacity": 35,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Витамини за цялото семейство",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "КЪМ ВИТАМИНИТЕ",
+            "link": "shopify:\/\/collections\/vitamini-i-minerali"
+          }
+        },
+        "col_2": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-4",
+            "image": "shopify:\/\/shop_images\/promo-kozmetika_a0db6acb-a931-4fc1-a1a0-62495794ee95.png",
+            "image_cover": true,
+            "image_overlay_opacity": 35,
+            "reduce_spaces": false,
+            "content_full_width": false,
+            "caption": "",
+            "title": "Козметика и грижа за кожата",
+            "heading_size_block": "h2",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "КЪМ КОЗМЕТИКАТА",
+            "link": "shopify:\/\/collections\/kozmetika"
+          }
+        }
+      },
+      "block_order": [
+        "col_1",
+        "col_2"
+      ],
+      "settings": {
+        "title": "",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "full",
+        "image_ratio": "landscape",
+        "columns_desktop": 2,
+        "grid_type": "grid",
+        "column_divider": false,
+        "column_alignment": "left",
+        "background_style": "primary",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-2",
+        "background_color_full_width": true,
+        "background_border_radius": false,
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "fee2a82b-1a9b-41ec-8ac2-d9d964c70db6": {
+      "type": "scrolling-banner",
+      "blocks": {
+        "scroll_1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>Грижа за [Здравето] на цялото семейство<\/p>",
+            "highlight_text": "#003e52"
+          }
+        }
+      },
+      "block_order": [
+        "scroll_1"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_scheme": "",
+        "scroll_speed": 15,
+        "scroll_direction": "direction-left",
+        "items_padding": 30,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "4cdd6535-a1f1-4308-afd3-00c3b607afc0": {
+      "type": "product-slider",
+      "blocks": {
+        "slide_baby_1": {
+          "type": "Slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/slider-pansoral-baby.webp",
+            "enable_img_radius": true,
+            "slide_title": "Грижа за първите зъбки",
+            "highlight_slide_title": "",
+            "heading_size": "h2",
+            "slide_description": "<p>Облекчете дискомфорта при никнене на зъбки с доказани продукти за бебета.<\/p>",
+            "text_size_block": "small",
+            "text_color": "main",
+            "link_label": "Виж продукта",
+            "enable_add_to_cart": true,
+            "color_scheme_slide": "scheme-7",
+            "product": "pansoral-za-parvi-zabki-15ml",
+            "product_heading_font_family": "heading-font"
+          }
+        },
+        "slide_baby_2": {
+          "type": "Slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/slider-wellkid-peppa-pig.webp",
+            "enable_img_radius": true,
+            "slide_title": "Витамини за малките герои",
+            "highlight_slide_title": "",
+            "heading_size": "h2",
+            "slide_description": "<p>Мултивитамини с любимите герои на децата — вкусни и полезни.<\/p>",
+            "text_size_block": "small",
+            "text_color": "main",
+            "link_label": "Виж продукта",
+            "enable_add_to_cart": true,
+            "color_scheme_slide": "scheme-7",
+            "product": "wellkid-peppa-pig-zhelirani-tabletki-multivitamini-s-vkus-na-yagoda-za-detsa-h30-vitabiotics",
+            "product_heading_font_family": "heading-font"
+          }
+        }
+      },
+      "block_order": [
+        "slide_baby_1",
+        "slide_baby_2"
+      ],
+      "settings": {
+        "image_position": "image-right",
+        "color_scheme": "",
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "ad33c27c-9ae9-44e8-a4ec-4b7a535c903a": {
+      "type": "featured-product",
+      "blocks": {
+        "title_1": {
+          "type": "title",
+          "settings": {
+            "heading_size": "h2"
+          }
+        },
+        "price_1": {
+          "type": "price",
+          "settings": {
+            "price_size": "price--medium"
+          }
+        },
+        "text_1": {
+          "type": "text",
+          "settings": {
+            "text": "Нежен хидратант за бебешка и детска кожа от BIODERMA — водещата дерматологична марка.",
+            "text_size_block": "small",
+            "text_style": "body",
+            "text_color": "foreground-secondary"
+          }
+        },
+        "buy_1": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": false,
+            "quantity_color_scheme": "",
+            "color_scheme": ""
+          }
+        }
+      },
+      "block_order": [
+        "title_1",
+        "price_1",
+        "text_1",
+        "buy_1"
+      ],
+      "settings": {
+        "product": "bioderma-abc-derm-hidratant-200ml",
+        "color_scheme": "scheme-1",
+        "secondary_background": false,
+        "secondary_background_color": "#e5f2ef",
+        "enable_sticky_info": false,
+        "media_size": "small",
+        "constrain_to_viewport": true,
+        "media_fit": "contain",
+        "gallery_layout": "thumbnail_slider",
+        "thumbnail_position": "left",
+        "media_position": "left",
+        "mobile_thumbnails": "show",
+        "image_zoom": "lightbox",
+        "hide_variants": false,
+        "enable_video_looping": false,
+        "padding_top": 100,
+        "padding_bottom": 100
+      }
+    },
+    "355af80a-5c77-40fb-83a7-dbff9c1c8ef4": {
+      "type": "collection-tabs",
+      "blocks": {
+        "tab_1": {
+          "type": "collection",
+          "settings": {
+            "collection": "vitamini-i-minerali",
+            "collection_title": "Витамини",
+            "show_view_all": true,
+            "button_label": "Виж всички",
+            "button_style_secondary": false
+          }
+        },
+        "tab_2": {
+          "type": "collection",
+          "settings": {
+            "collection": "grizha-za-litse",
+            "collection_title": "Грижа за лице",
+            "show_view_all": true,
+            "button_label": "Виж всички",
+            "button_style_secondary": false
+          }
+        },
+        "tab_3": {
+          "type": "collection",
+          "settings": {
+            "collection": "grizha-za-kosa",
+            "collection_title": "Грижа за коса",
+            "show_view_all": true,
+            "button_label": "Виж всички",
+            "button_style_secondary": false
+          }
+        }
+      },
+      "block_order": [
+        "tab_1",
+        "tab_2",
+        "tab_3"
+      ],
+      "settings": {
+        "title": "Популярни продукти",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "tabs_font_size": "h6",
+        "tabs_font_weight": "fw-600",
+        "tabs_font_family": "heading-font",
+        "card_heading_size": "h4",
+        "image_ratio": "landscape",
+        "image_overlay_opacity": 0,
+        "reverse_card": false,
+        "product_image_ratio": "portrait",
+        "show_secondary_image": true,
+        "show_vendor": true,
+        "show_rating": false,
+        "enable_quick_add": true,
+        "products_to_show": 8,
+        "color_scheme": "scheme-2",
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "e3f3133f-068e-4225-8236-785bae124e18": {
+      "type": "collage",
+      "blocks": {
+        "collage_1": {
+          "type": "image_text",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/collection-grizha-za-litse.png",
+            "title": "Грижа за лице и тяло",
+            "text": "<p>Над 1200 продукта за грижа за кожата от водещи марки<\/p>",
+            "text_color": "foreground",
+            "text_size_block": "medium",
+            "button_style": "link",
+            "link_label": "КЪМ КОЗМЕТИКАТА",
+            "link": "shopify:\/\/collections\/grizha-za-litse",
+            "item_color_scheme": "scheme-6"
+          }
+        },
+        "collage_2": {
+          "type": "image_text",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/collection-mayka-i-dete.webp",
+            "title": "Майка и дете",
+            "text": "<p>Всичко за бебето и детето - хранене, козметика, аксесоари<\/p>",
+            "text_color": "foreground",
+            "text_size_block": "medium",
+            "button_style": "link",
+            "link_label": "КЪМ ПРОДУКТИТЕ",
+            "link": "shopify:\/\/collections\/mayka-i-dete",
+            "item_color_scheme": "scheme-6"
+          }
+        },
+        "collage_3": {
+          "type": "image_text",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/collection-meditsinski-izdeliya.png",
+            "title": "Медицински изделия",
+            "text": "<p>Апарати, превързочни материали и консумативи<\/p>",
+            "text_color": "foreground",
+            "text_size_block": "medium",
+            "button_style": "link",
+            "link_label": "РАЗГЛЕДАЙ",
+            "link": "shopify:\/\/collections\/meditsinski-izdeliya-i-konsumativi",
+            "item_color_scheme": "scheme-6"
+          }
+        }
+      },
+      "block_order": [
+        "collage_1",
+        "collage_2",
+        "collage_3"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "Открий повече",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_color": "foreground",
+        "desktop_layout": "left",
+        "mobile_layout": "column",
+        "color_scheme": "scheme-2",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "multicolumn_rL3xb9": {
+      "type": "multicolumn",
+      "blocks": {
+        "brand_1": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "478 продукта",
+            "title": "BOIRON",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-boiron"
+          }
+        },
+        "brand_2": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "157 продукта",
+            "title": "BIODERMA",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-bioderma"
+          }
+        },
+        "brand_3": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "145 продукта",
+            "title": "AVÈNE",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-avene"
+          }
+        },
+        "brand_4": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "135 продукта",
+            "title": "NIVEA",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-nivea"
+          }
+        },
+        "brand_5": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "134 продукта",
+            "title": "GARNIER",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-garnier"
+          }
+        },
+        "brand_6": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "126 продукта",
+            "title": "VICHY",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-vichy"
+          }
+        },
+        "brand_7": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "126 продукта",
+            "title": "SOLGAR",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-solgar"
+          }
+        },
+        "brand_8": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "123 продукта",
+            "title": "EUCERIN",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-eucerin"
+          }
+        },
+        "brand_9": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "123 продукта",
+            "title": "URIAGE",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-uriage"
+          }
+        },
+        "brand_10": {
+          "type": "column",
+          "settings": {
+            "item_color_scheme": "scheme-2",
+            "image_cover": false,
+            "image_overlay_opacity": 0,
+            "reduce_spaces": true,
+            "content_full_width": false,
+            "caption": "94 продукта",
+            "title": "LA ROCHE-POSAY",
+            "heading_size_block": "h5",
+            "heading_color": "foreground",
+            "subheading": "",
+            "text": "",
+            "text_size_block": "",
+            "text_color": "foreground",
+            "button_style": "link",
+            "link_label": "Виж марката →",
+            "link": "shopify:\/\/collections\/brand-la-roche-posay"
+          }
+        }
+      },
+      "block_order": [
+        "brand_1",
+        "brand_2",
+        "brand_3",
+        "brand_4",
+        "brand_5",
+        "brand_6",
+        "brand_7",
+        "brand_8",
+        "brand_9",
+        "brand_10"
+      ],
+      "settings": {
+        "title": "Марки",
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "main",
+        "image_width": "full",
+        "image_ratio": "adapt",
+        "columns_desktop": 5,
+        "grid_type": "grid",
+        "column_divider": false,
+        "column_alignment": "center",
+        "background_style": "primary",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "scheme-2",
+        "background_color_full_width": true,
+        "background_border_radius": false,
+        "columns_mobile": "2",
+        "swipe_on_mobile": true,
+        "padding_top": 100,
+        "padding_bottom": 100
+      }
+    },
+    "homepage_discount_banner": {
+      "type": "image-banner",
+      "blocks": {
+        "banner_heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Над 9 000 продукта",
+            "heading_size": "h2"
+          }
+        },
+        "banner_text": {
+          "type": "text",
+          "settings": {
+            "text": "Лекарства, витамини, козметика и медицински изделия от доказани марки на едно място.",
+            "text_style": "body",
+            "text_color": "main"
+          }
+        },
+        "banner_buttons": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "РАЗГЛЕДАЙ КАТАЛОГА",
+            "button_link_1": "shopify:\/\/collections\/all",
+            "button_style_secondary_1": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": false
+          }
+        }
+      },
+      "block_order": [
+        "banner_heading",
+        "banner_text",
+        "banner_buttons"
+      ],
+      "disabled": true,
+      "settings": {
+        "full_width": false,
+        "image_overlay_opacity": 0,
+        "image_height": "small",
+        "content_width": 500,
+        "desktop_content_position": "middle-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "scheme-6",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "b2ca2552-6f9c-4585-9214-ed842fd2fe34": {
+      "type": "product-comparison",
+      "blocks": {
+        "comp_img": {
+          "type": "image",
+          "settings": {
+            "image_label": "",
+            "product_image_ratio": "adapt",
+            "show_secondary_image": true
+          }
+        },
+        "comp_title": {
+          "type": "title",
+          "settings": {
+            "title_label": "",
+            "heading_size": "h6"
+          }
+        },
+        "comp_price": {
+          "type": "price",
+          "settings": {
+            "price_label": "Цена",
+            "price_size": "price--small"
+          }
+        },
+        "comp_view": {
+          "type": "view_more",
+          "settings": {
+            "button_label": "",
+            "button_name": "Разгледай",
+            "enable_add_to_cart": true
+          }
+        }
+      },
+      "block_order": [
+        "comp_img",
+        "comp_title",
+        "comp_price",
+        "comp_view"
+      ],
+      "settings": {
+        "card_style": "",
+        "color_scheme": "scheme-1",
+        "secondary_background": true,
+        "secondary_background_color": "#ebf6fb",
+        "title": "Сравни и избери",
+        "heading_size": "h2",
+        "description": "<p>Не сте сигурни кое да изберете? Сравнете продуктите и вижте разликата.<\/p>",
+        "text_size_block": "medium",
+        "text_color": "secondary",
+        "heading_alignment": "center",
+        "content_alignment": "center",
+        "table_text_color": "main",
+        "product_list": [],
+        "padding_top": 100,
+        "padding_bottom": 100
+      }
+    },
+    "bff1f354-16f7-4be2-a816-44e694d864e4": {
+      "type": "testimonials",
+      "blocks": {
+        "review_1": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 5,
+            "full_name": "Мария К.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Много удобно е да си поръчам лекарствата онлайн. Бърза доставка и голям избор от продукти.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        },
+        "review_2": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 5,
+            "full_name": "Георги П.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Намерих витамините, които търсех, на отлична цена. Препоръчвам на всеки, който цени удобството.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        },
+        "review_3": {
+          "type": "testimonial",
+          "settings": {
+            "color_scheme": "scheme-2",
+            "rating_star": 5,
+            "full_name": "Елена Д.",
+            "name_color": "foreground",
+            "job_title": "",
+            "job_title_color": "foreground-secondary",
+            "text": "Отличен избор от козметика и грижа за кожата. Поръчвам редовно за цялото семейство.",
+            "text_color": "foreground",
+            "border_color": "rgba(0,0,0,0)"
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "disabled": true,
+      "settings": {
+        "title": "Нашите клиенти споделят",
+        "heading_width": 660,
+        "heading_alignment": "center",
+        "heading_size": "h2",
+        "color_scheme": "scheme-1",
+        "description": "",
+        "text_size_block": "medium",
+        "text_color": "foreground",
+        "scrolling_speed": 60,
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    },
+    "f6e4d7b0-8b93-4391-bc83-1d3b618d2ed3": {
+      "type": "featured-blog",
+      "settings": {
+        "heading": "Здравни съвети",
+        "heading_size": "h2",
+        "blog": "добре-дошли-в-света-на-нежната-грижа-за-вашето-бебе-🌸👶",
+        "read_more_title": "ПРОЧЕТИ ПОВЕЧЕ",
+        "post_limit": 3,
+        "columns_desktop": 3,
+        "color_scheme": "scheme-1",
+        "show_image": true,
+        "show_date": true,
+        "show_author": false,
+        "show_comment": false,
+        "all_button_style": "solid",
+        "show_view_all": true,
+        "swipe_on_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 130
+      }
+    }
+  },
+  "order": [
+    "image_banner_8fBx8p",
+    "collection_list_yY9iXL",
+    "featured_collection",
+    "d9c67ae0-02b4-4b54-a01f-6f10449397c1",
+    "fee2a82b-1a9b-41ec-8ac2-d9d964c70db6",
+    "4cdd6535-a1f1-4308-afd3-00c3b607afc0",
+    "ad33c27c-9ae9-44e8-a4ec-4b7a535c903a",
+    "355af80a-5c77-40fb-83a7-dbff9c1c8ef4",
+    "e3f3133f-068e-4225-8236-785bae124e18",
+    "multicolumn_rL3xb9",
+    "homepage_discount_banner",
+    "b2ca2552-6f9c-4585-9214-ed842fd2fe34",
+    "bff1f354-16f7-4be2-a816-44e694d864e4",
+    "f6e4d7b0-8b93-4391-bc83-1d3b618d2ed3"
+  ]
+}

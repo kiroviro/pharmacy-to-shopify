@@ -1,0 +1,246 @@
+.complementary-products__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+product-recommendations:not(.is-accordion) .complementary-products__container {
+  margin-top: 1.5rem;
+}
+
+.complementary-products__container > details[open] {
+  padding-bottom: 1.5rem;
+}
+
+.complementary-slider {
+  margin-top: 0;
+  gap: 0;
+}
+
+.complementary-slide {
+  --shadow-padding-sides: calc((var(--shadow-horizontal-offset) + var(--shadow-blur-radius)) * var(--shadow-visible));
+  --shadow-padding-sides-negative: calc(
+    (var(--shadow-horizontal-offset) * -1 + var(--shadow-blur-radius)) * var(--shadow-visible)
+  );
+}
+
+.complementary-slide > ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-mobile-vertical-spacing);
+}
+
+.complementary-slide.complementary-slide--standard > ul {
+  gap: calc(var(--grid-mobile-vertical-spacing) + 8px);
+}
+
+@media screen and (min-width: 750px) {
+  .complementary-slide > ul {
+    gap: var(--grid-desktop-vertical-spacing);
+  }
+
+  .complementary-slide.complementary-slide--standard > ul {
+    gap: calc(var(--grid-desktop-vertical-spacing) + 8px);
+  }
+}
+
+.complementary-slide.grid__item {
+  width: 100%;
+}
+
+.product__info-wrapper .complementary-products-contains-quick-add .complementary-slide.grid__item {
+  width: 92%;
+}
+
+.product__info-wrapper .complementary-slide.grid__item {
+  width: 80%;
+}
+
+@media screen and (max-width: 749px) {
+  .product__info-wrapper .complementary-slide.grid__item .price {
+    line-height: 1.2;
+  }
+}
+@media screen and (min-width: 750px) {
+  .product__info-wrapper .complementary-products-contains-quick-add .complementary-slide.grid__item {
+    width: 100%;
+  }
+  .product__info-wrapper .complementary-slide.grid__item {
+    width: 80%;
+  }
+}
+@media screen and (min-width: 1200px) {
+  .product__info-wrapper .complementary-products-contains-quick-add .complementary-slide.grid__item {
+    width: 80%;
+  }
+  .product__info-wrapper .complementary-slide.grid__item {
+    width: 60%;
+  }
+}
+
+.complementary-slide .card-wrapper,
+.complementary-slide .card-wrapper:hover,
+.complementary-slide .product-card-wrapper:has(.card--card .quick-add):hover {
+  height: auto;
+  border: var(--media-border-width) solid rgba(var(--color-foreground), var(--media-border-opacity));
+  border-radius: var(--media-radius);
+  box-shadow: none;
+}
+
+.complementary-slide .product-card-wrapper:has(.card--card .quick-add):hover .card--card {
+  border-radius: calc(var(--border-radius));
+} 
+
+.complementary-slide .product-card-wrapper .card__heading {
+  margin-bottom: 0;
+}
+
+.complementary-slide .card-wrapper:hover {
+  box-shadow: none;
+}
+
+.complementary-products > .summary__title {
+  display: flex;
+  line-height: 1;
+  padding: 1.5rem 0;
+}
+
+.accordion + product-recommendations .accordion,
+product-recommendations.is-accordion + .accordion {
+  margin-top: 0;
+  border-top: none;
+}
+
+.complementary-products > .summary__title .icon-accordion {
+  fill: rgb(var(--color-foreground));
+  height: 2rem;
+  margin-right: 1rem;
+  width: 2rem;
+}
+
+.complementary-products__container .card--card .card__content,
+.complementary-products__container .card--horizontal .card__information {
+  padding: 0;
+}
+
+.complementary-products-contains-quick-add .complementary-products__container .card--horizontal .card__inner {
+  max-width: 20%;
+}
+.complementary-products__container .card--horizontal .card__inner {
+  max-width: 30%;
+}
+
+@media screen and (min-width: 750px) and (max-width: 1200px) {
+  .complementary-products-contains-quick-add .complementary-products__container .card--horizontal .card__inner {
+    max-width: 25%;
+  }
+  .complementary-products__container .card--horizontal .card__inner {
+    max-width: 30%;
+  }
+}
+
+.complementary-slide .card--text .card__content {
+  grid-template-rows: minmax(0, 1fr) max-content auto;
+}
+
+.complementary-products__container .card--card > .card__content {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.complementary-products__container .card.card--horizontal {
+  align-items: center;
+  border: none;
+}
+
+.complementary-products-contains-quick-add .underline-links-hover:hover a {
+  text-decoration: initial;
+}
+
+.complementary-products-contains-quick-add .card__heading:hover a {
+  text-decoration: underline;
+}
+
+.complementary-products__container .card--card .card__inner .card__media {
+  border-radius: calc(var(--product-card-corner-radius) - var(--border-width) - var(--image-padding));
+}
+
+.complementary-products__container .card--horizontal .quick-add {
+  margin: 0;
+  max-width: 20rem;
+  flex-shrink: 0;
+}
+
+.complementary-products__container .quick-add__submit {
+  padding: 1rem 1.5rem;
+  min-height: inherit;
+}
+
+.complementary-products__container .quick-add__submit .icon-plus {
+  width: 1.2rem;
+}
+
+.complementary-products__container .icon-wrap {
+  display: flex;
+}
+
+.complementary-products .sold-out-message:not(.hidden) + .icon-wrap {
+  display: none;
+}
+
+.complementary-products__container .quick-add__submit:not(.animate-arrow) .icon-wrap {
+  transition: transform var(--duration-short) ease;
+}
+
+.complementary-products__container .quick-add__submit:not(.animate-arrow):hover .icon-wrap {
+  transform: rotate(90deg);
+}
+
+.complementary-products__container .card--horizontal .quick-add,
+.complementary-products__container .card__badge {
+  justify-self: var(--text-alignment);
+}
+
+.product--no-media .complementary-products__container .price {
+  text-align: var(--text-alignment);
+}
+
+@media screen and (min-width: 750px) {
+  .complementary-products__container .price--on-sale .price-item--regular {
+    font-size: 1.4rem;
+  }
+}
+
+.complementary-products .slider-buttons {
+  margin-left: auto;
+  margin-bottom: 1.6rem;
+}
+
+.complementary-products .summary__title {
+  max-width: calc(100% - 14rem);
+  margin-bottom: -3rem;
+}
+
+.complementary-products .summary__title:has(.h6:empty) {
+  margin-bottom: 0;
+}
+
+.complementary-products .slider-mobile-gutter:not(:has(.slider-buttons)) .summary__title {
+  margin-bottom: 1.6rem;
+}
+
+.complementary-products .summary__title h2 {
+  margin-bottom: 0;
+	margin-top: 0;
+}
+
+.complementary-products .summary__title * {
+  margin-bottom: 1.6rem;
+}
+
+.complementary-slider.contains-card--product {
+  gap: 1.6rem;
+}

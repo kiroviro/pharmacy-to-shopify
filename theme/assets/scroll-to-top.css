@@ -1,0 +1,125 @@
+.scroll-to-top {
+  position: fixed;
+  right: 1.6rem;
+  bottom: 3.6rem;
+  z-index: 3;
+  transition: all .4s ease;
+}
+ 
+.content-for-layout:has(.sticky-atc-bar.atc-visible) ~ .scroll-to-top.active {
+  /* bottom: 13.6rem; */
+}
+
+.content-for-layout:has(.sticky-atc-bar.atc-visible.hidden) ~ .scroll-to-top.active {
+	/* bottom: 3.6rem; */
+}
+
+.scroll-to-top:has( ~ .mobile-sticky-bar.active),
+.mobile-sticky-bar.active ~ .scroll-to-top.active {
+  /* bottom: 7.5rem; */
+}
+
+.scroll-to-top__media {
+	--size: 2rem;
+	width: var(--size);
+  height: var(--size);
+}
+
+.scroll-to-top__button {
+	width: 4.4rem;
+  height: 4.4rem;
+  padding: 0;
+  min-width: unset;
+  min-height: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transform: translateY(10rem);
+}
+
+.scroll-to-top__button.button {
+	color: rgb(var(--btn-clr));
+	border-color: rgb(var(--btn-bg));
+	background-color: rgb(var(--btn-bg));
+}
+
+.scroll-to-top__button.button:hover {
+	color: rgb(var(--btn-clr-hover));
+	border-color: rgb(var(--btn-bg-hover));
+}
+
+.scroll-to-top__button.button::before {
+	color: rgb(var(--btn-clr-hover));
+	background: rgb(var(--btn-bg-hover));
+}
+
+.scroll-to-top__button.button::after {
+	background: rgb(var(--btn-bg-hover));
+}
+
+.active .scroll-to-top__button {
+  transform: translateY(0);
+}
+
+.scroll-to-top__button--arrow_bold .icon {
+	z-index: 1;
+}
+
+.scroll-to-top__button .icon-caret {
+  transform: rotate(180deg);
+  width: 1.6rem;
+  height: auto;
+}
+
+.scroll-to-top__button.button-style--round {
+  border-radius: 50%;
+}
+
+@media screen and (max-width: 749px) {
+  .scroll-to-top {
+      right: 1.5rem;
+      bottom: 2rem;
+  }
+}
+
+
+#MainContent:has(.atc-visible)  ~ .scroll-to-top.active {
+	bottom: 15rem;
+}
+
+#MainContent:has(~.compare-banner.half-open):has(.atc-visible)  ~ .scroll-to-top.active {
+	bottom: 24rem;
+}
+
+#MainContent:has(~.compare-banner.half-open)  ~ .scroll-to-top.active {
+	bottom: 11rem;
+}
+
+#MainContent:has(~.compare-banner.open):has(.atc-visible)  ~ .scroll-to-top.active {
+	bottom: 38rem;
+}
+
+#MainContent:has(~.compare-banner.open)  ~ .scroll-to-top.active {
+	bottom: 26rem;
+}
+
+@media screen and (max-width: 749px) {
+  
+  #MainContent:has(~.compare-banner.half-open):has(.atc-visible)  ~ .scroll-to-top.active {
+    bottom: 24rem;
+  }
+  
+  #MainContent:has(~.compare-banner.half-open)  ~ .scroll-to-top.active {
+    bottom: 10rem;
+  }
+  
+  #MainContent:has(~.compare-banner.open):has(.atc-visible)  ~ .scroll-to-top.active {
+    bottom: 40rem;
+  }
+  
+  #MainContent:has(~.compare-banner.open)  ~ .scroll-to-top.active {
+    bottom: 30rem;
+  }
+  
+}

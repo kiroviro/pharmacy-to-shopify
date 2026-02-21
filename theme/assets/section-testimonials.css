@@ -1,0 +1,143 @@
+.testimonials .testimonials__section-title {
+	max-width: var(--title-width, 600px);
+}
+
+.testimonial__title {
+  margin-top: 0;
+  margin-bottom: 4rem;
+}
+
+@media screen and (max-width: 749px) {
+  .testimonial__title {
+    margin-bottom: 2.5rem;
+  }
+}
+
+.testimonials-wrapper {
+  max-width: 212rem;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.testimonials__list__wrap {
+  display: flex;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.testimonials__list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  flex-shrink: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  animation-name: to-left;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.testimonials__item {
+  width: 100%;
+  max-width: 310px;
+  padding: 2.5rem;
+  border-radius: var(--media-radius);
+  margin: 0 0.75rem;
+}
+
+@media screen and (min-width: 990px) {
+  .testimonials__item {
+    padding: 4rem 4rem 5rem 4rem;
+    max-width: 500px;
+    margin: 0 1.5rem;
+  }
+}
+
+.testimonials__item-text {
+  margin: 0;
+  padding: 0;
+  color: rgba(var(--color-foreground), 1);
+}
+
+.testimonials__item-author {
+  display: inline-flex;
+  margin-top: 25px;
+  gap: 18px;
+}
+
+@media screen and (min-width: 990px) {
+  .testimonials__item-author {
+    margin-top: 40px;
+  }
+}
+
+.testimonials__item-author-avatar,
+.testimonials__item-author-avatar-placeholder {
+  width: 65px;
+  height: 65px;
+  border-radius: var(--product-card-corner-radius);
+  object-fit: cover;
+}
+
+@media screen and (min-width: 990px) {
+  .testimonials__item-author-avatar,
+  .testimonials__item-author-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.testimonials__item-author-avatar-placeholder {
+  background-color: #dadada;
+}
+
+.testimonials__item-author-fullname {
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.3em;
+  margin-bottom: 0.5rem;
+  color: rgba(var(--color-foreground), 1);
+
+}
+
+@media screen and (min-width: 990px) {
+  .testimonials__item-author-fullname {
+    font-size: 1.8rem;
+    line-height: 1.41em;
+  }
+}
+
+.testimonials__item-author-jobtitle {
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.4em;
+  max-width: 165px;
+  width: 100%;
+}
+
+@media screen and (min-width: 990px) {
+  .testimonials__item-author-jobtitle {
+    font-size: 1.6rem;
+    line-height: 1.4em;
+  }
+}
+
+.testimonials__item-rating {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 2rem;
+}
+
+.testimonials__item-rating-star {
+  font-size: 0;
+}
+
+@keyframes to-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}

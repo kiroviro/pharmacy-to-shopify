@@ -1,0 +1,339 @@
+{{ 'promo-popup.css' | asset_url | stylesheet_tag }}
+
+{% if request.design_mode and section.settings.enable_in_customizer == true %}
+  <style>
+    #shopify-section-{{ section.id }} .promo-popup-wrap {
+      visibility: visible!important;
+      opacity: 1!important;
+      z-index: 998!important;
+      z-index: 99;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
+{% endif %}
+{% if request.design_mode and section.settings.enable_in_customizer == true and section.settings.popup_type == 'popup_subscribe' %}
+	<style>
+		#shopify-section-{{ section.id }} .promo-popup-container:nth-of-type(1) {
+			display: none;
+		}
+  </style>
+{% elsif request.design_mode and section.settings.enable_in_customizer == true and section.settings.popup_type == 'popup_discount' %}
+	<style>
+		#shopify-section-{{ section.id }} .promo-popup-container:nth-of-type(1) {
+			display: flex;
+		}
+		#shopify-section-{{ section.id }} .promo-popup-container:nth-of-type(2) {
+			display: none;
+		}
+  </style>
+{% endif %}
+
+<div class="promo-popup-wrap" style="visibility: hidden;" data-popup-timeout="{{ section.settings.popup_timeout }}" data-popup-times="{{ section.settings.popup_times }}">
+
+  <div class="overlay"> </div>
+
+  {% form 'customer', id: 'promo-popup-form', class: 'promo-popup-form' %}
+
+		{% comment %} Thank you message start {% endcomment %}
+		<div class="promo-popup-container color-{{ section.settings.color_scheme }} {% if form.posted_successfully? %} promo-popup-success{% endif %}">
+
+			<span class="promo-popup-close" tabindex="0" role="button" aria-label="Close popup">
+				<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+					<path d="M1.13281 1L13.6645 13.5317" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+					<path d="M13.6641 1L1.13233 13.5317" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+					<path d="M1 1.13379L13.5317 13.6655" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+					<path d="M13.5312 1.13379L0.999515 13.6655" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+				</svg>
+			</span>
+
+      {% if section.settings.image != blank %}
+        <div class="promo-popup-media">
+          {%- capture sizes -%}
+            600px
+          {%- endcapture -%}
+  
+          {{ section.settings.image | image_url: width: 600 | image_tag: sizes: sizes, alt: section.settings.image.alt,
+            widths: '480, 560, 640, 720, 750, 840'
+          }}
+        </div>
+      {% endif %}
+
+			<div class="promo-popup-content">
+				<h2 class="promo-popup-title h3 align-{{ section.settings.text_alignment_promo }}">
+					{{ section.settings.discount_popup_heading }}
+				</h2>
+				
+				{% if section.settings.discount_promocode != blank %}
+					<div class="promo-popup-content__label align-{{ section.settings.text_alignment_promo }}">
+						{{ 'promo_popup.discount_label' | t }}
+					</div>
+
+					<div class="promo-popup-discount">
+						<span id="promo-popup-discount-code" class="promo-popup-discount__code align-{{ section.settings.text_alignment_promo }}">
+							{{ section.settings.discount_promocode }}
+						</span>
+						<div class="promo-popup-discount__copy-btn" data-id="promo-popup-discount-code">
+							{% render 'icon-copy' %}
+							{% render 'icon-checkmark' %}
+						</div>
+					</div>
+				{% endif %}
+
+				<div class="promo-popup-description rte align-{{ section.settings.text_alignment_promo }} clr-{{ section.settings.text_color }}">
+					{{ section.settings.discount_popup_description }}
+				</div>
+			</div>
+		</div>
+		{% comment %} Thank you message end {% endcomment %}
+
+    <div class="promo-popup-container color-{{ section.settings.color_scheme }}">
+
+      <span class="promo-popup-close" tabindex="0" role="button" aria-label="Close popup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M1.13281 1L13.6645 13.5317" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M13.6641 1L1.13233 13.5317" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M1 1.13379L13.5317 13.6655" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M13.5312 1.13379L0.999515 13.6655" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>
+
+      {% if section.settings.image != blank %}
+        <div class="promo-popup-media">
+          {%- capture sizes -%}
+            600px
+          {%- endcapture -%}
+  
+          {{ section.settings.image | image_url: width: 600 | image_tag: sizes: sizes, alt: section.settings.image.alt,
+            widths: '480, 560, 640, 720, 750, 840'
+          }}
+        </div>
+      {% endif %}
+
+      <div class="promo-popup-content">
+
+        <div class="promo-popup-title rte align-{{ section.settings.text_alignment }}">
+          {{ section.settings.popup_text }}
+        </div>
+
+        <div class="promo-popup-description rte align-{{ section.settings.text_alignment }}">
+          {{ section.settings.popup_description }}
+        </div>
+
+        <div class="form-wrapp">
+          <input type="hidden" name="contact[tags]" value="{{ section.settings.popup_tag }}">
+          <div class="promo-popup-form__field-wrapper">
+
+            <div class="field">
+              <input id="NewsletterForm--{{ section.id }}" type="email" name="contact[email]"
+                class="field__input"
+                value="{{ form.email }}"
+                aria-required="true" autocorrect="off" autocapitalize="off" autocomplete="email"
+                {% if form.errors %}
+                  autofocus aria-invalid="true" aria-describedby="Newsletter-error--{{ section.id }}"
+                {% elsif form.posted_successfully? %}
+                  aria-describedby="Newsletter-success--{{ section.id }}"
+                {% endif %}
+                placeholder="{{ 'newsletter.label' | t }}" required >
+
+              <label class="field__label" for="NewsletterForm--{{ section.id }}">
+                {{ 'newsletter.label' | t }}
+              </label>
+
+              <button type="submit" class="newsletter-form__button field__button" name="commit" id="Subscribe" aria-label="{{ 'newsletter.button_label' | t }}">
+                {% render 'icon-arrow' %}
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endform %}
+
+			
+
+  {% if section.settings.enable_promo_popup %}
+    <script src="{{ 'promo-popup.js' | asset_url }}" defer="defer"></script>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Promo popup",
+  "tag": "section",
+  "class": "spaced-section section-promo-popup",
+  "limit": 1,
+  "enabled_on": {
+    "groups": [
+      "aside"
+    ]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_in_customizer",
+      "default": false,
+      "label": "Enable test mode",
+      "info": "Shows a popup example in the theme editor only."
+    },
+    {
+      "type": "radio",
+      "id": "popup_type",
+      "label": "Test mode popup type",
+      "options": [
+        {
+          "value": "popup_subscribe",
+          "label": "Popup subscribe"
+        },
+        {
+          "value": "popup_discount",
+          "label": "Popup discount"
+        }
+      ],
+      "default": "popup_subscribe"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_promo_popup",
+      "default": true,
+      "label": "Show promo popup"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "richtext",
+      "id": "popup_text",
+      "default": "<h2>Add campaign or promotional text here.</h2>",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "popup_description",
+      "default": "<p>Add descriptive text to invite your users to sign up for your newsletter.</p>",
+      "label": "Label"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Content alignment"
+    },
+    {
+      "type": "text",
+      "id": "popup_tag",
+      "default": "Discount code.",
+      "label": "Customer tag"
+    },
+    {
+      "type": "range",
+      "id": "popup_timeout",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "unit": "s",
+      "label": "Timeout",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "popup_times",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Show dismissed popup times",
+      "default": 3
+    },
+		{
+      "type": "header",
+      "content": "Promo popup discount"
+    },
+    {
+      "type": "text",
+      "id": "discount_popup_heading",
+      "default": "Congratulations! You’ve successfully joined our list",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "discount_popup_description",
+      "default": "<p>Stay tuned for further updates</p>",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "options": [
+      {
+        "value": "foreground",
+        "label": "t:settings_schema.colors.settings.text.label"
+      },
+      {
+        "value": "foreground-secondary",
+        "label": "t:settings_schema.colors.settings.text_secondary.label"
+      },
+      {
+        "value": "accent",
+        "label": "t:settings_schema.colors.settings.accent_color.label"
+      }
+      ],
+      "default": "foreground",
+      "label": "Description color"
+    },
+    {
+      "type": "text",
+      "id": "discount_promocode",
+      "default": "Promo",
+      "label": "Promocode"
+	},
+	{
+      "type": "select",
+      "id": "text_alignment_promo",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Content alignment"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo popup"
+    }
+  ]
+}
+{% endschema %}

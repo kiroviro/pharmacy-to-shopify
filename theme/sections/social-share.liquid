@@ -1,0 +1,181 @@
+{{ 'section-share.css' | asset_url | stylesheet_tag }}
+{{ 'section-notification-popup.css' | asset_url | stylesheet_tag }}
+
+<div class="social-share-block color-{{ section.settings.color_scheme }}{% if section.settings.show_mobile != true %} small-hide{% endif %}">
+  <div class="social-share-icons">
+
+    {%- liquid
+    assign page_title = shop.name
+    if product
+      assign page_title = product.title
+      assign share_image = product.featured_image | image_url: width: 1500
+    elsif collection
+      assign page_title = collection.title
+      assign share_image = collection.featured_image | image_url: width: 1500
+    elsif article
+      assign page_title = article.title
+      assign share_image = article.image | image_url: width: 1500
+    elsif blog
+      assign page_title = blog.title
+    elsif page
+      assign page_title = page.title
+    endif
+  -%}
+
+    <ul class="list-unstyled list-social" role="list">
+      {%- if section.settings.show_fb_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://www.facebook.com/sharer.php?u={{ canonical_url }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-facebook' -%}
+            <span class="visually-hidden">facebook</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+      {%- if section.settings.show_linkedin_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ canonical_url }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-linkedin' -%}
+            <span class="visually-hidden">linkedin</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+      {%- if section.settings.show_twitter_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://twitter.com/intent/tweet?text={{ page_title | escape }}&url={{ canonical_url }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-twitter' -%}
+            <span class="visually-hidden">twitter</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+      {%- if section.settings.show_pinterest_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://www.pinterest.com/pin/create/button/?guid=w7dEew2ynTe1-1&url={{ canonical_url }}&media={{ share_image }}&description={{ page_title | escape }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-pinterest' -%}
+            <span class="visually-hidden">pinterest</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+      {%- if section.settings.show_telegram_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://t.me/share/url?url={{ canonical_url }}&text={{ page_title | escape }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {% render 'icon-telegram' %}
+            <span class="visually-hidden">telegram</span>
+          </a>
+        </li>
+      {%- endif -%}
+
+      {%- if section.settings.show_snapchat_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://www.snapchat.com/scan?attachmentUrl={{ canonical_url }}&utm_source=sharethis" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-snapchat' -%}
+            <span class="visually-hidden">snapchat</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+      {%- if section.settings.show_tumblr_share != blank -%}
+        <li class="list-social__item">
+          <a href="https://www.tumblr.com/widgets/share/tool?canonicalUrl={{ canonical_url }}&title={{ page_title | escape }}&caption={{ article.excerpt | escape }}" class="link list-social__link" target="_blank" rel="noopener noreferrer">
+            {%- render 'icon-tumblr' -%}
+            <span class="visually-hidden">tumblr</span>
+          </a>
+        </li>
+      {%- endif -%}
+    
+    </ul>
+  </div>
+
+  {% if section.settings.social_label != blank %}
+    <div class="social-share-label inline-richtext">
+      {{ section.settings.social_label }}
+    </div>
+  {% endif %}
+  <span class="notification-close-popup share-close-button"> </span>
+
+</div>
+
+
+{% schema %}
+  {
+    "name": "Social share",
+    "tag": "section",
+    "class": "section-share",
+    "disabled_on": {
+      "groups": [
+        "header",
+        "footer"
+      ]
+    },
+    "settings": [
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-1"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "social_label",
+        "default": "Share",
+        "label": "Label"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_linkedin_share",
+        "default": true,
+        "label": "Show \"LinkedIn\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_fb_share",
+        "default": true,
+        "label": "Show \"Facebook\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_twitter_share",
+        "default": true,
+        "label": "Show \"Twitter\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_pinterest_share",
+        "default": false,
+        "label": "Show \"Pinterest\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_telegram_share",
+        "default": false,
+        "label": "Show \"Telegram\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_snapchat_share",
+        "default": false,
+        "label": "Show \"Snapchat\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tumblr_share",
+        "default": false,
+        "label": "Show \"Tumblr\" button"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_mobile",
+        "default": false,
+        "label": "Show on mobile"
+      }
+    ],
+    "presets": [
+      {
+        "name": "Social share"
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,99 @@
+
+<link rel="stylesheet" href="{{ 'section-notification-popup.css' | asset_url }}" media="print" onload="this.media='all'">
+
+{% if request.design_mode and section.settings.enable_in_customizer == true %}
+  <style>
+		#shopify-section-{{ section.id }} {
+			transform: translateX(0);
+      z-index: 9999!important;
+    }
+  </style>
+{% endif %}
+
+<style>
+  .section-notification-popup.popup-hidden {
+    transform: translateX(-150%);
+  }
+</style>
+
+<div class="notification-block color-{{ section.settings.color_scheme }} h6 inline-richtext"{% if section.settings.custom_text_color %} style="color: {{ section.settings.custom_text_color }};"{% endif %} data-show-notifications="{{ section.settings.show_notifications_times }}">
+
+  {% assign highlight = section.settings.highlight_text %}
+  {% assign notification = section.settings.notification %}
+  
+  {% if highlight != blank %}
+    {% assign highlight_span = '<span class="highlight" style="color: ' | append: section.settings.custom_highlight_text_color | append: ';">' | append: highlight | append: '</span>' %}
+    {% assign replaced_notification = notification | replace: highlight, highlight_span %}
+    {{ replaced_notification }}
+  {% else %}
+    {{ notification }}
+  {% endif %}
+  
+  <span class="notification-close-popup"> </span>
+</div>
+
+<script src="{{ 'section-notification-popup.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+  {
+    "name": "Notification",
+    "tag": "section",
+    "class": "section-notification-popup popup-hidden",
+    "enabled_on": {
+      "groups": [
+        "aside"
+      ]
+    },
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_in_customizer",
+        "default": false,
+        "label": "Enable test mode",
+        "info": "Shows a popup example in the theme editor only."
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-1"
+      },
+      {
+        "type": "range",
+        "id": "show_notifications_times",
+        "min": 0,
+        "max": 6,
+        "step": 1,
+        "label": "Notification display limit",
+        "default": 3
+      },
+      {
+        "type": "inline_richtext",
+        "id": "notification",
+        "default": "Welcome discount of 10%",
+        "label": "Notification"
+      },
+      {
+        "type": "color",
+        "id": "custom_text_color",
+        "label": "Custom text color"
+      },
+      {
+        "type": "text",
+        "id": "highlight_text",
+        "default": "10%",
+        "label": "Highlight text"
+      },
+      {
+        "type": "color",
+        "id": "custom_highlight_text_color",
+        "label": "Custom highlight text color"
+      }
+    ],
+    "presets": [
+      {
+        "name": "Notification"
+      }
+    ]
+  }
+{% endschema %}

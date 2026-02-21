@@ -1,0 +1,505 @@
+{{ 'section-testimonials.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+		--title-width: {{ section.settings.heading_width }}px;
+	}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .testimonials-{{ section.id }}
+  .testimonials__list {
+    animation-duration: {{ section.settings.scrolling_speed }}s;
+  }
+
+  {% if section.settings.secondary_background_color != blank and section.settings.secondary_background == true %}
+    .testimonials-{{ section.id }}.section-background-secondary {
+      background-color: {{ section.settings.secondary_background_color }};
+    }
+  {% endif %}
+
+{%- endstyle -%}
+
+<div class='testimonials testimonials-{{ section.id }} color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding gradient' >
+  <div class='testimonials-wrapper isolate'>
+
+    <div class="page-width">
+      <div class='testimonials__title-wrapper'>
+        <div class="section-heading align-{{ section.settings.heading_alignment }}">
+
+          {%- if section.settings.title != blank -%}
+            <h2 class="testimonials__section-title section-title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+              {{ section.settings.title }}
+            </h2>
+          {%- endif -%}
+  
+          {%- if section.settings.description != blank -%}
+            <div class="section-description rte-{{ section.settings.text_size_block }} rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %} clr-{{ section.settings.text_color }}">
+              {{ section.settings.description }}
+            </div>
+          {%- endif -%}
+  
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonials__list__wrap {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      <ul class='testimonials__list'>
+        {% for block in section.blocks %}
+
+          <style>
+            .testimonials__item.{{ block.id }} {
+              border: 0.1rem solid {{ block.settings.border_color }};
+            }
+          </style>
+
+          <li class='{{ block.id }} testimonials__item color-{{ block.settings.color_scheme }}' {{ block.shopify_attributes }}>
+            {% assign rating = block.settings.rating_star %}
+
+            <div class="testimonials__item-rating">
+              {% for i in (1..5) %}
+                {% if i <= rating %}
+                  <span class="testimonials__item-rating-star filled">
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10.0123 0.0150871C9.94557 0.0594917 8.44048 3.16041 7.5137 5.15861C7.29868 5.62486 7.17264 5.81728 7.06143 5.83948C6.97246 5.85429 6.67589 5.90609 6.38673 5.9505C4.9113 6.16512 0.833471 6.84599 0.781572 6.88299C0.744501 6.90519 0.714844 6.9422 0.714844 6.9718C0.714844 7.01621 3.85848 10.0431 5.04476 11.1384L5.40064 11.4715L4.94837 14.3134C4.7037 15.8823 4.48127 17.3551 4.45162 17.5993C4.39972 18.0285 4.39972 18.0285 4.57766 17.9767C4.67404 17.9471 5.47478 17.5327 6.34966 17.0516C7.22454 16.578 8.46272 15.9119 9.09293 15.5715L10.2421 14.9498L13.1411 16.4226C14.7352 17.2293 16.0697 17.8657 16.1142 17.8435C16.1587 17.8139 16.1439 17.5475 16.0549 17.0738C15.9808 16.6742 15.7657 15.4827 15.5804 14.4244C15.395 13.3661 15.1948 12.2485 15.1281 11.9451L15.0243 11.3975L17.3376 9.08102C18.8204 7.59346 19.6286 6.74238 19.5841 6.69797C19.5173 6.63137 16.4034 6.17252 14.2087 5.90609C13.6601 5.83948 13.1708 5.75068 13.1263 5.69887C13.0818 5.65447 12.4219 4.38153 11.6583 2.87918C10.8946 1.36943 10.2347 0.103896 10.1828 0.0520905C10.1309 0.000285143 10.0568 -0.0145159 10.0123 0.0150871Z" fill="#FCC802" />
+                    </svg>
+
+                  </span>
+                {% else %}
+                  <span class="testimonials__item-rating-star">
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9.58261 0.0150871C9.51588 0.0594917 8.01079 3.16041 7.08401 5.15861C6.869 5.62486 6.74295 5.81728 6.63174 5.83948C6.54277 5.85429 6.2462 5.90609 5.95704 5.9505C4.48161 6.16512 0.403784 6.84599 0.351884 6.88299C0.314813 6.90519 0.285156 6.9422 0.285156 6.9718C0.285156 7.01621 3.42879 10.0431 4.61507 11.1384L4.97095 11.4715L4.51868 14.3134C4.27401 15.8823 4.05159 17.3551 4.02193 17.5993C3.97003 18.0285 3.97003 18.0285 4.14797 17.9767C4.24436 17.9471 5.04509 17.5327 5.91997 17.0516C6.79485 16.578 8.03303 15.9119 8.66324 15.5715L9.81245 14.9498L12.7114 16.4226C14.3055 17.2293 15.64 17.8657 15.6845 17.8435C15.729 17.8139 15.7142 17.5475 15.6252 17.0738C15.5511 16.6742 15.3361 15.4827 15.1507 14.4244C14.9653 13.3661 14.7652 12.2485 14.6984 11.9451L14.5946 11.3975L16.9079 9.08102C18.3907 7.59346 19.1989 6.74238 19.1544 6.69797C19.0877 6.63137 15.9737 6.17252 13.7791 5.90609C13.2304 5.83948 12.7411 5.75068 12.6966 5.69887C12.6521 5.65447 11.9922 4.38153 11.2286 2.87918C10.4649 1.36943 9.80503 0.103896 9.75313 0.0520905C9.70123 0.000285143 9.62709 -0.0145159 9.58261 0.0150871Z" fill="#D9D9D9" />
+                    </svg>
+                  </span>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <div class='testimonials__item-text inline-richtext clr-{{ block.settings.text_color }}'>
+              {{ block.settings.text }}
+            </div>
+
+            <div class='testimonials__item-author'>
+
+              {% if block.settings.image != blank %}
+                {%- capture sizes -%}
+                  80px
+                {%- endcapture -%}
+                {% if block.settings.image.alt != blank %}
+                  {% assign alt = block.settings.image.alt %}
+                {% else %}
+                  {% assign alt = 'testimonial author avatar' %}
+                {% endif %}
+
+                {% assign image_class = 'testimonials__item-author-avatar' %}
+                {{ block.settings.image | image_url: width: 80| image_tag: sizes: sizes, 
+                  alt: alt,
+                  class: image_class,
+                  widths: '60, 80, 100, 320, 360, 375, 420, 480, 768, 950, 1024, 1200, 1360, 1440 1600, 1920, 2560'
+                }}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'testimonials__item-author-avatar-placeholder' }}
+              {% endif %}
+
+              <div class='testimonials__item-author-info'>
+                <div class='testimonials__item-author-fullname inline-richtext h6 clr-{{ block.settings.name_color }}'>
+                  {{ block.settings.full_name }}
+                </div>
+
+                <div class='testimonials__item-author-jobtitle inline-richtext clr-{{ block.settings.job_title_color }}'>
+                  {{ block.settings.job_title }}
+                </div>
+              </div>
+            </div>
+          </li>
+
+        {% endfor %}
+      </ul>
+
+      <ul class='testimonials__list'>
+        {% for block in section.blocks %}
+
+          <style>
+            .testimonials__item.{{ block.id }} {
+              border: 0.1rem solid {{ block.settings.border_color }};
+            }
+          </style>
+
+          <li class='{{ block.id }} testimonials__item color-{{ block.settings.color_scheme }}' {{ block.shopify_attributes }}>
+
+            {% assign rating = block.settings.rating_star %}
+
+            <div class="testimonials__item-rating">
+              {% for i in (1..5) %}
+                {% if i <= rating %}
+                  <span class="testimonials__item-rating-star filled">
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10.0123 0.0150871C9.94557 0.0594917 8.44048 3.16041 7.5137 5.15861C7.29868 5.62486 7.17264 5.81728 7.06143 5.83948C6.97246 5.85429 6.67589 5.90609 6.38673 5.9505C4.9113 6.16512 0.833471 6.84599 0.781572 6.88299C0.744501 6.90519 0.714844 6.9422 0.714844 6.9718C0.714844 7.01621 3.85848 10.0431 5.04476 11.1384L5.40064 11.4715L4.94837 14.3134C4.7037 15.8823 4.48127 17.3551 4.45162 17.5993C4.39972 18.0285 4.39972 18.0285 4.57766 17.9767C4.67404 17.9471 5.47478 17.5327 6.34966 17.0516C7.22454 16.578 8.46272 15.9119 9.09293 15.5715L10.2421 14.9498L13.1411 16.4226C14.7352 17.2293 16.0697 17.8657 16.1142 17.8435C16.1587 17.8139 16.1439 17.5475 16.0549 17.0738C15.9808 16.6742 15.7657 15.4827 15.5804 14.4244C15.395 13.3661 15.1948 12.2485 15.1281 11.9451L15.0243 11.3975L17.3376 9.08102C18.8204 7.59346 19.6286 6.74238 19.5841 6.69797C19.5173 6.63137 16.4034 6.17252 14.2087 5.90609C13.6601 5.83948 13.1708 5.75068 13.1263 5.69887C13.0818 5.65447 12.4219 4.38153 11.6583 2.87918C10.8946 1.36943 10.2347 0.103896 10.1828 0.0520905C10.1309 0.000285143 10.0568 -0.0145159 10.0123 0.0150871Z" fill="#FCC802" />
+                    </svg>
+                  </span>
+                {% else %}
+                  <span class="testimonials__item-rating-star">
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9.58261 0.0150871C9.51588 0.0594917 8.01079 3.16041 7.08401 5.15861C6.869 5.62486 6.74295 5.81728 6.63174 5.83948C6.54277 5.85429 6.2462 5.90609 5.95704 5.9505C4.48161 6.16512 0.403784 6.84599 0.351884 6.88299C0.314813 6.90519 0.285156 6.9422 0.285156 6.9718C0.285156 7.01621 3.42879 10.0431 4.61507 11.1384L4.97095 11.4715L4.51868 14.3134C4.27401 15.8823 4.05159 17.3551 4.02193 17.5993C3.97003 18.0285 3.97003 18.0285 4.14797 17.9767C4.24436 17.9471 5.04509 17.5327 5.91997 17.0516C6.79485 16.578 8.03303 15.9119 8.66324 15.5715L9.81245 14.9498L12.7114 16.4226C14.3055 17.2293 15.64 17.8657 15.6845 17.8435C15.729 17.8139 15.7142 17.5475 15.6252 17.0738C15.5511 16.6742 15.3361 15.4827 15.1507 14.4244C14.9653 13.3661 14.7652 12.2485 14.6984 11.9451L14.5946 11.3975L16.9079 9.08102C18.3907 7.59346 19.1989 6.74238 19.1544 6.69797C19.0877 6.63137 15.9737 6.17252 13.7791 5.90609C13.2304 5.83948 12.7411 5.75068 12.6966 5.69887C12.6521 5.65447 11.9922 4.38153 11.2286 2.87918C10.4649 1.36943 9.80503 0.103896 9.75313 0.0520905C9.70123 0.000285143 9.62709 -0.0145159 9.58261 0.0150871Z" fill="#D9D9D9" />
+                    </svg>
+                  </span>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <div class='testimonials__item-text inline-richtext clr-{{ block.settings.text_color }}'>
+              {{ block.settings.text }}
+            </div>
+
+            <div class='testimonials__item-author'>
+              {% if block.settings.image != blank %}
+                {%- capture sizes -%}
+                  80px
+                {%- endcapture -%}
+                {% if block.settings.image.alt != blank %}
+                  {% assign alt = block.settings.image.alt %}
+                {% else %}
+                  {% assign alt = 'testimonial author avatar' %}
+                {% endif %}
+                {% assign image_class = 'testimonials__item-author-avatar' %}
+                {{ block.settings.image | image_url: width: 80| image_tag: sizes: sizes, 
+                  alt: alt,
+                  class: image_class,
+                  widths: '60, 80, 100, 320, 360, 375, 420, 480, 768, 950, 1024, 1200, 1360, 1440 1600, 1920, 2560'
+                }}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'testimonials__item-author-avatar-placeholder' }}
+              {% endif %}
+
+              <div class='testimonials__item-author-info'>
+                <div class='testimonials__item-author-fullname inline-richtext h6 clr-{{ block.settings.name_color }}'>
+                  {{ block.settings.full_name }}
+                </div>
+                <div class='testimonials__item-author-jobtitle inline-richtext clr-{{ block.settings.job_title_color }}'>
+                  {{ block.settings.job_title }}
+                </div>
+              </div>
+            </div>
+          </li>
+
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "t:sections.testimonials.name",
+    "class": "section",
+    "tag": "section",
+    "disabled_on": {
+      "groups": [
+        "header",
+        "footer"
+      ]
+    },
+    "settings": [
+      {
+        "type": "inline_richtext",
+        "id": "title",
+        "default": "Testimonials",
+        "label": "t:sections.testimonials.settings.title.label"
+      },
+			{
+				"type": "range",
+				"id": "heading_width",
+				"min": 200,
+				"max": 1000,
+				"step": 20,
+				"label": "Heading width",
+				"unit": "px",
+				"default": 600
+			},
+      {
+        "type": "text_alignment",
+        "id": "heading_alignment",
+        "label": "Heading alignment",
+        "default": "center"
+      },
+      {
+        "type": "select",
+        "id": "heading_size",
+        "options": [
+          {
+            "value": "h3",
+            "label": "t:sections.all.heading_size.options__1.label"
+          },
+          {
+            "value": "h2",
+            "label": "t:sections.all.heading_size.options__2.label"
+          },
+          {
+            "value": "h1",
+            "label": "t:sections.all.heading_size.options__3.label"
+          }
+        ],
+        "default": "h2",
+        "label": "t:sections.all.heading_size.label"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "richtext",
+        "id": "description",
+        "label": "t:sections.testimonials.settings.description.label"
+      },
+      {
+        "type": "select",
+        "id": "text_size_block",
+        "options": [
+          {
+          "value": "small",
+          "label": "Small"
+          },
+          {
+          "value": "medium",
+          "label": "Medium"
+          },
+          {
+          "value": "large",
+          "label": "Large"
+          }
+          ],
+        "default": "medium",
+        "label": "Description font size"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "options": [
+        {
+          "value": "foreground",
+          "label": "t:settings_schema.colors.settings.text.label"
+        },
+        {
+          "value": "foreground-secondary",
+          "label": "t:settings_schema.colors.settings.text_secondary.label"
+        },
+        {
+          "value": "accent",
+          "label": "t:settings_schema.colors.settings.accent_color.label"
+        }
+        ],
+        "default": "foreground",
+        "label": "Description color"
+      },
+      {
+        "type": "range",
+        "id": "scrolling_speed",
+        "min": 20,
+        "max": 200,
+        "step": 5,
+        "unit": "s",
+        "label": "Scrolling speed",
+        "default": 80
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 70
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 70
+      }
+    ],
+    "blocks": [
+      {
+        "type": "testimonial",
+        "name": "t:sections.testimonials.blocks.testimonial.name",
+        "settings": [
+          {
+            "type": "color_scheme",
+            "id": "color_scheme",
+            "label": "t:sections.all.colors.label",
+            "default": "scheme-1"
+          },
+          {
+            "type": "range",
+            "id": "rating_star",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "default": 5,
+            "label": "t:sections.testimonials.blocks.testimonial.settings.rating.label"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "t:sections.testimonials.blocks.testimonial.settings.image.label"
+          },
+          {
+            "type": "inline_richtext",
+            "id": "full_name",
+            "default": "John Doe",
+            "label": "t:sections.testimonials.blocks.testimonial.settings.full_name.label"
+          },
+          {
+            "type": "select",
+            "id": "name_color",
+            "options": [
+            {
+              "value": "foreground",
+              "label": "t:settings_schema.colors.settings.text.label"
+            },
+            {
+              "value": "foreground-secondary",
+              "label": "t:settings_schema.colors.settings.text_secondary.label"
+            },
+            {
+              "value": "accent",
+              "label": "t:settings_schema.colors.settings.accent_color.label"
+            }
+            ],
+            "default": "foreground",
+            "label": "Name color"
+          },
+          {
+            "type": "inline_richtext",
+            "id": "job_title",
+            "default": "Engineering leader at a pre-IPO startup",
+            "label": "t:sections.testimonials.blocks.testimonial.settings.job_title.label"
+          },
+          {
+            "type": "select",
+            "id": "job_title_color",
+            "options": [
+            {
+              "value": "foreground",
+              "label": "t:settings_schema.colors.settings.text.label"
+            },
+            {
+              "value": "foreground-secondary",
+              "label": "t:settings_schema.colors.settings.text_secondary.label"
+            },
+            {
+              "value": "accent",
+              "label": "t:settings_schema.colors.settings.accent_color.label"
+            }
+            ],
+            "default": "foreground",
+            "label": "Job title color"
+          },
+          {
+            "type": "inline_richtext",
+            "id": "text",
+            "default": "Add customer reviews and testimonials to showcase your store’s happy customers.",
+            "label": "t:sections.testimonials.blocks.testimonial.settings.text.label"
+          },
+          {
+            "type": "select",
+            "id": "text_color",
+            "options": [
+            {
+              "value": "foreground",
+              "label": "t:settings_schema.colors.settings.text.label"
+            },
+            {
+              "value": "foreground-secondary",
+              "label": "t:settings_schema.colors.settings.text_secondary.label"
+            },
+            {
+              "value": "accent",
+              "label": "t:settings_schema.colors.settings.accent_color.label"
+            }
+            ],
+            "default": "foreground",
+            "label": "Text color"
+          },
+          {
+            "type": "color",
+            "id": "border_color",
+            "label": "Border color",
+            "default": "transparent"
+          },
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.testimonials.presets.name",
+        "blocks": [
+          {
+            "type": "testimonial",
+            "settings": {
+              "rating_star": 5,
+              "full_name": "Author's name",
+              "job_title": "Author's position",
+              "text": "Add customer reviews and testimonials to showcase your store’s happy customers."
+            }
+          },
+          {
+            "type": "testimonial",
+            "settings": {
+              "rating_star": 5,
+              "full_name": "Author's name",
+              "job_title": "Author's position",
+              "text": "Add customer reviews and testimonials to showcase your store’s happy customers."
+            }
+          },
+          {
+            "type": "testimonial",
+            "settings": {
+              "rating_star": 5,
+              "full_name": "Author's name",
+              "job_title": "Author's position",
+              "text": "Add customer reviews and testimonials to showcase your store’s happy customers."
+            }
+          },
+          {
+            "type": "testimonial",
+            "settings": {
+              "rating_star": 5,
+              "full_name": "Author's name",
+              "job_title": "Author's position",
+              "text": "Add customer reviews and testimonials to showcase your store’s happy customers."
+            }
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,201 @@
+<style type="text/css">
+  .template-404-wrapper {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .template-404-wrapper {
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+  @media screen and (max-width: 749px) {
+    .template-404-wrapper {
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+  .template-404 {
+    border-radius: var(--text-boxes-radius);
+    padding: 14rem 1.5rem 5rem;
+  }
+  @media screen and (max-width: 1199px) {
+    .template-404 {
+      padding-top: 10rem;
+    }
+  }
+  @media screen and (max-width: 749px) {
+    .template-404 {
+      padding-top: 8rem;
+    }
+  }
+  .subtext-404 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.8rem;
+    font-size: 10rem;
+    color: rgb(var(--color-foreground));
+    line-height: 1.2em;
+    font-weight: 600;
+    margin: 0;
+  }
+  @media (max-width: 989px) {
+    .subtext-404 {
+      font-size: 8rem;
+    }
+  }
+  @media (max-width: 989px) {
+    .subtext-404 img {
+      height: 8rem;
+      width: 8rem;
+    }
+  }
+  .title-404 {
+    margin: 2rem 0 0;
+  }
+  .description-404 {
+    margin-top: 1.5rem;
+    color: #757575;
+  }
+  .button-404 {
+    margin-top: 2rem;
+    border-radius: var(--buttons-radius);
+  }
+  .image-404__wrapper img {
+    margin-top: 5rem;
+    width: 100%;
+    max-width: 1046px;
+    object-fit: cover;
+    object-position: center;
+    height: auto;
+  }
+  .image-404__wrapper {
+    position: relative;
+  }
+</style>
+
+<div class="template-404-wrapper color-{{ section.settings.section_color_scheme }}">
+  <div class="page-width">
+    <div class="template-404 center color-{{ section.settings.color_scheme }}">
+      
+      <p class="subtext-404 {{ section.settings.heading_font_family }}-family {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {% if section.settings.icon != blank %}
+          <span>4</span>
+          <img src="{{ section.settings.icon | image_url }}" loading="lazy" alt="404 icon" width="100" height="100">
+          <span>4</span>
+        {% else %}
+          {{ 'templates.404.subtext' | t }}
+        {% endif %}
+      </p>
+
+      <h1 class="title title-404 h2 {{ section.settings.heading_font_family }}-family {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        {{ 'templates.404.title' | t }}
+      </h1>
+  
+      {% if section.settings.text != blank %}
+        <div class="rte description-404{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+          {{ section.settings.text }}
+        </div>
+      {% endif %}
+  
+      <a href="{{ routes.root_url }}" class="button button-404{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+        <span>
+          {{ 'general.return_to_homepage' | t }}
+        </span>
+      </a>
+  
+      {% if section.settings.image != blank %}
+        <div class="image-404__wrapper{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+          <img src="{{ section.settings.image | image_url }}" loading="lazy" alt="image" width="1046" height="365">
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+{% schema %}
+  {
+    "name": "Main 404",
+    "class": "section",
+    "disabled_on": {
+      "groups": [
+        "header",
+        "footer"
+      ]
+    },
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "t:sections.all.learn_more_preset.info"
+      },
+      {
+        "type": "color_scheme",
+        "id": "section_color_scheme",
+        "label": "Section color scheme",
+        "default": "scheme-2"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Content color scheme",
+        "default": "scheme-1"
+      },
+      {
+        "type": "image_picker",
+        "id": "icon",
+        "label": "Icon"
+      },
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "t:sections.image-with-text.settings.image.label"
+      },
+			{
+				"type": "select",
+				"id": "heading_font_family",
+				"label": "Font family",
+				"options": [
+					{
+					"value": "heading-font",
+					"label": "Heading"
+					},
+					{
+					"value": "body-font",
+					"label": "Body"
+					}
+				],
+				"default": "heading-font"
+			},
+      {
+        "type": "richtext",
+        "id": "text",
+        "default": "<p>Please go to homepage to procced further.</p>",
+        "label": "t:sections.image-with-text.blocks.text.settings.text.label"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 140
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,201 @@
+{% comment %}
+  Renders a collection card
+
+  Accepts:
+  - card_collection: {Object} Collection Liquid object
+  - media_aspect_ratio: {String} Size of the product image card. Values are "square" and "portrait". Default is "square" (optional)
+  - button_style: {String} Button style. Default is "Inline button with icon" (optional)
+  - card_heading_size: {String} Heading size. Default is "h4" (required)
+  - description_size: {String} Description size. Default is "text--medium" (optional)
+  - columns: {Number}
+  - extend_height: {Boolean} Card height extends to available container space. Default: false (optional)
+  - wrapper_class: {String} Wrapper class for card (optional)
+  - placeholder_image: {String} Placeholder image when collection is empty (optional)
+  - card_reversed: {Boolean}
+  Usage:
+  {% render 'card-collection' %}
+{% endcomment %}
+
+{%- liquid
+  assign ratio = 1
+
+  if card_collection.featured_image and media_aspect_ratio == 'portrait'
+    assign ratio = 0.8
+  elsif card_collection.featured_image and media_aspect_ratio == 'landscape'
+    assign ratio = 1.3
+  elsif card_collection.featured_image and media_aspect_ratio == 'adapt'
+    assign ratio = card_collection.featured_image.aspect_ratio
+  endif
+
+  if ratio == 0 or ratio == null
+    assign ratio = 1
+  endif
+
+  assign card_color_scheme = settings.card_color_scheme
+  assign card_style = settings.card_style
+
+  if wrapper_class == null or wrapper_class == 'none'
+    assign card_color_scheme = settings.collection_card_color_scheme
+    assign card_style = settings.collection_card_style
+  endif
+	
+	assign c_button_style = 'link animate-arrow'
+	assign c_button_icon = true
+
+	if button_style == 'link'
+		assign c_button_style = 'link underlined-link'
+		assign c_button_icon = false
+	elsif button_style == 'link_hover'
+		assign c_button_style = 'link link-hover'
+		assign c_button_icon = false
+	endif
+-%}
+
+<div class="card-wrapper animate-arrow {% if wrapper_class and wrapper_class != 'none' %}{{ wrapper_class }}{% else %}collection-card-wrapper{% endif %}">
+
+  <div class="card card--{{ card_style }} 
+    card-type-{{ image_type }} 
+    {% if card_collection.featured_image %} card--media{% else %} card--text{% endif %} 
+    {% if card_style == 'card' %} color-{{ card_color_scheme }} gradient{% endif %} 
+    {% if extend_height %} card--extend-height{% endif %} 
+    {% if card_collection.featured_image == nil and card_style == 'card' %} ratio{% endif %}"
+     
+     {% if card_reversed %}
+      style="padding-bottom: {{ 1 | divided_by: ratio | times: 100 }}%;"
+     {% else %}
+      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+     {% endif %} 
+     >
+
+    <div class="card__inner {% if card_style == 'standard' %} color-{{ card_color_scheme }} gradient{% endif %} {% if card_collection.featured_image or card_style == 'standard' %} ratio{% endif %}" style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;">
+
+      <style>
+        {%- if card_reversed and media_aspect_ratio != 'adapt' -%}
+          .card__inner {
+            --padding: 80%;
+          }
+        {%- else -%}
+          .card__inner {
+            --padding: 85%;
+          }
+        {%- endif -%}
+      </style>
+  
+      {%- if card_collection.featured_image -%}
+        <a class="card__media" href="{{ card_collection.url }}">
+          <div class="media media--transparent media--hover-effect">
+            <img srcset="
+                {%- if card_collection.featured_image.width >= 165 -%}{{ card_collection.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 330 -%}{{ card_collection.featured_image | image_url: width: 330 }} 330w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 535 -%}{{ card_collection.featured_image | image_url: width: 535 }} 535w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 750 -%}{{ card_collection.featured_image | image_url: width: 750 }} 750w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 1000 -%}{{ card_collection.featured_image | image_url: width: 1000 }} 1000w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 1500 -%}{{ card_collection.featured_image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                {%- if card_collection.featured_image.width >= 3000 -%}{{ card_collection.featured_image | image_url: width: 3000 }} 3000w,{%- endif -%}
+                {{ card_collection.featured_image | image_url }} {{ card_collection.featured_image.width }}w"
+              src="{{ card_collection.featured_image | image_url: width: 1500 }}"
+              sizes="
+                (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: columns }}px,
+                (min-width: 750px) {% if columns > 1 %}calc((100vw - 10rem) / 2){% else %}calc(100vw - 10rem){% endif %},
+                calc(100vw - 3rem)"
+              alt="{{- card_collection.title | escape -}}" 
+              height="{{ card_collection.featured_image.height }}" width="{{ card_collection.featured_image.width }}" loading="lazy" class="motion-reduce">
+          </div>
+        </a>
+
+      {% elsif card_collection.featured_image == blank and image_type == 'cover_first' and forloop.index == 1 %}
+        <div class="card__content{% if image_type == 'cover_first' and forloop.index == 1 %} color-{{ cover_color_scheme }} {% elsif image_type == 'cover' or image_type == 'cover_style_2' %} color-{{ cover_color_scheme }}{% endif %}">
+          <div class="card__information">
+            <h3 class="card__heading {{ card_heading_size }}">
+              <a {% if card_collection == blank %} role="link" aria-disabled="true" {% else %} href="{{ card_collection.url }}" {% endif %} class="full-unstyled-link">
+                {%- if card_collection.title != blank -%}
+                  {{- card_collection.title | escape -}}
+                {%- else -%}
+                  {{ 'onboarding.collection_title' | t }}
+                {%- endif -%}
+                {%- if link_label == blank -%}
+                  <span class="icon-wrap">{% render 'icon-arrow' %}</span>
+                {%- endif %}
+              </a>
+            </h3>
+
+            {%- if card_collection.description != blank and show_description == true -%}
+              <p class="card__caption {% if description_size != blank %} {{ description_size }} {% endif %}">
+                {{- card_collection.description | strip_html | truncatewords: 12 -}}
+              </p>
+            {%- endif -%}
+
+            {% if link_label != blank %}
+              <a href="{{ card_collection.url }}" class="card-link full-unstyled-link">
+                {{ link_label }}
+                {% render 'icon-caret' %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if card_collection == blank -%}
+        <div class="card__media">
+          {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+
+      {% if card_reversed %}
+        <div class="card__inner-icon">
+          {% render "icon-caret" %}
+        </div>  
+      {% endif %}
+      
+    </div>
+
+    {%- if card_collection != blank and card_style == 'card' or card_collection.featured_image -%}
+      <div class="card__content{% if image_type == 'cover_first' and forloop.index == 1 %} color-{{ cover_color_scheme }} {% elsif image_type == 'cover' or image_type == 'cover_style_2' %} color-{{ cover_color_scheme }}{% endif %}">
+        <div class="card__information">
+          <h3 class="card__heading {{ card_heading_size }}">
+            <a {% if card_collection == blank %} role="link" aria-disabled="true" {% else %} href="{{ card_collection.url }}" {% endif %} class="full-unstyled-link">
+							{%- if card_collection.title != blank -%}
+								{{- card_collection.title | escape -}}
+							{%- else -%}
+								{{ 'onboarding.collection_title' | t }}
+							{%- endif -%}
+              {%- if link_label == blank and card_reversed == false -%}
+                <span class="icon-wrap">{% render 'icon-arrow' %}</span>
+              {%- endif %}
+            </a>
+          </h3>
+
+          {%- if card_collection.description != blank and show_description == true -%}
+            <p class="card__caption {% if description_size != blank %} {{ description_size }} {% endif %}">
+              {{- card_collection.description | strip_html | truncatewords: 12 -}}
+            </p>
+          {%- endif -%}
+
+          {% if link_label != blank %}
+            <a href="{{ card_collection.url }}" class="card-link full-unstyled-link {{ c_button_style }}">
+							<span>
+								{{ link_label }}
+							</span>
+							{% if c_button_icon %}
+								{% render 'icon-caret' %}
+							{% endif %}
+            </a>
+          {% endif %}
+        </div>     
+      </div>
+    {%- endif -%}
+
+    {%- if card_collection == blank -%}
+      <div class="card__content{% if image_type == 'cover_first' and forloop.index == 1 %} color-{{ cover_color_scheme }} {% elsif image_type == 'cover' or image_type == 'cover_style_2' %} color-{{ cover_color_scheme }}{% endif %}">
+        <div class="card__information">
+          <h3 class="card__heading h4 card__heading--placeholder">
+            <a role="link" aria-disabled="true" class="full-unstyled-link">
+              {{ 'onboarding.collection_title' | t }}
+              <span class="icon-wrap">{% render 'icon-arrow' %}</span>
+            </a>
+          </h3>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

@@ -1,0 +1,58 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-search",
+      "settings": {
+        "banner_color_scheme": "",
+        "show_collection_breadcrumbs": true,
+        "show_breadcrumbs_top": false,
+        "image": "",
+        "image_block": false,
+        "image_size": "60",
+        "banner_height": "medium",
+        "hide_radius": true,
+        "title": "",
+        "heading_size": "h1",
+        "description_text": "",
+        "text_size_block": "medium",
+        "heading_alignment": "center",
+        "content_alignment": "bottom",
+        "image_overlay_opacity": 40,
+        "text_secondary_color": false,
+        "section_full_width": true,
+        "section_background": "#ffffff",
+        "banner_padding_top": 200,
+        "banner_padding_bottom": 100,
+        "color_scheme": "scheme-8",
+        "columns_desktop": 3,
+        "columns_mobile": "2",
+        "label_font_size": "text--medium",
+        "label_font_weight": "fw-500",
+        "label_font_style": "capitalize",
+        "summary_font_size": "h6",
+        "summary_font_weight": "fw-600",
+        "filter_text_font_size": "b-text-sm",
+        "enable_filtering": true,
+        "filter_type": "vertical",
+        "swatch_layout": "stacked",
+        "filter_color_scheme": "",
+        "enable_sorting": true,
+        "sorting_color_scheme": "",
+        "sorting_inside_color_scheme": "scheme-3",
+        "image_ratio": "square",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": false,
+        "enable_quick_add": true,
+        "article_show_date": false,
+        "article_show_author": false,
+        "read_more_title": "ПРОЧЕТИ ПОВЕЧЕ",
+        "padding_top": 130,
+        "padding_bottom": 130
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

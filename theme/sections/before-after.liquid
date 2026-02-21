@@ -1,0 +1,263 @@
+{{ 'component-before-after.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .image-comparison__figure:not(.image-comparison__figure--overlay) {
+    padding-top: {{ section.settings.image_height }}%;
+  }
+{%- endstyle -%}
+
+<div class="before-after section-{{ section.id }}-padding color-{{ section.settings.color_scheme }}">
+
+  <div class="page-width isolate">
+
+    {%- if section.settings.heading != blank or section.settings.text != blank -%}
+      <div class="section-heading align-{{ section.settings.heading_alignment }}">
+        {%- if section.settings.heading != blank -%}
+          <h2 id="SectionHeading-{{ section.id }}" class="section-title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.text != blank -%}
+          <div class="section-description rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.text -}}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <before-after class="image-comparison {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}" data-id="{{ section.id }}" data-is-init="false" data-layout="horizontal" data-component="image-comparison-slider">
+
+      <div class="image-comparison__slider-wrapper">
+				<label for="image-compare-range" class="image-comparison__label">Move image comparison slider</label>
+				<input type="range" min="0" max="100" value="50" class="image-comparison__range" id="image-compare-range">
+		
+				<div class="image-comparison__image-wrapper image--before image-comparison__image-wrapper--overlay" style="clip-path: inset(0px 50% 0px 0px);">
+					<figure class="image-comparison__figure image-comparison__figure--overlay">
+						<div class="image-comparison__picture">
+							{%- if section.settings.before_image != blank -%}
+                {%- assign widths = '165, 360, 375, 390, 420, 535, 750, 768, 1024 1070, 1200' -%}
+                {%- capture sizes -%}
+                  (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 }}px,
+                  (min-width: 750px) calc((100vw - 130px)), calc((100vw - 50px))
+                {%- endcapture -%}
+								{{
+									section.settings.before_image
+									| image_url: width: 1200
+									| image_tag: loading: 'lazy',
+                  sizes: sizes,
+                  widths: widths,
+                  class: 'image-comparison__image',
+                  alt: section.settings.before_image.alt
+								}}
+							{%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg image-comparison__image' }}
+							{%- endif -%} 
+						</div>
+            {%- if section.settings.before_image_heading != blank -%}
+						  <figcaption class="image-comparison__caption image-comparison__caption--before">
+								<span class="image-comparison__caption-body inline-richtext text-color-{{ section.settings.before_color }}">
+                  {{ section.settings.before_image_heading }}
+                </span>
+              </figcaption>
+						{%- endif -%}
+					</figure>
+				</div>
+		
+				<div class="image-comparison__slider">
+					<span class="image-comparison__thumb" data-image-comparison-thumb="">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="19" viewBox="0 0 14 19" fill="none">
+							<path d="M7 1.97144V17.9714" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M13 2V18" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M1 1.97144V17.9714" stroke="currentColor" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</span>
+				</div>
+		
+				<div class="image-comparison__image-wrapper image--after" style="clip-path: inset(0px 0px 0px 50%);">
+					<figure class="image-comparison__figure">
+						<div class="image-comparison__picture">
+							{%- if section.settings.after_image != blank -%}
+                {%- assign widths = '165, 360, 375, 390, 420, 535, 750, 768, 1024 1070, 1200' -%}
+                {%- capture sizes -%}
+                  (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 50 }}px,
+                  (min-width: 750px) calc((100vw - 30px)), 
+                  calc((100vw - 20px))
+                {%- endcapture -%}
+								{{
+									section.settings.after_image
+									| image_url: width: 1200
+									| image_tag: loading: 'lazy',
+                  sizes: sizes,
+                  widths: widths,
+                  class: 'image-comparison__image',
+                  alt: section.settings.after_image.alt
+								}}
+							{%- else -%}
+                {{ 'collection-2' | placeholder_svg_tag: 'placeholder-svg image-comparison__image' }}
+							{%- endif -%} 
+						</div>
+		
+            {%- if section.settings.after_image_heading != blank -%}
+						  <figcaption class="image-comparison__caption image-comparison__caption--after">
+								<span class="image-comparison__caption-body inline-richtext text-color-{{ section.settings.after_color }}">
+                  {{ section.settings.after_image_heading }}
+                </span>
+              </figcaption>
+						{%- endif -%}
+					</figure>
+				</div>
+			</div>
+
+    </before-after>
+  </div>
+</div>
+
+<script src="{{ 'before-after.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+  {
+    "name": "t:sections.before-after.name",
+    "tag": "section",
+    "class": "section",
+    "disabled_on": {
+      "groups": [
+        "header",
+        "footer"
+      ]
+    },
+    "settings": [
+      {
+        "type": "range",
+        "id": "image_height",
+        "min": 20,
+        "max": 120,
+        "step": 1,
+        "unit": "%",
+        "label": "Image height",
+        "default": 55
+      },
+      {
+        "type": "inline_richtext",
+        "id": "heading",
+        "default": "Find the perfect match",
+        "label": "t:sections.before-after.settings.heading.label"
+      },
+      {
+        "type": "text_alignment",
+        "id": "heading_alignment",
+        "label": "Heading alignment",
+        "default": "center"
+      },
+      {
+        "type": "select",
+        "id": "heading_size",
+        "options": [
+          {
+            "value": "h3",
+            "label": "t:sections.all.heading_size.options__1.label"
+          },
+          {
+            "value": "h2",
+            "label": "t:sections.all.heading_size.options__2.label"
+          },
+          {
+            "value": "h1",
+            "label": "t:sections.all.heading_size.options__3.label"
+          }
+        ],
+        "default": "h2",
+        "label": "t:sections.all.heading_size.label"
+      },
+      {
+        "type": "richtext",
+        "id": "text",
+        "default": "<p>Explore a range of product variations to discover the ideal match that perfectly suits your style and needs.</p>",
+        "label": "t:sections.before-after.settings.text.label"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.before-after.headings.before_image"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "before_image_heading",
+        "label": "t:sections.before-after.settings.heading.label"
+      },
+      {
+        "type": "image_picker",
+        "id": "before_image",
+        "label": "t:sections.before-after.settings.image.label",
+        "info": "For best results, use an image with width and height like in an external image container."
+      },
+      {
+        "type": "header",
+        "content": "t:sections.before-after.headings.after_image"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "after_image_heading",
+        "label": "t:sections.before-after.settings.heading.label"
+      },
+      {
+        "type": "image_picker",
+        "id": "after_image",
+        "label": "t:sections.before-after.settings.image.label",
+        "info": "For best results, use an image with width and height like in an external image container."
+      },
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 70
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 70
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:sections.before-after.name"
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,63 @@
+{% comment %}
+  Renders color scheme variables
+
+  Accepts:
+  - scheme: {Object} scheme object.
+
+
+  Usage:
+  {% render 'color-scheme', scheme: scheme %}
+{% endcomment %}
+
+.color-{{ scheme.id }} {
+	--color-background: {{ scheme.settings.background.red }}, 
+	{{ scheme.settings.background.green }}, 
+	{{ scheme.settings.background.blue }};
+	{% if scheme.settings.background_gradient != empty %}
+		--gradient-background: {{ scheme.settings.background_gradient }};
+	{% else %}
+		--gradient-background: {{ scheme.settings.background }};
+	{% endif %}
+
+	{% liquid
+		assign background_color = scheme.settings.background
+		assign background_color_brightness = background_color | color_brightness
+		if background_color_brightness <= 26
+			assign background_color_contrast = background_color | color_lighten: 50
+		elsif background_color_brightness <= 65
+			assign background_color_contrast = background_color | color_lighten: 5
+		else
+			assign background_color_contrast = background_color | color_darken: 25
+		endif 
+	%}
+
+	--color-foreground: {{ scheme.settings.text.red }}, {{ scheme.settings.text.green }}, {{ scheme.settings.text.blue }};
+	--color-background-contrast: {{ background_color_contrast.red }}, {{ background_color_contrast.green }}, {{ background_color_contrast.blue }};
+	--color-foreground-secondary: {{ scheme.settings.text_secondary.red }}, {{ scheme.settings.text_secondary.green }}, {{ scheme.settings.text_secondary.blue }};
+	--color-shadow: {{ scheme.settings.shadow.red }}, {{ scheme.settings.shadow.green }}, {{ scheme.settings.shadow.blue }};
+	--color-accent: {{ scheme.settings.accent_color.red }}, {{ scheme.settings.accent_color.green }}, {{ scheme.settings.accent_color.blue }};
+
+	--color-button: {{ scheme.settings.button.red }}, {{ scheme.settings.button.green }}, {{ scheme.settings.button.blue }};
+	--color-button-text: {{ scheme.settings.button_label.red }}, {{ scheme.settings.button_label.green }}, {{ scheme.settings.button_label.blue }};
+	--color-button-hover: {{ scheme.settings.button_hover.red }}, {{ scheme.settings.button_hover.green }}, {{ scheme.settings.button_hover.blue }};
+	--color-button-text-hover: {{ scheme.settings.button_label_hover.red }}, {{ scheme.settings.button_label_hover.green }}, {{ scheme.settings.button_label_hover.blue }};
+	--color-button-2: {{ scheme.settings.button_2.red }}, {{ scheme.settings.button_2.green }}, {{ scheme.settings.button_2.blue }};
+	--color-button-text-2: {{ scheme.settings.button_label_2.red }}, {{ scheme.settings.button_label_2.green }}, {{ scheme.settings.button_label_2.blue }};
+	--color-button-2-hover: {{ scheme.settings.button_2_hover.red }}, {{ scheme.settings.button_2_hover.green }}, {{ scheme.settings.button_2_hover.blue }};
+	--color-button-text-2-hover: {{ scheme.settings.button_label_2_hover.red }}, {{ scheme.settings.button_label_2_hover.green }}, {{ scheme.settings.button_label_2_hover.blue }};
+	--color-secondary-button: {{ scheme.settings.background.red }}, {{ scheme.settings.background.green }}, {{ scheme.settings.background.blue }};
+	--color-secondary-button-text: {{ scheme.settings.secondary_button_label.red }}, {{ scheme.settings.secondary_button_label.green }}, {{ scheme.settings.secondary_button_label.blue }};
+
+	--color-link: {{ scheme.settings.secondary_button_label.red }}, {{ scheme.settings.secondary_button_label.green }}, {{ scheme.settings.secondary_button_label.blue }};
+
+	--color-slider-btn: {{ scheme.settings.slider_btn.red }}, {{ scheme.settings.slider_btn.green }}, {{ scheme.settings.slider_btn.blue }};
+	--color-slider-btn-text: {{ scheme.settings.slider_btn_label.red }}, {{ scheme.settings.slider_btn_label.green }}, {{ scheme.settings.slider_btn_label.blue }};
+	--color-slider-btn-hover: {{ scheme.settings.slider_btn_hover.red }}, {{ scheme.settings.slider_btn_hover.green }}, {{ scheme.settings.slider_btn_hover.blue }};
+	--color-slider-btn-text-hover: {{ scheme.settings.slider_btn_label_hover.red }}, {{ scheme.settings.slider_btn_label_hover.green }}, {{ scheme.settings.slider_btn_label_hover.blue }};
+
+	--color-badge-foreground: {{ scheme.settings.text.red }}, {{ scheme.settings.text.green }}, {{ scheme.settings.text.blue }};
+	--color-badge-background: {{ scheme.settings.background.red }}, {{ scheme.settings.background.green }}, {{ scheme.settings.background.blue }};
+	--color-badge-border: {{ scheme.settings.text.red }}, {{ scheme.settings.text.green }}, {{ scheme.settings.text.blue }};
+	--input-border-color: {{ scheme.settings.input_border_color.red }}, {{ scheme.settings.input_border_color.green }}, {{ scheme.settings.input_border_color.blue }};
+	--payment-terms-background-color: rgb({{ scheme.settings.background.rgb }});
+}

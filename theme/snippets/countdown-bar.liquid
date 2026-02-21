@@ -1,0 +1,55 @@
+{% if countdown_date != blank %}
+
+  {{ 'countdown-bar.css' | asset_url | stylesheet_tag }}
+
+  <div id="countdownBar-{{ block.id }}" class="countdown-bar countdown-bar-js quick-add-hidden color-{{ color_scheme }}" data-date="{{ countdown_date }}" data-complited="{{ countdown_end }}" {{ block_shopify_attributes }} {{ label_color }}>
+
+    {% if countdown_label != blank %}
+      <div class="coundown-label inline-richtext fw-{{ font_weight }}">
+        {{ countdown_label }}
+      </div>
+    {% endif %}
+
+    <div class="countdown-bar__item countdown-bar__days">
+      <span class="countdown-bar__number 
+				{% if numbers_size != blank %} {{ numbers_size }} {% endif %}
+				{% if numbers_weight %} {{ numbers_weight }} {% endif %}
+				">00</span>
+      <span class="countdown-bar__title">
+        {{- days_label -}}
+      </span>
+    </div>
+
+    <div class="countdown-bar__item countdown-bar__hours">
+      <span class="countdown-bar__number 
+				{% if numbers_size != blank %} {{ numbers_size }} {% endif %}
+				{% if numbers_weight %} {{ numbers_weight }} {% endif %}
+				">00</span>
+      <span class="countdown-bar__title">
+        {{- hours_label -}}
+      </span>
+    </div>
+
+    <div class="countdown-bar__item countdown-bar__min">
+      <span class="countdown-bar__number 
+				{% if numbers_size != blank %} {{ numbers_size }} {% endif %}
+				{% if numbers_weight %} {{ numbers_weight }} {% endif %}
+				">00</span>
+      <span class="countdown-bar__title">
+        {{- mins_label -}}
+      </span>
+    </div>
+
+    <div class="countdown-bar__item countdown-bar__sec">
+      <span class="countdown-bar__number 
+				{% if numbers_size != blank %} {{ numbers_size }} {% endif %}
+				{% if numbers_weight %} {{ numbers_weight }} {% endif %}
+				">00</span>
+      <span class="countdown-bar__title">
+        {{- secs_label -}}
+      </span>
+    </div>
+
+  </div>
+  <script src="{{ 'countdown.js' | asset_url }}" defer="defer"></script>
+{% endif %}

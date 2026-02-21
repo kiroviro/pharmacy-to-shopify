@@ -1,0 +1,354 @@
+{{ 'section-cart-footer.css' | asset_url | stylesheet_tag }}
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-discounts.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  @media screen and (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.57 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.57 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top | times: 0.72 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.72 | round: 0 }}px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="gradient color-{{ section.settings.color_scheme }}{% if cart == empty %} is-empty{% endif %}" id="main-cart-footer" data-id="{{ section.id }}">
+  <div class="page-width">
+    <div class="cart__footer isolate section-{{ section.id }}-padding {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+
+      {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+      {{ 'component-card.css' | asset_url | stylesheet_tag }}
+
+
+      {% if section.settings.cart_drawer_promoted_collection != blank %}
+
+        {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+        <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+
+        <div data-section-id="{{ section.id }}" class="recommendations-slider-container cart-recommendations recommendations-slider-container-{{ section.id }} color-{{ section.settings.color_scheme_block }}">
+  
+          <div class="recommendations-header">
+            {% if section.settings.cart_drawer_promoted_collection_text != blank %}
+              <span class="recommendations-heading h6 inline-richtext">
+                {{ section.settings.cart_drawer_promoted_collection_text }}
+              </span>
+            {% endif %}
+  
+						{%- assign number_of_slides = section.settings.cart_drawer_promoted_collection.products.size -%}
+						{%- if number_of_slides > 1 -%}
+							<div class="recommendations-navigation">
+								<button class="prev">{% render 'icon-arrow-short' %}</button>
+								<button class="next">{% render 'icon-arrow-short' %}</button>
+							</div>
+						{%- endif -%}
+          </div>
+  
+          <div class="recommendations-slider">
+            {%- for product in section.settings.cart_drawer_promoted_collection.products limit: 10 -%}
+              <div id="Slide-{{ section.id }}-{{ forloop.index }}" class="recommendations-slide">
+  
+                {% render 'complimentary-product', 
+                  card_product: product, 
+									heading_font_weight: section.settings.product_heading_font_weight,
+                  media_aspect_ratio: 'portrait', 
+                  lazy_load: true, 
+                  show_quick_add: true, 
+                  section_id: section.id, 
+                  horizontal_class: true, 
+                  horizontal_quick_add: true, 
+                  show_add_to_cart: settings.show_add_to_cart
+                %}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="cart__blocks color-{{ section.settings.color_scheme_block }}">
+
+        {% for block in section.blocks %}
+          {%- case block.type -%}
+
+            {%- when '@app' -%}
+              {% render block %}
+
+            {%- when 'subtotal' -%}
+              <div class="js-contents" {{ block.shopify_attributes }}>
+
+                <div class="subtotals">
+                  <p class="subtotals-label">
+                    {{ 'sections.cart.estimated_subtotal' | t }}
+                  </p>
+                  <p class="subtotals-value">
+                    {{ cart.original_total_price | money_with_currency }}
+                  </p>
+                </div>
+
+                <div>
+                  {%- if cart.cart_level_discount_applications.size > 0 -%}
+                    <ul class="discounts list-unstyled" role="list"
+                      aria-label="{{ 'customer.order.discount' | t }}">
+                      {%- for discount in cart.cart_level_discount_applications -%}
+                        <li class="discounts__discount discounts__discount--position">
+                          {%- render 'icon-discount' -%}
+                          {{ discount.title }}
+                          <span>
+                            -{{ discount.total_allocated_amount | money }}
+                          </span>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+
+                <div class="totals">
+                  <h2 class="totals__total">{{ 'sections.cart.estimated_total' | t }}</h2>
+                  <p class="totals__total-value">{{ cart.total_price | money_with_currency }}</p>
+                </div>
+
+                <small class="tax-note caption-large rte">
+                  {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+                    {{ 'sections.cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                  {%- elsif cart.taxes_included -%}
+                    {{ 'sections.cart.taxes_included_but_shipping_at_checkout' | t }}
+                  {%- elsif shop.shipping_policy.body != blank -%}
+                    {{ 'sections.cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+                  {%- else -%}
+                    {{ 'sections.cart.taxes_and_shipping_at_checkout' | t }}
+                  {%- endif -%}
+                </small>
+              </div>
+            {%- else -%}
+
+              {%- if settings.show_cart_note -%}
+                <cart-note class="cart__note">
+                  <label for="Cart-note">
+                    {{ 'sections.cart.note' | t }}
+                  </label>
+                  <textarea class="text-area field__input" name="note" form="cart" id="Cart-note" placeholder="{{ 'sections.cart.note' | t }}">
+                    {{- cart.note -}}
+                  </textarea>
+                </cart-note>
+              {%- endif -%}
+
+
+              <div class="cart__ctas" {{ block.shopify_attributes }}>
+                <noscript>
+                  <button type="submit" class="cart__update-button button button--secondary" form="cart">
+                    <span>
+                      {{ 'sections.cart.update' | t }}
+                    </span>
+                  </button>
+                </noscript>
+
+                <button type="submit" id="checkout" class="cart__checkout-button button" name="checkout" {% if cart == empty %} disabled {% endif %}  form="cart">
+                  <span>
+                    {% render 'icon-cart' %}
+                    {{ 'sections.cart.checkout' | t }}
+                  </span>
+                </button>
+              </div>
+
+              {%- if additional_checkout_buttons -%}
+                <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
+                  {{ content_for_additional_checkout_buttons }}
+                </div>
+              {%- endif -%}
+
+          {%- endcase -%}
+        {% endfor %}
+
+        {% comment %} <a class="cart__blocks-link link-with-arrow" href="{{ routes.all_products_collection_url }}">
+          {{ 'general.continue_shopping' | t }}
+          {% render 'icon-caret' %}
+        </a> {% endcomment %}
+
+		{%- liquid
+		assign button_style = 'button button--secondary'
+
+		if section.settings.button_style == 'link'
+			assign button_style = 'link underlined-link'
+		elsif section.settings.button_style == 'solid'
+			assign button_style = 'button'
+		elsif section.settings.button_style == 'link_icon'
+			assign button_style = 'link-with-arrow'
+		elsif section.settings.button_style == 'link_hover'
+			assign button_style = 'link link-hover'
+		endif
+	-%}	
+
+		<a href="{{ routes.all_products_collection_url }}"  class="{{ button_style }} link cart__blocks-link">
+			{%- if section.settings.button_style != 'link_icon' -%}
+				<span>  {{ 'general.continue_shopping' | t }}</span>
+				{%- else -%}
+				 {{ 'general.continue_shopping' | t }}
+			
+				{%- render 'icon-caret' -%}
+				
+			{%- endif -%}
+		</a>
+
+        <div id="cart-errors"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function isIE() {
+      const ua = window.navigator.userAgent;
+      const msie = ua.indexOf('MSIE ');
+      const trident = ua.indexOf('Trident/');
+
+      return msie > 0 || trident > 0;
+    }
+
+    if (!isIE()) return;
+    const cartSubmitInput = document.createElement('input');
+    cartSubmitInput.setAttribute('name', 'checkout');
+    cartSubmitInput.setAttribute('type', 'hidden');
+    document.querySelector('#cart').appendChild(cartSubmitInput);
+    document.querySelector('#checkout').addEventListener('click', function (event) {
+      document.querySelector('#cart').submit();
+    });
+
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "t:sections.main-cart-footer.name",
+    "class": "cart__footer-wrapper",
+    "settings": [
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-2"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme_block",
+        "label": "Color scheme block",
+        "default": "scheme-1"
+      },
+			{
+				"type": "select",
+				"id": "button_style",
+				"label": "Button style",
+					"options": [
+					{
+							"value": "link",
+						"label": "Inline button"
+					},
+					{
+						"value": "link_hover",
+						"label": "Inline button with underline on hover"
+					},
+					{
+						"value": "link_icon",
+						"label": "Inline button with icon"
+					}
+					],
+				"default": "link_icon"
+			},
+			{
+				"type": "header",
+				"content": "Product settings"
+			},
+      {
+        "type": "collection",
+        "id": "cart_drawer_promoted_collection",
+        "label": "t:settings_schema.cart.settings.cart_drawer.recommended_collection.label",
+        "info": "t:settings_schema.cart.settings.cart_drawer.recommended_collection.info"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "cart_drawer_promoted_collection_text",
+        "default": "You may also buy these products",
+        "label": "Promoted collection title"
+      },
+			{
+				"type": "select",
+				"id": "product_heading_font_weight",
+				"label": "Product heading font weight",
+				"options": [
+					{
+						"value": "fw-400",
+						"label": "Regular"
+					},
+					{
+						"value": "fw-500",
+						"label": "Medium"
+					},
+					{
+						"value": "fw-600",
+						"label": "Semi Bold"
+					},
+					{
+						"value": "fw-700",
+						"label": "Bold"
+					}
+				],
+				"default": "fw-500"
+			},
+      {
+        "type": "header",
+        "content": "t:sections.all.padding.section_padding_heading"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_top",
+        "default": 70
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "label": "t:sections.all.padding.padding_bottom",
+        "default": 70
+      }
+    ],
+    "blocks": [
+      {
+        "type": "subtotal",
+        "name": "t:sections.main-cart-footer.blocks.subtotal.name",
+        "limit": 1
+      },
+      {
+        "type": "buttons",
+        "name": "t:sections.main-cart-footer.blocks.buttons.name",
+        "limit": 1
+      },
+      {
+        "type": "@app"
+      }
+    ]
+  }
+{% endschema %}

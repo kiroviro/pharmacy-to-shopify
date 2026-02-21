@@ -1,0 +1,70 @@
+{% comment %}
+    Renders a product tags badges
+
+    Accepts:
+		- product_obj: {Object} Product object
+
+    Usage:
+    {% render 'product-badges',
+      product_obj: product
+    %}
+{% endcomment %}
+
+<div class="product-badge card__badge {{ settings.badge_position }}">
+	{% for tag in product_obj.tags %}
+		{%- liquid
+			assign tag_handleize = tag | handleize
+			assign badge_names = settings.badge_names | split: ','
+		%}
+		{% for badge in badge_names %}
+			{% assign badge_handleize = badge | handleize %}
+			{% if tag_handleize contains badge_handleize and  tag_handleize == badge_handleize %}
+				<span
+					class="badge product-badge__badge"
+					style="color: {{ settings.blog_color_text }}; background-color: {{ settings.blog_color_bg }}; border-color: {{ settings.blog_color_bg }};"
+					aria-hidden="true"
+				>
+					{{- badge | escape -}}
+				</span>
+			{% endif %}
+		{% endfor %}
+	{% endfor %}
+	
+	{%- if product_obj.compare_at_price > product_obj.price and product_obj.available -%}
+		<span class="badge price__badge-sale"
+			style="color: {{ settings.sale_color_text }}; border-color: {{ settings.sale_color_bg }};background-color: {{ settings.sale_color_bg }};"
+		>
+			{% if settings.sale_badge_style == 'sale' %}
+				{% if settings.sale_badge_text != blank %}
+					{{- settings.sale_badge_text -}}
+				{% else %}
+					{{- 'products.product.on_sale' | t -}}
+				{% endif %}
+			{% elsif settings.sale_badge_style == 'saving' %}
+				{%- assign savings = product.compare_at_price | minus: product.price | money_without_trailing_zeros -%}
+				{% if settings.saving_badge_text != blank %}
+					{{- settings.saving_badge_text }} {{ savings -}}
+				{% else %}
+					Save {{ savings -}}
+				{% endif %}
+			{% else %}
+				{%- assign savings = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round | append: '%' -%}
+				{% if settings.percentage_badge_text != blank %}
+					{{- savings }} {{ settings.percentage_badge_text -}}
+				{% else %}
+					{{- savings }} Off 
+				{% endif %}
+			{% endif %}
+		</span>
+	{%- endif -%}
+
+	{%- if product_obj.available == false -%}
+		<span
+			class="badge price__badge-sold-out"
+			style="color: {{ settings.sold_color_text }}; background-color: {{ settings.sold_color_bg }}; border-color: {{ settings.sold_color_bg }};"
+			aria-hidden="true"
+		>
+			{{ 'products.product.sold_out' | t }}
+		</span>
+	{%- endif -%}
+</div>
