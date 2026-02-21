@@ -43,15 +43,35 @@ This project demonstrates that modern tooling enables rapid development of produ
 
 ## How It Works
 
+The pipeline covers eight stages — from raw sitemap URLs to a live store with running ad campaigns:
+
 ```
-Discover URLs  -->  Extract Products  -->  Export CSV  -->  Import to Shopify
-(sitemap)          (structured data)      (56-column)      (Admin > Products)
+ 1. DISCOVER    2. EXTRACT     3. VALIDATE    4. CLEANUP
+ ──────────     ──────────     ──────────     ──────────
+ Sitemap    →   Per-product →  Post-crawl  →  Tag
+ URLs           structured     CSV checks     normalization
+                data + inline                 + L1 inference
+                validation
+
+ 5. EXPORT      6. IMPORT      7. STORE SETUP  8. GOOGLE ADS
+ ──────────     ──────────     ────────────    ──────────────
+ Split CSV  →   Shopify    →   Collections, →  Performance Max
+ files for      Admin          menus, filters  campaign linked
+ import         Products       & translations  to product feed
 ```
 
-1. **Discover** -- fetch all product URLs from the vendor's sitemap
-2. **Extract** -- parse each product page for title, price, description, images, categories
-3. **Export** -- generate Shopify-compatible CSV (56-column template with custom metafields)
-4. **Import** -- upload CSV to Shopify Admin for direct product creation
+**What each stage delivers:**
+
+| Stage | What it does | Why it matters |
+|-------|-------------|----------------|
+| **1. Discover** | Fetches all product URLs from vendor sitemap | Finds 9,800 products in ~2 seconds, with zero manual work |
+| **2. Extract** | Parses title, price (Vue.js), description, images, categories, brand, SKU, barcode, metafields | Multi-source extraction with fallback chains; 3 layers of inline validation catch issues before they reach Shopify |
+| **3. Validate** | Post-crawl CSV checks: duplicates, coverage, image URLs, optional live spot-check | Catches data problems before import; exit code usable in CI |
+| **4. Cleanup** | Normalises tags, infers missing L1 categories, strips promotional tags | Ensures smart collections match correctly; prevents duplicate/broken tags in Shopify |
+| **5. Export** | Generates 56-column Shopify CSV split into ≤14MB files | Shopify's import limit is 15MB — auto-splitting handles this; files import in order |
+| **6. Import** | Shopify Admin CSV import | 9,800 products with images, prices, metafields, tags, SEO data — one upload per file |
+| **7. Store Setup** | Automated smart collections, navigation menus, sidebar filters (metafield definitions + Bulgarian translations), theme customization | A manually configured store would take weeks; this runs in minutes |
+| **8. Google Ads** | OAuth2 → account creation → Performance Max campaign linked to Shopify product feed | Drives traffic from day one; campaign targets all products automatically via the product feed |
 
 ---
 
@@ -85,18 +105,31 @@ The demo script extracts a sample product page and shows all extracted fields:
 
 ### Complete Workflow Overview
 
+Eight stages from sitemap to live store with running ad campaigns:
+
 ```
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Discover  │ -> │   Extract    │ -> │   Export    │ -> │   Import    │
-│     URLs    │    │   Products   │    │   to CSV    │    │  to Shopify │
-└─────────────┘    └──────────────┘    └─────────────┘    └─────────────┘
-  sitemap.xml      Fresh prices         Split into         Shopify Admin
-  9,272 URLs       9,270 products       14MB chunks        Products > Import
+ 1. DISCOVER     2. EXTRACT       3. VALIDATE      4. CLEANUP
+ ─────────────   ─────────────    ─────────────    ─────────────
+ Fetch all       Per-product      Post-crawl CSV   Normalise tags,
+ URLs from   →   structured   →   checks:      →   infer missing
+ sitemap         data + 3-layer   duplicates,      L1 categories,
+ (~9,800 URLs)   inline valid.    coverage,        strip promo tags
+                 (zero extra      image URLs,
+                 HTTP)            spot-check
+
+ 5. EXPORT       6. IMPORT        7. STORE SETUP   8. GOOGLE ADS
+ ─────────────   ─────────────    ─────────────    ─────────────
+ Generate    →   Shopify      →   Smart        →   Performance Max
+ 56-column CSV   Admin >          collections,     campaign linked
+ split into      Products >       menus, sidebar   to Shopify
+ ≤14MB files     Import           filters,         product feed
+                                  translations
 ```
 
 **File locations:**
 - **Source data:** `data/benu.bg/raw/products.csv` (output from bulk extraction)
-- **Shopify import:** `output/shopify/products_*.csv` (split files ready for import)
+- **Processed:** `data/benu.bg/processed/products_cleaned.csv` (after tag cleanup)
+- **Shopify import:** `output/benu.bg/products_*.csv` (split files ready for import)
 
 ### Option 1: Local Setup
 
@@ -112,12 +145,12 @@ cp .env.example .env
 
 # 3. Discover product URLs from pharmacy site sitemap
 python3 scripts/discover_urls.py --site benu.bg
-# Output: data/benu.bg/raw/urls.txt (9,272 URLs)
+# Output: data/benu.bg/raw/urls.txt (~9,800 URLs in ~2 seconds)
 
 # 4. Extract a single product (test)
 python3 scripts/extract_single.py --url "https://benu.bg/sample-product" --verbose
 
-# 5. Bulk extract all products (~4.8 hours for 9,270 products)
+# 5. Bulk extract all products (~4.8 hours for ~9,800 products)
 # Option A: Extract + Auto-export to Shopify (recommended)
 python3 scripts/bulk_extract.py \
   --urls data/benu.bg/raw/urls.txt \
@@ -132,81 +165,78 @@ python3 scripts/bulk_extract.py \
   --delay 1.0
 
 # Output summary:
-#   ✅ Products extracted: 9,270
-#   ✅ Total images:       9,921
-#   ✅ Failed URLs:        2
-#   ✅ File size:          29 MB
-#   ✅ Price accuracy:     Fresh from live site
-#   ✅ Success rate:       99.98%
-#   ✅ Shopify files:      Ready in output/shopify/ (if --export-shopify used)
+#   ✅ Products extracted: ~9,800
+#   ✅ Inline validation:  SpecificationValidator + SourceConsistencyChecker
+#   ✅ Quality gate:       PASS/FAIL printed at end (>5% errors = exit 1)
+#   ✅ Price accuracy:     Fresh from Vue.js component (matches live site)
+#   ✅ File size:          ~30 MB
 
-# 6. Export for Shopify (auto-splits into 14MB files)
-# Note: Skip this step if you used --export-shopify during extraction!
-# Otherwise, manually export with:
+# 6. Post-crawl validation (catches data issues before import)
+python3 scripts/validate_crawl.py --csv data/benu.bg/raw/products.csv
+# Optional: add --spot-check 100 to also verify 100 products against the live site
+
+# 7. Clean up tags (normalise, infer missing L1 categories, strip promotional tags)
+python3 scripts/cleanup_tags.py \
+  --input data/benu.bg/raw/products.csv \
+  --output data/benu.bg/processed/products_cleaned.csv
+
+# 8. Export for Shopify (auto-splits into ≤14MB files)
 python3 scripts/export_by_brand.py \
   --all-brands \
-  --input data/benu.bg/raw/products.csv \
-  --output output/shopify/products.csv \
-  --max-size 14
+  --input data/benu.bg/processed/products_cleaned.csv \
+  --output output/benu.bg/products.csv
 
-# Output: Creates products_001.csv, products_002.csv, products_003.csv
-# Located at: output/shopify/products_*.csv
+# Output: products_001.csv, products_002.csv, products_003.csv
+# Located at: output/benu.bg/products_*.csv  (~9,800 products total)
 
-# 7. Import to Shopify (READY NOW - files exist in output/shopify/)
-#    IMPORTANT: Import files in order (001, 002, 003)
+# 9. Import to Shopify
+#    IMPORTANT: Import files in order — Shopify processes one at a time
+#    Wait for each Shopify confirmation email before uploading the next file.
 #
-#    Step 1: Import products_001.csv
+#    For each file (001, 002, 003):
 #      - Go to: Shopify Admin > Products > Import
-#      - Upload: output/shopify/products_001.csv (14 MB, 4,482 products)
+#      - Upload the file
 #      - Settings:
 #        ✅ "Overwrite existing products that have the same handle"
 #        ✅ "Publish new products to online store"
-#      - Click "Import products" and wait for completion
-#
-#    Step 2: Import products_002.csv
-#      - Repeat above steps with products_002.csv (14 MB, 4,516 products)
-#
-#    Step 3: Import products_003.csv
-#      - Repeat above steps with products_003.csv (0.8 MB, 273 products)
-#
-# See SHOPIFY_IMPORT_READINESS.md for detailed verification report
-```
+#      - Click "Import products" and wait for Shopify's confirmation email
 
-### Data Quality Verification
-
-After extraction, validate the CSV before exporting to Shopify:
-
-```bash
-# Run post-crawl validation (checks duplicates, coverage, image URLs)
-python3 scripts/validate_crawl.py --csv data/benu.bg/raw/products.csv
-
-# Optional: also spot-check 100 random products against the live site
-python3 scripts/validate_crawl.py \
-  --csv data/benu.bg/raw/products.csv \
-  --spot-check 100
-```
-
-Exit code `0` = PASS (ready to export). Exit code `1` = FAIL (investigate before importing).
-
-After importing to Shopify, verify products landed correctly:
-
-```bash
+# 10. Post-import verification (optional but recommended)
 python3 scripts/verify_shopify.py \
-  --csv data/benu.bg/raw/products.csv \
-  --shop viapharma \
+  --csv data/benu.bg/processed/products_cleaned.csv \
+  --shop YOUR_STORE \
   --sample 100
+# Checks: product exists, title matches, vendor matches, price within 5%
+
+# 11. Store setup (smart collections, navigation, sidebar filters, translations)
+python3 scripts/create_shopify_collections.py \
+  --csv data/benu.bg/processed/products_cleaned.csv \
+  --shop YOUR_STORE --token YOUR_TOKEN --skip-brands
+python3 scripts/create_shopify_menus.py \
+  --shop YOUR_STORE --token YOUR_TOKEN \
+  --csv data/benu.bg/processed/products_cleaned.csv
+python3 scripts/configure_shopify_filters.py \
+  --shop YOUR_STORE --token YOUR_TOKEN
+# Creates: category collections + navigation menus + Bulgarian-labelled sidebar
+# filters (Форма, За кого, Наличност, Цена, Марка, Категория)
+
+# 12. Google Ads — Performance Max campaign linked to Shopify product feed
+python3 scripts/google_ads_auth.py          # OAuth2 token (one-time)
+python3 scripts/google_ads_create_account.py  # create/link MCC account
+python3 scripts/google_ads_pmax.py          # Performance Max campaign
+# Result: campaign auto-targets all products via the Shopify product feed
 ```
 
-Note: during extraction, three layers of validation run automatically — field checks (`SpecificationValidator`), source cross-checks (`SourceConsistencyChecker`), and aggregate tracking (`CrawlQualityTracker`). The final quality report is printed at the end of `bulk_extract.py`. See [Testing and Validation](docs/TESTING_AND_VALIDATION.md) for details.
+Three layers of validation run automatically during extraction — field checks (`SpecificationValidator`), source cross-checks (`SourceConsistencyChecker`), and aggregate tracking (`CrawlQualityTracker`). The final quality report is printed at the end of `bulk_extract.py`. See [Testing and Validation](docs/TESTING_AND_VALIDATION.md) for details.
 
 **Expected data completeness:**
-- Title: 100% (9,270/9,270)
-- Price: 100% (9,270/9,270) ✅ **Fresh prices from Vue.js component**
-- Compare-at price: ~15-25% (products on promotion only)
-- SKU: 100% (9,270/9,270)
-- Barcode: 88.1% (8,164/9,270)
-- Description: 100% (9,270/9,270)
-- Vendor/Brand: 100% (9,270/9,270)
+- Title: 100%
+- Price: 100% ✅ **Fresh prices from Vue.js component**
+- Compare-at price: ~15–25% (products on promotion only)
+- SKU: 100%
+- Barcode: ~88% (valid GTIN only — EAN-13, UPC-A, EAN-8, GTIN-14)
+- Description: 100%
+- Vendor/Brand: 100%
 
 **Price accuracy (Feb 2026 update):**
 
