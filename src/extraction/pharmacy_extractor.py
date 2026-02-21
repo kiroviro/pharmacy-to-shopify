@@ -137,7 +137,7 @@ class PharmacyExtractor:
             price=price_bgn,
             barcode=barcode,
             price_eur=price_eur,
-            original_price=self._extract_original_price(),
+            original_price="",  # Always sell at regular price, no compare-at
             availability=self._extract_availability(),
             category_path=categories,
             highlights=highlights,
@@ -338,19 +338,20 @@ class PharmacyExtractor:
                 try:
                     variant = variants[0]  # First variant (most products have 1)
 
-                    # Get discounted price (what customers actually pay)
+                    # Always use the regular (undiscounted) price.
+                    # benu.bg sometimes runs promotions; we sell at list price.
+                    regular_price_eur = float(variant.get('price', 0))
                     discounted_price_eur = float(variant.get('discountedPrice', 0))
+                    use_price_eur = regular_price_eur if regular_price_eur > 0 else discounted_price_eur
 
-                    if discounted_price_eur > 0:
-                        price_eur = f"{discounted_price_eur:.2f}"
-                        price_bgn = f"{discounted_price_eur * EUR_TO_BGN:.2f}"
+                    if use_price_eur > 0:
+                        price_eur = f"{use_price_eur:.2f}"
+                        price_bgn = f"{use_price_eur * EUR_TO_BGN:.2f}"
 
-                        # Log if product is on promotion
-                        regular_price_eur = float(variant.get('price', 0))
                         if regular_price_eur != discounted_price_eur:
                             logger.debug(
-                                f"Price from Vue (ON PROMO): {price_eur} EUR "
-                                f"(regular: {regular_price_eur:.2f} EUR)"
+                                f"Price from Vue (was on promo, using regular): "
+                                f"{price_eur} EUR (discounted was: {discounted_price_eur:.2f} EUR)"
                             )
                         else:
                             logger.debug(f"Price from Vue: {price_eur} EUR / {price_bgn} BGN")
