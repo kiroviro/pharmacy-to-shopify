@@ -183,9 +183,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--output",
-        default="theme",
+        default=str(Path(__file__).parent.parent.parent / "viapharma.us-theme"),
         metavar="DIR",
-        help="Directory to write theme files (default: theme/)",
+        help="Directory to write theme files (default: ../viapharma.us-theme/)",
     )
     parser.add_argument(
         "--shop",
@@ -242,7 +242,10 @@ def main() -> None:
     if summary["assets_failed"]:
         print(f"  Failed:   {summary['assets_failed']} assets (check logs)")
     print()
-    print(f"  git add {output_dir}/ && git commit -m 'chore: backup Shopify theme'")
+    print("  To commit the backup:")
+    print(f"    cd {output_dir}")
+    print("    git add . && git commit -m 'chore: sync theme snapshot'")
+    print("    git push")
 
 
 if __name__ == "__main__":
