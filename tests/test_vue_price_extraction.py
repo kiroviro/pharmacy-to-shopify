@@ -53,7 +53,7 @@ class TestVueComponentParsing:
         assert float(price_bgn) == pytest.approx(10.50 * EUR_TO_BGN, rel=0.01)
 
     def test_promotional_product(self):
-        """Extract promotional price (discounted)"""
+        """Promotional product: discountedPrice is ignored, regular price is used"""
         html = '''
         <html>
         <body>
@@ -72,12 +72,12 @@ class TestVueComponentParsing:
         extractor = PharmacyExtractor("https://benu.bg/test")
         extractor.load_html(html)
 
-        # Current price should be discounted price
+        # Always use regular price (discountedPrice ignored)
         price_bgn, price_eur = extractor._extract_prices()
-        assert price_eur == "11.65"
-        assert float(price_bgn) == pytest.approx(11.65 * EUR_TO_BGN, rel=0.01)
+        assert price_eur == "13.75"
+        assert float(price_bgn) == pytest.approx(13.75 * EUR_TO_BGN, rel=0.01)
 
-        # Original price should be regular price
+        # Original price equals regular price (no sale display)
         original_price = extractor._extract_original_price()
         assert original_price == f"{13.75 * EUR_TO_BGN:.2f}"
 
@@ -377,11 +377,11 @@ class TestRealWorldVueExamples:
         price_bgn, price_eur = extractor._extract_prices()
         original_price = extractor._extract_original_price()
 
-        # Current price (discounted)
-        assert price_eur == "11.65"
-        assert float(price_bgn) == pytest.approx(22.79, abs=0.01)
+        # Always use regular price (discountedPrice ignored)
+        assert price_eur == "13.75"
+        assert float(price_bgn) == pytest.approx(26.89, abs=0.01)
 
-        # Original price (before discount)
+        # Original price equals regular price (no sale display)
         assert float(original_price) == pytest.approx(26.89, abs=0.01)
 
     def test_benu_regular_product(self):
