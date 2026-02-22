@@ -280,11 +280,6 @@ Track these KPIs:
 cd ~/IdeaProjects/pharmacy-to-shopify
 python3 scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --resume
 
-# Generate missing barcode report
-python3 scripts/report_missing_barcodes.py \
-  --input "output/benu.bg/products_*.csv" \
-  --output "reports/missing_barcodes.csv"
-
 # Re-export to Shopify format
 python3 scripts/export_by_brand.py \
   --all-brands \

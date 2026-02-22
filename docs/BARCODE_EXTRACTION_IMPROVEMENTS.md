@@ -61,18 +61,20 @@ python3 scripts/extract_single.py \
   --verbose
 ```
 
-### Phase 2: Generate Missing Barcode Report
+### Phase 2: Identify Products Still Missing Barcodes
 
-Identify which products still need barcodes:
+Identify which products still need barcodes by inspecting the extracted CSV directly
+(e.g. filter rows where the `Barcode` column is empty):
 
 ```bash
-# Generate report of products without barcodes
-python3 scripts/report_missing_barcodes.py \
-  --input "output/benu.bg/products_*.csv" \
-  --output "reports/missing_barcodes.csv"
-
-# Review the report
-less reports/missing_barcodes.csv
+# Count products without barcodes in the extracted CSV
+python3 -c "
+import csv
+with open('data/benu.bg/raw/products.csv') as f:
+    rows = list(csv.DictReader(f))
+missing = [r for r in rows if not r.get('Barcode', '').strip()]
+print(f'{len(missing)} products without barcodes')
+"
 ```
 
 ### Phase 3: Re-Extract Missing Barcode Products

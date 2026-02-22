@@ -246,8 +246,6 @@ Prices are now extracted from Vue.js component data instead of JSON-LD:
 - ✅ Includes original price for products on sale
 - ✅ Supports running your own promotions in Shopify
 
-See `CHANGELOG.md` for implementation details.
-
 ### Ongoing Price Management
 
 After initial import, use the price sync tool to detect and update price changes without a full re-crawl:
