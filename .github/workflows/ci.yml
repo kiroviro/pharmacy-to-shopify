@@ -32,3 +32,14 @@ jobs:
       - name: Coverage report
         if: matrix.python-version == '3.11'
         run: python -m pytest tests/ --cov=src --cov-report=term-missing
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install detect-secrets
+      - run: detect-secrets scan --baseline .secrets.baseline
+      - run: detect-secrets audit --report --baseline .secrets.baseline

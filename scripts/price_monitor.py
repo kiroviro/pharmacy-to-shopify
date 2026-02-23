@@ -61,6 +61,11 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
+def _chunked(items: list, size: int) -> list[list]:
+    """Split a list into chunks of the given size."""
+    return [items[i : i + size] for i in range(0, len(items), size)]
+
+
 @dataclass
 class PriceInfo:
     """Price information for a product."""
@@ -115,7 +120,11 @@ class PriceMonitor:
 
     def fetch_shopify_prices(self, handles: list[str]) -> dict[str, tuple[float | None, str | None]]:
         """
-        Fetch prices from Shopify using GraphQL.
+        Fetch prices from Shopify using batched GraphQL queries.
+
+        Batches handles into groups of 50 and uses products(query:...)
+        to fetch multiple products per request (instead of N+1 individual
+        productByHandle calls).
 
         Args:
             handles: List of product handles
@@ -128,16 +137,18 @@ class PriceMonitor:
 
         results = {}
 
-        # GraphQL query to fetch products by handle
         query = """
-        query getProductByHandle($handle: String!) {
-            productByHandle(handle: $handle) {
-                handle
-                title
-                variants(first: 1) {
-                    edges {
-                        node {
-                            price
+        query getProducts($query: String!, $first: Int!) {
+            products(query: $query, first: $first) {
+                edges {
+                    node {
+                        handle
+                        variants(first: 1) {
+                            edges {
+                                node {
+                                    price
+                                }
+                            }
                         }
                     }
                 }
@@ -145,23 +156,33 @@ class PriceMonitor:
         }
         """
 
-        for handle in handles:
+        for batch in _chunked(handles, 50):
+            filter_str = " OR ".join(f"handle:{h}" for h in batch)
             try:
-                data = self.shopify_client.graphql_request(query, {"handle": handle})
-                if data and data.get("productByHandle"):
-                    product = data["productByHandle"]
-                    variants = product.get("variants", {}).get("edges", [])
-                    if variants:
-                        price = float(variants[0]["node"]["price"])
-                        results[handle] = (price, None)
-                    else:
-                        results[handle] = (None, "No variants")
-                else:
-                    results[handle] = (None, "Not found")
+                data = self.shopify_client.graphql_request(
+                    query, {"query": filter_str, "first": len(batch)}
+                )
+                if data and data.get("products"):
+                    for edge in data["products"].get("edges", []):
+                        node = edge["node"]
+                        variants = node.get("variants", {}).get("edges", [])
+                        if variants:
+                            price = float(variants[0]["node"]["price"])
+                            results[node["handle"]] = (price, None)
+                        else:
+                            results[node["handle"]] = (None, "No variants")
             except Exception as e:
-                results[handle] = (None, str(e)[:50])
+                # On batch failure, mark all handles in batch as errored
+                for h in batch:
+                    if h not in results:
+                        results[h] = (None, str(e)[:50])
 
-            time.sleep(0.3)  # Rate limit
+            time.sleep(0.3)  # Rate limit between batches
+
+        # Mark any handles not returned by Shopify
+        for h in handles:
+            if h not in results:
+                results[h] = (None, "Not found")
 
         return results
 

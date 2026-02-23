@@ -26,6 +26,7 @@ import os
 import random
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 
 import requests
@@ -93,16 +94,37 @@ def load_handles_from_csv(csv_path: str) -> list[tuple[str, str]]:
     return products
 
 
+def _fetch_shopify_with_delay(
+    session: requests.Session, handle: str, delay: float
+) -> tuple[str, float | None, float | None, str | None]:
+    """Fetch a single Shopify price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
+    result = fetch_shopify_price(session, handle)
+    time.sleep(delay)
+    return (handle, *result)
+
+
+def _fetch_benu_with_delay(
+    session: requests.Session, handle: str, delay: float
+) -> tuple[str, float | None, float | None, str | None]:
+    """Fetch a single benu.bg price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
+    result = fetch_benu_price(session, handle)
+    time.sleep(delay)
+    return (handle, *result)
+
+
 def compare_prices(
     products: list[tuple[str, str]],
     delay: float = 0.3,
+    max_workers: int = 5,
 ) -> list[PriceChange]:
     """
     Compare prices between benu.bg and viapharma.us.
 
+    Fetches Shopify and benu.bg prices concurrently using ThreadPoolExecutor,
+    then compares the pre-fetched data without further HTTP calls.
+
     Returns list of products with price differences.
     """
-    changes = []
     total = len(products)
 
     session = requests.Session()
@@ -110,24 +132,48 @@ def compare_prices(
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"
     })
 
+    handles = [h for h, _ in products]
+
+    # Phase 1: Fetch all Shopify prices concurrently
+    print(f"\nFetching {total} Shopify prices (max_workers={max_workers})...")
+    shopify_data: dict[str, tuple[float | None, float | None, str | None]] = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(_fetch_shopify_with_delay, session, h, delay): h
+            for h in handles
+        }
+        for future in as_completed(futures):
+            h, bgn, eur, err = future.result()
+            shopify_data[h] = (bgn, eur, err)
+
+    # Phase 2: Fetch all benu.bg prices concurrently
+    print(f"Fetching {total} benu.bg prices (max_workers={max_workers})...")
+    benu_data: dict[str, tuple[float | None, float | None, str | None]] = {}
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(_fetch_benu_with_delay, session, h, delay): h
+            for h in handles
+        }
+        for future in as_completed(futures):
+            h, bgn, eur, err = future.result()
+            benu_data[h] = (bgn, eur, err)
+
+    # Phase 3: Compare pre-fetched data (no HTTP)
+    changes = []
     print(f"\nComparing {total} products...\n")
     print(f"{'#':>4} | {'Status':<10} | {'Handle':<50} | {'Shopify':>10} | {'Benu.bg':>10} | {'Diff':>8}")
     print("-" * 100)
 
     for i, (handle, title) in enumerate(products, 1):
-        # Fetch both prices
-        shopify_bgn, shopify_eur, shopify_err = fetch_shopify_price(session, handle)
+        shopify_bgn, shopify_eur, shopify_err = shopify_data.get(handle, (None, None, "Missing"))
+        benu_bgn, benu_eur, benu_err = benu_data.get(handle, (None, None, "Missing"))
 
         if shopify_err:
             print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {'N/A':>10} | {'N/A':>10} | {shopify_err}")
-            time.sleep(delay)
             continue
-
-        benu_bgn, benu_eur, benu_err = fetch_benu_price(session, handle)
 
         if benu_err:
             print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {'N/A':>10} | {benu_err}")
-            time.sleep(delay)
             continue
 
         # Compare
@@ -142,12 +188,7 @@ def compare_prices(
         else:
             status = "DECREASE"
 
-        # Format diff string
-        if diff > 0:
-            diff_str = f"+{diff:.2f}"
-        else:
-            diff_str = f"{diff:.2f}"
-
+        diff_str = f"+{diff:.2f}" if diff > 0 else f"{diff:.2f}"
         print(f"{i:4} | {status:<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {benu_bgn:>10.2f} | {diff_str:>8}")
 
         # Record change if significant
@@ -163,8 +204,6 @@ def compare_prices(
                 benu_url=f"https://benu.bg/{handle}",
                 shopify_url=f"https://viapharma.us/products/{handle}",
             ))
-
-        time.sleep(delay)
 
     return changes
 
