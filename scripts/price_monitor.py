@@ -40,13 +40,11 @@ SETUP:
 """
 
 import argparse
-import csv
 import logging
 import os
 import random
 import sys
 import time
-from dataclasses import dataclass
 from datetime import datetime
 
 import requests
@@ -54,6 +52,10 @@ import requests
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from src.common.constants import BENU_USER_AGENT
+from src.common.credentials import load_shopify_credentials
+from src.common.csv_utils import iter_product_rows
+from src.common.price_change import PriceChange
 from src.common.price_fetcher import fetch_benu_price as _fetch_benu_price
 from src.shopify.api_client import ShopifyAPIClient
 
@@ -64,31 +66,6 @@ logger = logging.getLogger(__name__)
 def _chunked(items: list, size: int) -> list[list]:
     """Split a list into chunks of the given size."""
     return [items[i : i + size] for i in range(0, len(items), size)]
-
-
-@dataclass
-class PriceInfo:
-    """Price information for a product."""
-
-    handle: str
-    title: str
-    benu_bgn: float | None = None
-    benu_eur: float | None = None
-    shopify_bgn: float | None = None
-    shopify_eur: float | None = None
-    error: str | None = None
-
-
-@dataclass
-class PriceChange:
-    """Detected price change."""
-
-    handle: str
-    title: str
-    old_price: float
-    new_price: float
-    change_pct: float
-    source: str  # "benu" or "drift"
 
 
 class PriceMonitor:
@@ -106,13 +83,10 @@ class PriceMonitor:
             self.shopify_client = ShopifyAPIClient(shopify_shop, shopify_token)
 
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"
-        })
+        self.session.headers.update({"User-Agent": BENU_USER_AGENT})
 
-        # Product cache
-        self.products: dict[str, PriceInfo] = {}
         self.changes: list[PriceChange] = []
+        self._checked_count: int = 0
 
     def fetch_benu_price(self, handle: str) -> tuple[float | None, float | None, str | None]:
         """Fetch live price from benu.bg via shared helper."""
@@ -140,6 +114,7 @@ class PriceMonitor:
         query = """
         query getProducts($query: String!, $first: Int!) {
             products(query: $query, first: $first) {
+                pageInfo { hasNextPage }
                 edges {
                     node {
                         handle
@@ -163,7 +138,14 @@ class PriceMonitor:
                     query, {"query": filter_str, "first": len(batch)}
                 )
                 if data and data.get("products"):
-                    for edge in data["products"].get("edges", []):
+                    products_data = data["products"]
+                    if products_data.get("pageInfo", {}).get("hasNextPage"):
+                        logger.warning(
+                            "Shopify returned a truncated page for batch of %d handles — "
+                            "some prices may be missing. Reduce batch size if this persists.",
+                            len(batch),
+                        )
+                    for edge in products_data.get("edges", []):
                         node = edge["node"]
                         variants = node.get("variants", {}).get("edges", [])
                         if variants:
@@ -197,14 +179,10 @@ class PriceMonitor:
             List of product handles
         """
         handles = []
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                # Only main product rows (with Title)
-                if row.get("Title", "").strip():
-                    handle = row.get("URL handle", "").strip()
-                    if handle:
-                        handles.append(handle)
+        for row in iter_product_rows(csv_path):
+            handle = row.get("URL handle", "").strip()
+            if handle:
+                handles.append(handle)
         return handles
 
     def compare_prices(
@@ -233,6 +211,7 @@ class PriceMonitor:
             logger.info("Fetching prices from Shopify...")
             shopify_prices = self.fetch_shopify_prices(handles)
 
+        self._checked_count = total
         logger.info("Comparing %d products with benu.bg...", total)
 
         for i, handle in enumerate(handles, 1):
@@ -258,8 +237,8 @@ class PriceMonitor:
                         changes.append(PriceChange(
                             handle=handle,
                             title=handle[:40],  # Will be enriched later
-                            old_price=shopify_price,
-                            new_price=benu_bgn,
+                            old_bgn=shopify_price,
+                            new_bgn=benu_bgn,
                             change_pct=change_pct,
                             source="benu" if benu_bgn > shopify_price else "drift",
                         ))
@@ -278,7 +257,7 @@ class PriceMonitor:
             f"PRICE MONITORING REPORT - {now}",
             "=" * 80,
             "",
-            f"Products checked: {len(self.products) or 'N/A'}",
+            f"Products checked: {self._checked_count or 'N/A'}",
             f"Price changes detected: {len(changes)}",
             "",
         ]
@@ -299,7 +278,7 @@ class PriceMonitor:
             for c in sorted(increases, key=lambda x: -x.change_pct):
                 lines.append(
                     f"  {c.handle[:50]}..."
-                    f"\n    {c.old_price:.2f} → {c.new_price:.2f} BGN (+{c.change_pct:.1f}%)"
+                    f"\n    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN (+{c.change_pct:.1f}%)"
                 )
             lines.append("")
 
@@ -310,7 +289,7 @@ class PriceMonitor:
             for c in sorted(decreases, key=lambda x: x.change_pct):
                 lines.append(
                     f"  {c.handle[:50]}..."
-                    f"\n    {c.old_price:.2f} → {c.new_price:.2f} BGN ({c.change_pct:.1f}%)"
+                    f"\n    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN ({c.change_pct:.1f}%)"
                 )
             lines.append("")
 
@@ -384,7 +363,7 @@ class PriceMonitor:
             # Update the price
             result = self.shopify_client.graphql_request(
                 mutation,
-                {"input": {"id": variant_id, "price": str(change.new_price)}},
+                {"input": {"id": variant_id, "price": str(change.new_bgn)}},
             )
 
             if result:
@@ -393,7 +372,7 @@ class PriceMonitor:
                     logger.error("Error updating %s: %s", change.handle, user_errors)
                 else:
                     updated += 1
-                    logger.info("Updated %s: %.2f BGN", change.handle, change.new_price)
+                    logger.info("Updated %s: %.2f BGN", change.handle, change.new_bgn)
 
             time.sleep(0.5)  # Rate limit
 
@@ -447,12 +426,11 @@ def main():
 
     args = parser.parse_args()
 
-    # Get Shopify credentials
-    shop = os.environ.get("SHOPIFY_SHOP")
-    token = os.environ.get("SHOPIFY_ACCESS_TOKEN")
+    # Get Shopify credentials (env vars → .shopify_token.json)
+    shop, token = load_shopify_credentials()
 
     if args.auto_sync and not (shop and token):
-        logger.error("SHOPIFY_SHOP and SHOPIFY_ACCESS_TOKEN required for --auto-sync")
+        logger.error("Shopify credentials not found. Set SHOPIFY_SHOP/SHOPIFY_ACCESS_TOKEN or run shopify_oauth.py")
         sys.exit(1)
 
     # Initialize monitor

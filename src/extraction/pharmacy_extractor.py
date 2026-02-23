@@ -312,6 +312,11 @@ class PharmacyExtractor:
 
         return self._cached_vue_data
 
+    @property
+    def vue_data(self) -> dict | None:
+        """Public access to parsed Vue.js product data (cached)."""
+        return self._parse_vue_product_data()
+
     def _extract_prices(self) -> tuple[str, str]:
         """Extract current selling price in BGN and EUR.
 

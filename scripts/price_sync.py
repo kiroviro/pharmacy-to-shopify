@@ -25,34 +25,32 @@ import logging
 import os
 import random
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
 
 import requests
 
 # Add project root to path for proper package imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import EUR_TO_BGN
+from src.common.constants import BENU_USER_AGENT, EUR_TO_BGN
+from src.common.price_change import PriceChange
 from src.common.price_fetcher import fetch_benu_price
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+# Thread-local storage: one session per worker thread (avoids shared-state race conditions)
+_thread_local = threading.local()
 
-@dataclass
-class PriceChange:
-    """Detected price change for a product."""
-    handle: str
-    title: str
-    old_bgn: float
-    new_bgn: float
-    old_eur: float
-    new_eur: float
-    change_pct: float
-    benu_url: str
-    shopify_url: str
+
+def _get_session() -> requests.Session:
+    """Return this thread's session, creating it on first use."""
+    if not hasattr(_thread_local, "session"):
+        _thread_local.session = requests.Session()
+        _thread_local.session.headers.update({"User-Agent": BENU_USER_AGENT})
+    return _thread_local.session
 
 
 def fetch_shopify_price(session: requests.Session, handle: str) -> tuple[float | None, float | None, str | None]:
@@ -95,19 +93,19 @@ def load_handles_from_csv(csv_path: str) -> list[tuple[str, str]]:
 
 
 def _fetch_shopify_with_delay(
-    session: requests.Session, handle: str, delay: float
+    handle: str, delay: float
 ) -> tuple[str, float | None, float | None, str | None]:
     """Fetch a single Shopify price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
-    result = fetch_shopify_price(session, handle)
+    result = fetch_shopify_price(_get_session(), handle)
     time.sleep(delay)
     return (handle, *result)
 
 
 def _fetch_benu_with_delay(
-    session: requests.Session, handle: str, delay: float
+    handle: str, delay: float
 ) -> tuple[str, float | None, float | None, str | None]:
     """Fetch a single benu.bg price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
-    result = fetch_benu_price(session, handle)
+    result = fetch_benu_price(_get_session(), handle)
     time.sleep(delay)
     return (handle, *result)
 
@@ -126,32 +124,26 @@ def compare_prices(
     Returns list of products with price differences.
     """
     total = len(products)
-
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"
-    })
-
     handles = [h for h, _ in products]
 
-    # Phase 1: Fetch all Shopify prices concurrently
+    # Phase 1: Fetch all Shopify prices concurrently (each thread uses its own session)
     print(f"\nFetching {total} Shopify prices (max_workers={max_workers})...")
     shopify_data: dict[str, tuple[float | None, float | None, str | None]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
-            pool.submit(_fetch_shopify_with_delay, session, h, delay): h
+            pool.submit(_fetch_shopify_with_delay, h, delay): h
             for h in handles
         }
         for future in as_completed(futures):
             h, bgn, eur, err = future.result()
             shopify_data[h] = (bgn, eur, err)
 
-    # Phase 2: Fetch all benu.bg prices concurrently
+    # Phase 2: Fetch all benu.bg prices concurrently (each thread uses its own session)
     print(f"Fetching {total} benu.bg prices (max_workers={max_workers})...")
     benu_data: dict[str, tuple[float | None, float | None, str | None]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
-            pool.submit(_fetch_benu_with_delay, session, h, delay): h
+            pool.submit(_fetch_benu_with_delay, h, delay): h
             for h in handles
         }
         for future in as_completed(futures):

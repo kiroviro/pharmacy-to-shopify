@@ -23,19 +23,16 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from dotenv import load_dotenv
-
+from src.common.credentials import load_shopify_credentials
 from src.common.log_config import setup_logging
 from src.shopify import ShopifyAPIClient
-
-load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +50,6 @@ BINARY_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
     ".woff", ".woff2", ".ttf", ".otf", ".eot",
 }
-
-
-def _load_token_file() -> tuple[str, str] | tuple[None, None]:
-    """Try to read shop + token from .shopify_token.json."""
-    token_file = Path(__file__).parent.parent / ".shopify_token.json"
-    if token_file.exists():
-        try:
-            data = json.loads(token_file.read_text())
-            return data.get("shop"), data.get("access_token")
-        except (json.JSONDecodeError, OSError):
-            pass
-    return None, None
 
 
 def _is_binary(asset: dict) -> bool:
@@ -207,22 +192,16 @@ def main() -> None:
 
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    # Resolve credentials
-    shop = args.shop or os.environ.get("SHOPIFY_SHOP")
-    token = args.token or os.environ.get("SHOPIFY_ACCESS_TOKEN")
-
-    if not shop or not token:
-        file_shop, file_token = _load_token_file()
-        shop = shop or file_shop
-        token = token or file_token
-
-    if not shop or not token:
-        print(
-            "ERROR: Shopify credentials not found.\n"
-            "Use --shop / --token, set SHOPIFY_SHOP / SHOPIFY_ACCESS_TOKEN,\n"
-            "or run shopify_oauth.py first to create .shopify_token.json."
-        )
-        sys.exit(1)
+    # CLI flags override env vars / token file
+    if args.shop and args.token:
+        shop, token = args.shop, args.token
+    else:
+        shop, token = load_shopify_credentials()
+        # Allow partial CLI override
+        if args.shop:
+            shop = args.shop
+        if args.token:
+            token = args.token
 
     output_dir = Path(args.output)
 

@@ -10,7 +10,6 @@ Modules:
 
 from urllib.parse import urlparse
 
-from ..common.text_utils import remove_source_references
 from .brand_matcher import BrandMatcher
 from .bulk_extractor import BulkExtractor
 from .consistency_checker import SourceConsistencyChecker
@@ -80,6 +79,4 @@ __all__ = [
     'BrandMatcher',
     # Bulk extraction
     'BulkExtractor',
-    # Utilities
-    'remove_source_references',
 ]

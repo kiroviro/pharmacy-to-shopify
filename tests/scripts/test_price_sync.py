@@ -4,12 +4,12 @@ import csv
 from unittest.mock import MagicMock, patch
 
 from scripts.price_sync import (
-    PriceChange,
     compare_prices,
     fetch_shopify_price,
     generate_shopify_csv,
     load_handles_from_csv,
 )
+from src.common.price_change import PriceChange
 
 # ── fetch_shopify_price ──────────────────────────────────────────────────────
 

@@ -1,10 +1,11 @@
 """Tests for scripts/price_monitor.py"""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scripts.price_monitor import PriceChange, PriceMonitor, _chunked
+from scripts.price_monitor import PriceMonitor, _chunked
+from src.common.price_change import PriceChange
 
 # ── _chunked helper ──────────────────────────────────────────────────────────
 
@@ -235,3 +236,78 @@ class TestGenerateReport:
         report = monitor.generate_report(changes)
         assert "PRICE INCREASES" in report
         assert "PRICE DECREASES" in report
+
+
+# ── sync_to_shopify ───────────────────────────────────────────────────────────
+
+
+class TestSyncToShopify:
+    def _monitor_with_client(self) -> PriceMonitor:
+        monitor = PriceMonitor.__new__(PriceMonitor)
+        monitor.shopify_client = MagicMock()
+        monitor.changes = []
+        monitor._checked_count = 0
+        import requests
+        monitor.session = requests.Session()
+        return monitor
+
+    def test_dry_run_returns_zero_without_api_calls(self):
+        monitor = self._monitor_with_client()
+        change = PriceChange("prod-a", "Product A", 10.0, 15.0, 50.0)
+
+        updated = monitor.sync_to_shopify([change], dry_run=True)
+
+        assert updated == 0
+        monitor.shopify_client.graphql_request.assert_not_called()
+
+    def test_no_client_returns_zero(self):
+        monitor = PriceMonitor()  # No client configured
+        change = PriceChange("prod-a", "Product A", 10.0, 15.0, 50.0)
+
+        updated = monitor.sync_to_shopify([change], dry_run=False)
+
+        assert updated == 0
+
+    def test_updates_product_price(self):
+        monitor = self._monitor_with_client()
+        change = PriceChange("prod-a", "Product A", 10.0, 15.0, 50.0)
+
+        # First call: get variant ID; second call: mutation
+        monitor.shopify_client.graphql_request.side_effect = [
+            {"productByHandle": {"variants": {"edges": [{"node": {"id": "gid://shopify/ProductVariant/123"}}]}}},
+            {"productVariantUpdate": {"productVariant": {"id": "gid://...123", "price": "15.0"}, "userErrors": []}},
+        ]
+
+        with patch("scripts.price_monitor.time.sleep"):
+            updated = monitor.sync_to_shopify([change], dry_run=False)
+
+        assert updated == 1
+        # Verify the mutation was called with the new price
+        mutation_call_args = monitor.shopify_client.graphql_request.call_args_list[1]
+        payload = mutation_call_args[0][1]  # second positional arg = variables
+        assert payload["input"]["price"] == "15.0"
+
+    def test_skips_product_not_found_in_shopify(self):
+        monitor = self._monitor_with_client()
+        change = PriceChange("nonexistent", "Unknown", 10.0, 15.0, 50.0)
+
+        monitor.shopify_client.graphql_request.return_value = {"productByHandle": None}
+
+        with patch("scripts.price_monitor.time.sleep"):
+            updated = monitor.sync_to_shopify([change], dry_run=False)
+
+        assert updated == 0
+
+    def test_skips_product_with_user_errors(self):
+        monitor = self._monitor_with_client()
+        change = PriceChange("prod-a", "Product A", 10.0, 15.0, 50.0)
+
+        monitor.shopify_client.graphql_request.side_effect = [
+            {"productByHandle": {"variants": {"edges": [{"node": {"id": "gid://...123"}}]}}},
+            {"productVariantUpdate": {"productVariant": None, "userErrors": [{"field": "price", "message": "Invalid"}]}},
+        ]
+
+        with patch("scripts.price_monitor.time.sleep"):
+            updated = monitor.sync_to_shopify([change], dry_run=False)
+
+        assert updated == 0

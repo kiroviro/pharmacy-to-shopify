@@ -9,11 +9,13 @@ Usage:
 """
 
 import argparse
+import html
 import http.server
 import json
 import logging
 import secrets
 import socketserver
+import stat
 import sys
 import threading
 import urllib.parse
@@ -62,7 +64,7 @@ class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):
                 </html>
             """)
         else:
-            error = params.get('error', ['Unknown error'])[0]
+            error = html.escape(params.get('error', ['Unknown error'])[0])
             self.send_response(400)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -124,6 +126,7 @@ def save_token(shop: str, token_data: dict):
 
     with open(TOKEN_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    TOKEN_FILE.chmod(stat.S_IRUSR | stat.S_IWUSR)  # 0o600 — owner read/write only
 
     logger.info("Token saved to: %s", TOKEN_FILE)
 

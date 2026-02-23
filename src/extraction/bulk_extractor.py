@@ -252,7 +252,7 @@ class BulkExtractor:
                                 checker = SourceConsistencyChecker(
                                     soup=extractor.soup,
                                     json_ld=extractor.json_ld,
-                                    vue_data=extractor._parse_vue_product_data(),
+                                    vue_data=extractor.vue_data,
                                     brand_matcher=extractor.brand_matcher,
                                 )
                                 consistency_warnings = checker.check(product)
