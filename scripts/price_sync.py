@@ -114,6 +114,7 @@ def compare_prices(
     products: list[tuple[str, str]],
     delay: float = 0.3,
     max_workers: int = 5,
+    verbose: bool = True,
 ) -> list[PriceChange]:
     """
     Compare prices between benu.bg and viapharma.us.
@@ -121,13 +122,21 @@ def compare_prices(
     Fetches Shopify and benu.bg prices concurrently using ThreadPoolExecutor,
     then compares the pre-fetched data without further HTTP calls.
 
+    Args:
+        products: List of (handle, title) pairs to compare.
+        delay: Per-request rate-limit delay in seconds.
+        max_workers: Thread pool size for concurrent fetches.
+        verbose: If True, print progress and per-product comparison table to stdout.
+                 Set to False when calling as a library function.
+
     Returns list of products with price differences.
     """
     total = len(products)
     handles = [h for h, _ in products]
 
     # Phase 1: Fetch all Shopify prices concurrently (each thread uses its own session)
-    print(f"\nFetching {total} Shopify prices (max_workers={max_workers})...")
+    if verbose:
+        print(f"\nFetching {total} Shopify prices (max_workers={max_workers})...")
     shopify_data: dict[str, tuple[float | None, float | None, str | None]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
@@ -139,7 +148,8 @@ def compare_prices(
             shopify_data[h] = (bgn, eur, err)
 
     # Phase 2: Fetch all benu.bg prices concurrently (each thread uses its own session)
-    print(f"Fetching {total} benu.bg prices (max_workers={max_workers})...")
+    if verbose:
+        print(f"Fetching {total} benu.bg prices (max_workers={max_workers})...")
     benu_data: dict[str, tuple[float | None, float | None, str | None]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
@@ -152,20 +162,23 @@ def compare_prices(
 
     # Phase 3: Compare pre-fetched data (no HTTP)
     changes = []
-    print(f"\nComparing {total} products...\n")
-    print(f"{'#':>4} | {'Status':<10} | {'Handle':<50} | {'Shopify':>10} | {'Benu.bg':>10} | {'Diff':>8}")
-    print("-" * 100)
+    if verbose:
+        print(f"\nComparing {total} products...\n")
+        print(f"{'#':>4} | {'Status':<10} | {'Handle':<50} | {'Shopify':>10} | {'Benu.bg':>10} | {'Diff':>8}")
+        print("-" * 100)
 
     for i, (handle, title) in enumerate(products, 1):
         shopify_bgn, shopify_eur, shopify_err = shopify_data.get(handle, (None, None, "Missing"))
         benu_bgn, benu_eur, benu_err = benu_data.get(handle, (None, None, "Missing"))
 
         if shopify_err:
-            print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {'N/A':>10} | {'N/A':>10} | {shopify_err}")
+            if verbose:
+                print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {'N/A':>10} | {'N/A':>10} | {shopify_err}")
             continue
 
         if benu_err:
-            print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {'N/A':>10} | {benu_err}")
+            if verbose:
+                print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {'N/A':>10} | {benu_err}")
             continue
 
         # Compare
@@ -180,8 +193,9 @@ def compare_prices(
         else:
             status = "DECREASE"
 
-        diff_str = f"+{diff:.2f}" if diff > 0 else f"{diff:.2f}"
-        print(f"{i:4} | {status:<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {benu_bgn:>10.2f} | {diff_str:>8}")
+        if verbose:
+            diff_str = f"+{diff:.2f}" if diff > 0 else f"{diff:.2f}"
+            print(f"{i:4} | {status:<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {benu_bgn:>10.2f} | {diff_str:>8}")
 
         # Record change if significant
         if abs(diff) > tolerance:
@@ -200,13 +214,23 @@ def compare_prices(
     return changes
 
 
-def generate_shopify_csv(changes: list[PriceChange], output_path: str) -> None:
+def generate_shopify_csv(
+    changes: list[PriceChange],
+    output_path: str,
+    verbose: bool = True,
+) -> None:
     """
     Generate Shopify-compatible CSV with price updates.
 
     Uses minimal fields required for price update import:
     - Handle (to match existing products)
     - Variant Price (new price)
+
+    Args:
+        changes: List of price changes to write.
+        output_path: Path to write the output CSV.
+        verbose: If True, print a summary to stdout after writing.
+                 Set to False when calling as a library function.
     """
     fieldnames = [
         "Handle",
@@ -227,8 +251,9 @@ def generate_shopify_csv(changes: list[PriceChange], output_path: str) -> None:
                 "Variant Compare At Price": "",  # Clear compare-at price
             })
 
-    print(f"\nCSV saved to: {output_path}")
-    print(f"Products to update: {len(changes)}")
+    if verbose:
+        print(f"\nCSV saved to: {output_path}")
+        print(f"Products to update: {len(changes)}")
 
 
 def print_summary(changes: list[PriceChange]) -> None:

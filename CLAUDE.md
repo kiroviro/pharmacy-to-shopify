@@ -42,6 +42,7 @@ Beyond the 8 pipeline scripts above, grouped by function:
 | **Google Ads** | `google_ads_auth.py` | OAuth token management |
 | | `google_ads_auth_flow.py` | Interactive OAuth flow |
 | | `google_ads_create_account.py` | Create Google Ads sub-account |
+| **Data cleanup** | `dedup_csv.py` | Deduplicate cleaned CSV by SKU (expiry-aware + true-dupe) |
 | **Utilities** | `shopify_oauth.py` | Shopify OAuth helper |
 | | `extract_single.py` | Debug single product extraction |
 | | `demo.py` | Demo/playground script |
