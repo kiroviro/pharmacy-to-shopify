@@ -88,9 +88,6 @@ class ExtractedProduct:
     inventory_policy: str = "deny"  # "deny" or "continue" selling when OOS
     requires_shipping: bool = True
 
-    # Extraction metadata (tracks which source provided each field)
-    extraction_method: dict[str, str] = field(default_factory=dict)
-
     def __post_init__(self):
         """Validate required fields after initialization."""
         if not self.title:

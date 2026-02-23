@@ -125,7 +125,7 @@ class PharmacyExtractor:
         images = self._extract_images()
         self._optimize_image_alt_texts(images, brand, title)
 
-        barcode = self._extract_barcode()  # Now uses self.soup, self.json_ld
+        barcode = self._extract_barcode(page_text)
         highlights = self._extract_highlights()
 
         return ExtractedProduct(
@@ -160,7 +160,7 @@ class PharmacyExtractor:
             google_age_group=self._determine_google_age_group(categories),
         )
 
-    def _extract_barcode(self) -> str:
+    def _extract_barcode(self, page_text: str = "") -> str:
         """
         Extract barcode/GTIN from multiple sources with fallback chain.
 
@@ -199,8 +199,10 @@ class PharmacyExtractor:
 
         # 3. Try "Допълнителна информация" section (existing logic - enhanced)
         if not barcode:
-            more_info = self._extract_tab_content("Допълнителна информация",
-                                                  self.soup.get_text(separator="\n") if self.soup else "")
+            more_info = self._extract_tab_content(
+                "Допълнителна информация",
+                page_text or (self.soup.get_text(separator="\n") if self.soup else ""),
+            )
             if more_info:
                 # Try multiple patterns - ONLY with explicit labels to avoid matching SKUs
                 patterns = [
@@ -414,44 +416,6 @@ class PharmacyExtractor:
 
         logger.warning(f"Could not extract price for {self.url}")
         return price_bgn, price_eur
-
-    def _extract_original_price(self) -> str:
-        """
-        Extract original/regular price (for products on promotion).
-
-        Returns the pre-discount price for promotional products.
-        For regular-priced products, returns empty string.
-
-        Used for Shopify's "Compare-at price" field to show savings.
-        """
-        product_data = self._parse_vue_product_data()
-        if not product_data:
-            return ""
-
-        variants = product_data.get('variants', [])
-        if not variants:
-            return ""
-
-        try:
-            variant = variants[0]
-
-            regular_price_eur = float(variant.get('price', 0))
-            discounted_price_eur = float(variant.get('discountedPrice', 0))
-
-            # Only return original price if product is on promotion
-            if regular_price_eur > 0 and regular_price_eur != discounted_price_eur:
-                original_price_bgn = regular_price_eur * EUR_TO_BGN
-                logger.debug(
-                    f"Original price (before discount): "
-                    f"{regular_price_eur:.2f} EUR / {original_price_bgn:.2f} BGN"
-                )
-                return f"{original_price_bgn:.2f}"
-
-        except ValueError as e:
-            logger.debug(f"Failed to extract original price from Vue variant data: {e}")
-
-        # No promotion or extraction failed
-        return ""
 
     @staticmethod
     def _extract_availability() -> str:

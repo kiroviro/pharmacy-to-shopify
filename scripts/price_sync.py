@@ -274,7 +274,7 @@ def main():
     )
     parser.add_argument(
         "--csv",
-        default="/Users/kiril/IdeaProjects/pharmacy-to-shopify/data/benu.bg/raw/products.csv",
+        default="data/benu.bg/raw/products.csv",
         help="Source products CSV",
     )
     parser.add_argument(

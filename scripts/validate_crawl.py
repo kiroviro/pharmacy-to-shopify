@@ -53,9 +53,6 @@ def _is_placeholder_domain(hostname: str) -> bool:
     h = hostname.lower()
     return any(h == d or h.endswith("." + d) for d in _PLACEHOLDER_DOMAIN_SUFFIXES)
 
-# BGN/EUR fixed exchange rate
-_EUR_TO_BGN = 1.95583
-
 
 def read_products_from_csv(csv_path: str) -> list[dict]:
     """Read rows with a non-empty Title from the CSV."""
