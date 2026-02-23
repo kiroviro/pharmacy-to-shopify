@@ -8,6 +8,26 @@ from __future__ import annotations
 
 import re
 
+# Exact placeholder hostnames and domain suffixes that mark an image as broken.
+# A hostname matches if it IS one of these OR ends with ".<suffix>".
+# This catches benu.bg crawl regression: images got pharmacy.example.com base
+# domain when source_domain was not forwarded to the extractor (commit a9b6d3b).
+PLACEHOLDER_DOMAINS: frozenset[str] = frozenset({
+    "example.com",       # catches pharmacy.example.com, www.example.com, etc.
+    "placeholder.com",   # catches via.placeholder.com
+    "dummyimage.com",
+    "placehold.it",
+    "placekitten.com",
+    "lorempixel.com",
+    "localhost",
+})
+
+
+def is_placeholder_domain(hostname: str) -> bool:
+    """Return True if hostname is or is a subdomain of a known placeholder domain."""
+    h = hostname.lower()
+    return any(h == d or h.endswith("." + d) for d in PLACEHOLDER_DOMAINS)
+
 
 def remove_source_references(text: str | None, source_domain: str) -> str | None:
     """

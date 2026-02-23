@@ -33,25 +33,9 @@ import requests
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.common.log_config import setup_logging
+from src.common.text_utils import is_placeholder_domain
 
 logger = logging.getLogger(__name__)
-
-# Banned image domain suffixes — matches exact hostname AND all subdomains.
-# Mirrors the same logic as src/extraction/validator._is_placeholder_domain().
-_PLACEHOLDER_DOMAIN_SUFFIXES = frozenset({
-    "example.com",      # catches pharmacy.example.com (commit a9b6d3b regression)
-    "placeholder.com",  # catches via.placeholder.com
-    "dummyimage.com",
-    "placehold.it",
-    "placekitten.com",
-    "lorempixel.com",
-    "localhost",
-})
-
-
-def _is_placeholder_domain(hostname: str) -> bool:
-    h = hostname.lower()
-    return any(h == d or h.endswith("." + d) for d in _PLACEHOLDER_DOMAIN_SUFFIXES)
 
 
 def read_products_from_csv(csv_path: str) -> list[dict]:
@@ -85,7 +69,7 @@ def check_image_url(url: str) -> str | None:
         return f"image URL not https: {url[:60]!r}"
     try:
         hostname = urlparse(url).netloc.lower()
-        if _is_placeholder_domain(hostname):
+        if is_placeholder_domain(hostname):
             return f"placeholder image domain: {hostname}"
     except Exception:
         pass

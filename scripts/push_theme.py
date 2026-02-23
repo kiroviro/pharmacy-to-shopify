@@ -20,69 +20,28 @@ Usage:
 
 import argparse
 import base64
-import json
 import os
 import sys
-import time
 from pathlib import Path
 
-import requests
-from dotenv import load_dotenv
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+from src.common.credentials import load_shopify_credentials
+from src.shopify.api_client import ShopifyAPIClient
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-def _load_token_file() -> tuple[str, str]:
-    """Fallback: read shop + token from .shopify_token.json written by shopify_oauth.py."""
-    token_file = Path(__file__).parent.parent / ".shopify_token.json"
-    if token_file.exists():
-        data = json.loads(token_file.read_text())
-        shop = data.get("shop", "")
-        if shop and "." not in shop:
-            shop = f"{shop}.myshopify.com"
-        return shop, data.get("access_token", "")
-    return "", ""
-
-_token_shop, _token_access = _load_token_file()
-
-SHOP_URL = (os.getenv("SHOPIFY_SHOP_URL") or _token_shop).rstrip("/")
-ACCESS_TOKEN = os.getenv("SHOPIFY_ACCESS_TOKEN") or _token_access
 THEME_ID = os.getenv("SHOPIFY_THEME_ID", "195131081041")
-API_VERSION = "2024-01"
 
 # Theme repo lives next to this project
 THEME_DIR = Path(__file__).parent.parent.parent / "viapharma.us-theme"
-
-# Shopify rate limit: 2 req/s for REST API (leaky bucket 40 calls, fills at 2/s)
-REQUEST_DELAY = 0.6  # seconds between requests
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 BINARY_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot"}
 
-
-def api_url() -> str:
-    return f"https://{SHOP_URL}/admin/api/{API_VERSION}/themes/{THEME_ID}/assets.json"
-
-
-def headers() -> dict:
-    return {
-        "X-Shopify-Access-Token": ACCESS_TOKEN,
-        "Content-Type": "application/json",
-    }
-
-
-def validate_config() -> None:
-    missing = []
-    if not SHOP_URL:
-        missing.append("SHOPIFY_SHOP_URL")
-    if not ACCESS_TOKEN:
-        missing.append("SHOPIFY_ACCESS_TOKEN")
-    if missing:
-        print(f"[error] Missing env vars: {', '.join(missing)}")
-        print("        Set them in .env or export them before running.")
-        sys.exit(1)
+# Module-level client — initialized in main()
+_client: ShopifyAPIClient | None = None
 
 
 def theme_key(file_path: Path) -> str:
@@ -114,14 +73,13 @@ def push_file(file_path: Path, dry_run: bool = False) -> bool:
         return True
 
     asset = build_asset_payload(file_path)
-    response = requests.put(api_url(), headers=headers(), json={"asset": asset}, timeout=30)
-
-    if response.status_code == 200:
-        updated_at = response.json().get("asset", {}).get("updated_at", "")
+    result = _client.rest_request("PUT", f"themes/{THEME_ID}/assets.json", data={"asset": asset})
+    if result is not None:
+        updated_at = result.get("asset", {}).get("updated_at", "")
         print(f"  [ok]    {key}  ({updated_at})")
         return True
     else:
-        print(f"  [error] {key}  HTTP {response.status_code}: {response.text[:200]}")
+        print(f"  [error] {key}  (see log for details)")
         return False
 
 
@@ -137,12 +95,11 @@ def collect_theme_files() -> list[Path]:
 
 def list_themes() -> None:
     """Print all themes on the store."""
-    url = f"https://{SHOP_URL}/admin/api/{API_VERSION}/themes.json"
-    response = requests.get(url, headers=headers(), timeout=15)
-    if response.status_code != 200:
-        print(f"[error] HTTP {response.status_code}: {response.text[:200]}")
+    result = _client.rest_request("GET", "themes.json")
+    if result is None:
+        print("[error] Failed to fetch themes (see log for details)")
         sys.exit(1)
-    themes = response.json().get("themes", [])
+    themes = result.get("themes", [])
     print(f"{'ID':<20} {'ROLE':<12} NAME")
     print("-" * 60)
     for t in themes:
@@ -154,6 +111,8 @@ def list_themes() -> None:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    global _client
+
     parser = argparse.ArgumentParser(
         description="Push Shopify theme files via Admin API.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -165,8 +124,9 @@ def main() -> None:
     parser.add_argument("--list-themes", action="store_true", help="List all themes on the store and exit")
     args = parser.parse_args()
 
-    if not args.dry_run:
-        validate_config()
+    if not args.dry_run or args.list_themes:
+        shop, token = load_shopify_credentials()
+        _client = ShopifyAPIClient(shop, token)
 
     if args.list_themes:
         list_themes()
@@ -182,14 +142,15 @@ def main() -> None:
     else:
         files = [THEME_DIR / f for f in args.files]
 
+    shop_display = f"{_client.shop}.myshopify.com" if _client else "(dry-run)"
     mode = "DRY RUN — " if args.dry_run else ""
-    print(f"\n{mode}Pushing to theme {THEME_ID} on {SHOP_URL}")
+    print(f"\n{mode}Pushing to theme {THEME_ID} on {shop_display}")
     print(f"Theme dir: {THEME_DIR}")
     print(f"Files: {len(files)}\n")
 
     ok = failed = skipped = 0
 
-    for i, f in enumerate(files):
+    for f in files:
         result = push_file(f, dry_run=args.dry_run)
         if result:
             ok += 1
@@ -197,10 +158,6 @@ def main() -> None:
             failed += 1
         else:
             skipped += 1
-
-        # Rate limiting — pause between requests (skip on dry run)
-        if not args.dry_run and i < len(files) - 1:
-            time.sleep(REQUEST_DELAY)
 
     print(f"\nDone. {ok} pushed, {failed} failed, {skipped} skipped.")
     if failed:

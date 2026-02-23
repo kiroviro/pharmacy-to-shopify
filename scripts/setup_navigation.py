@@ -12,17 +12,11 @@ Run: python scripts/setup_navigation.py
 import json
 import os
 import sys
-import requests
 
-# ── Credentials ────────────────────────────────────────────────────────────────
-TOKEN_FILE = os.path.join(os.path.dirname(__file__), '..', '.shopify_token.json')
-with open(TOKEN_FILE) as f:
-    _creds = json.load(f)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-SHOP    = _creds['shop'] + '.myshopify.com'
-TOKEN   = _creds['access_token']
-API_URL = f'https://{SHOP}/admin/api/2025-01/graphql.json'
-HEADERS = {'X-Shopify-Access-Token': TOKEN, 'Content-Type': 'application/json'}
+from src.common.credentials import load_shopify_credentials
+from src.shopify.api_client import ShopifyAPIClient
 
 MAIN_MENU_ID = 'gid://shopify/Menu/251398586705'
 
@@ -287,6 +281,9 @@ mutation menuUpdate($id: ID!, $title: String!, $handle: String!, $items: [MenuIt
 
 
 def run():
+    shop, token = load_shopify_credentials()
+    client = ShopifyAPIClient(shop, token)
+
     items = build_items(MENU)
     variables = {
         'id':     MAIN_MENU_ID,
@@ -299,23 +296,19 @@ def run():
     for item in items:
         print(f'  {item["title"]} → {len(item["items"])} columns')
 
-    resp = requests.post(
-        API_URL,
-        headers=HEADERS,
-        json={'query': MUTATION, 'variables': variables},
-        timeout=30,
-    )
-    resp.raise_for_status()
-    data = resp.json()
+    data = client.graphql_request(MUTATION, variables)
+    if data is None:
+        print('\n❌ GraphQL request failed')
+        sys.exit(1)
 
-    errors = data.get('data', {}).get('menuUpdate', {}).get('userErrors', [])
+    errors = data.get('menuUpdate', {}).get('userErrors', [])
     if errors:
         print('\n❌ API errors:')
         for e in errors:
             print(f'  {e["field"]}: {e["message"]}')
         sys.exit(1)
 
-    result_menu = data.get('data', {}).get('menuUpdate', {}).get('menu', {})
+    result_menu = data.get('menuUpdate', {}).get('menu', {})
     if not result_menu:
         print('\n❌ Unexpected response:')
         print(json.dumps(data, indent=2, ensure_ascii=False))

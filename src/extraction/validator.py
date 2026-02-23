@@ -9,30 +9,9 @@ from __future__ import annotations
 import re
 from urllib.parse import urlparse
 
+from ..common.constants import EUR_TO_BGN
+from ..common.text_utils import is_placeholder_domain
 from ..models import ExtractedProduct
-
-# EUR/BGN fixed exchange rate (pegged since 1999)
-_EUR_TO_BGN = 1.95583
-
-# Exact placeholder hostnames and domain suffixes that mark an image as broken.
-# A hostname matches if it IS one of these OR ends with ".<suffix>".
-# This catches benu.bg crawl regression: images got pharmacy.example.com base
-# domain when source_domain was not forwarded to the extractor (commit a9b6d3b).
-_PLACEHOLDER_DOMAINS: frozenset[str] = frozenset({
-    "example.com",       # catches pharmacy.example.com, www.example.com, etc.
-    "placeholder.com",   # catches via.placeholder.com
-    "dummyimage.com",
-    "placehold.it",
-    "placekitten.com",
-    "lorempixel.com",
-    "localhost",
-})
-
-
-def _is_placeholder_domain(hostname: str) -> bool:
-    """Return True if hostname is or is a subdomain of a known placeholder domain."""
-    h = hostname.lower()
-    return any(h == d or h.endswith("." + d) for d in _PLACEHOLDER_DOMAINS)
 
 # Barcode lengths valid for EAN-8, UPC-A, EAN-13, ITF-14
 _VALID_BARCODE_LENGTHS = frozenset({8, 12, 13, 14})
@@ -127,7 +106,7 @@ class SpecificationValidator:
                 else:
                     try:
                         hostname = urlparse(img_url).netloc.lower()
-                        if _is_placeholder_domain(hostname):
+                        if is_placeholder_domain(hostname):
                             errors.append(
                                 f"image URL: placeholder domain ({hostname})"
                             )
@@ -138,7 +117,7 @@ class SpecificationValidator:
         if p.price_eur and p.price and price_float is not None:
             try:
                 price_eur_f = float(p.price_eur)
-                expected_bgn = price_eur_f * _EUR_TO_BGN
+                expected_bgn = price_eur_f * EUR_TO_BGN
                 if price_float > 0:
                     deviation = abs(price_float - expected_bgn) / price_float
                     if deviation > 0.01:

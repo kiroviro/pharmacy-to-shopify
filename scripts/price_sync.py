@@ -21,7 +21,6 @@ Usage:
 
 import argparse
 import csv
-import json
 import logging
 import os
 import random
@@ -30,12 +29,12 @@ import time
 from dataclasses import dataclass
 
 import requests
-from bs4 import BeautifulSoup
 
 # Add project root to path for proper package imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.common.constants import EUR_TO_BGN
+from src.common.price_fetcher import fetch_benu_price
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -53,38 +52,6 @@ class PriceChange:
     change_pct: float
     benu_url: str
     shopify_url: str
-
-
-def fetch_benu_price(session: requests.Session, handle: str) -> tuple[float | None, float | None, str | None]:
-    """Fetch live price from benu.bg using JSON-LD."""
-    url = f"https://benu.bg/{handle}"
-    try:
-        resp = session.get(url, timeout=15)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "lxml")
-
-        scripts = soup.find_all("script", type="application/ld+json")
-        for script in scripts:
-            try:
-                data = json.loads(script.string or "")
-                if isinstance(data, dict) and data.get("@type") == "Product":
-                    offers = data.get("offers", {})
-                    if isinstance(offers, list):
-                        offers = offers[0] if offers else {}
-                    price = offers.get("price")
-                    if price:
-                        price_eur = float(str(price).replace(",", "."))
-                        price_bgn = round(price_eur * EUR_TO_BGN, 2)
-                        return price_bgn, round(price_eur, 2), None
-            except (json.JSONDecodeError, ValueError):
-                continue
-
-        return None, None, "No price in JSON-LD"
-
-    except requests.exceptions.HTTPError as e:
-        return None, None, f"HTTP {e.response.status_code}"
-    except Exception as e:
-        return None, None, str(e)[:40]
 
 
 def fetch_shopify_price(session: requests.Session, handle: str) -> tuple[float | None, float | None, str | None]:

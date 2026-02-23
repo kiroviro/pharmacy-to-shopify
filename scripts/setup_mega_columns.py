@@ -10,17 +10,11 @@ Run: python scripts/setup_mega_columns.py
 import json
 import os
 import sys
-import requests
 
-# ── Credentials ────────────────────────────────────────────────────────────────
-TOKEN_FILE = os.path.join(os.path.dirname(__file__), '..', '.shopify_token.json')
-with open(TOKEN_FILE) as f:
-    _creds = json.load(f)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-SHOP    = _creds['shop'] + '.myshopify.com'
-TOKEN   = _creds['access_token']
-API_URL = f'https://{SHOP}/admin/api/2025-01/graphql.json'
-HEADERS = {'X-Shopify-Access-Token': TOKEN, 'Content-Type': 'application/json'}
+from src.common.credentials import load_shopify_credentials
+from src.shopify.api_client import ShopifyAPIClient
 
 # ── Column definitions ──────────────────────────────────────────────────────────
 # Each entry: (nav_item_title, column_title, handle_suffix, [(link_title, url), ...])
@@ -168,35 +162,30 @@ mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateIn
 """
 
 
-def gql(query, variables):
-    resp = requests.post(
-        API_URL,
-        headers=HEADERS,
-        json={'query': query, 'variables': variables},
-        timeout=30,
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
-def create_menu(title, handle, items):
+def create_menu(client, title, handle, items):
     """Create a flat menu and return its handle."""
     menu_items = [{'title': t, 'type': 'HTTP', 'url': u} for t, u in items]
-    data = gql(CREATE_MUTATION, {
+    data = client.graphql_request(CREATE_MUTATION, {
         'title': title,
         'handle': handle,
         'items': menu_items,
     })
-    errors = data.get('data', {}).get('menuCreate', {}).get('userErrors', [])
+    if data is None:
+        print(f'  ⚠ GraphQL request failed for {handle}')
+        return None
+    errors = data.get('menuCreate', {}).get('userErrors', [])
     if errors:
         print(f'  ⚠ Errors for {handle}: {errors}')
         return None
-    menu = data.get('data', {}).get('menuCreate', {}).get('menu', {})
+    menu = data.get('menuCreate', {}).get('menu', {})
     print(f'  ✅ Created: {menu.get("handle")} (id: {menu.get("id")})')
     return menu.get('handle')
 
 
 def run():
+    shop, token = load_shopify_credentials()
+    client = ShopifyAPIClient(shop, token)
+
     created_blocks = []
     print(f'Creating {len(COLUMNS)} flat column menus...\n')
 
@@ -204,7 +193,7 @@ def run():
         handle = f'mega-col-{handle_suffix}'
         menu_title = f'Mega: {col_title}'
         print(f'Creating {handle} ({len(links)} links)...')
-        actual_handle = create_menu(menu_title, handle, links)
+        actual_handle = create_menu(client, menu_title, handle, links)
         if actual_handle:
             created_blocks.append({
                 'nav_item': nav_item,

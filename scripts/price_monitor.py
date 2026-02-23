@@ -41,7 +41,6 @@ SETUP:
 
 import argparse
 import csv
-import json
 import logging
 import os
 import random
@@ -51,12 +50,11 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import requests
-from bs4 import BeautifulSoup
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import EUR_TO_BGN
+from src.common.price_fetcher import fetch_benu_price as _fetch_benu_price
 from src.shopify.api_client import ShopifyAPIClient
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -112,46 +110,8 @@ class PriceMonitor:
         self.changes: list[PriceChange] = []
 
     def fetch_benu_price(self, handle: str) -> tuple[float | None, float | None, str | None]:
-        """
-        Fetch live price from benu.bg.
-
-        Args:
-            handle: Product URL handle
-
-        Returns:
-            Tuple of (price_bgn, price_eur, error)
-        """
-        url = f"https://benu.bg/{handle}"
-        try:
-            resp = self.session.get(url, timeout=15)
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "lxml")
-
-            # Extract from JSON-LD (most reliable)
-            scripts = soup.find_all("script", type="application/ld+json")
-            for script in scripts:
-                try:
-                    data = json.loads(script.string or "")
-                    if isinstance(data, dict) and data.get("@type") == "Product":
-                        offers = data.get("offers", {})
-                        if isinstance(offers, list):
-                            offers = offers[0] if offers else {}
-                        price = offers.get("price")
-                        if price:
-                            price_eur = float(str(price).replace(",", "."))
-                            price_bgn = round(price_eur * EUR_TO_BGN, 2)
-                            return price_bgn, price_eur, None
-                except (json.JSONDecodeError, ValueError):
-                    continue
-
-            return None, None, "No JSON-LD price found"
-
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                return None, None, "Product not found (404)"
-            return None, None, f"HTTP {e.response.status_code}"
-        except Exception as e:
-            return None, None, str(e)[:50]
+        """Fetch live price from benu.bg via shared helper."""
+        return _fetch_benu_price(self.session, handle)
 
     def fetch_shopify_prices(self, handles: list[str]) -> dict[str, tuple[float | None, str | None]]:
         """

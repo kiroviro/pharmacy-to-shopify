@@ -20,7 +20,8 @@ from pathlib import Path
 
 import pytest
 
-from src.extraction.validator import SpecificationValidator, _is_placeholder_domain
+from src.common.text_utils import is_placeholder_domain
+from src.extraction.validator import SpecificationValidator
 from src.models import ExtractedProduct, ProductImage
 from src.validation.crawl_tracker import CrawlQualityTracker
 
@@ -101,16 +102,16 @@ class TestPlaceholderImageDomainRegression:
         assert not any("placeholder domain" in e for e in result["errors"]), \
             f"{good_domain!r} should not be flagged"
 
-    def test_is_placeholder_domain_helper(self):
+    def testis_placeholder_domain_helper(self):
         """Unit test for the domain check helper."""
-        assert _is_placeholder_domain("pharmacy.example.com")
-        assert _is_placeholder_domain("example.com")
-        assert _is_placeholder_domain("www.example.com")
-        assert _is_placeholder_domain("localhost")
-        assert _is_placeholder_domain("via.placeholder.com")
-        assert not _is_placeholder_domain("benu.bg")
-        assert not _is_placeholder_domain("cdn.benu.bg")
-        assert not _is_placeholder_domain("cdn.shopify.com")
+        assert is_placeholder_domain("pharmacy.example.com")
+        assert is_placeholder_domain("example.com")
+        assert is_placeholder_domain("www.example.com")
+        assert is_placeholder_domain("localhost")
+        assert is_placeholder_domain("via.placeholder.com")
+        assert not is_placeholder_domain("benu.bg")
+        assert not is_placeholder_domain("cdn.benu.bg")
+        assert not is_placeholder_domain("cdn.shopify.com")
 
 
 # ---------------------------------------------------------------------------
