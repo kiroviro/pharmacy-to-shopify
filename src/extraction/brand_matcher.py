@@ -1,10 +1,9 @@
 """
 Brand Matcher
 
-Matches product titles to known brand names using multiple strategies:
-1. Exact match from structured data (JSON-LD, GTM)
-2. Title prefix matching against known brands list
-3. Multi-word brand matching (e.g., "La Roche-Posay", "Nature's Way")
+Matches product titles to known brand names using title prefix matching
+against a known brands list, supporting multi-word brands
+(e.g., "La Roche-Posay", "Nature's Way").
 
 The known brands list is loaded from config/known_brands.yaml.
 """
@@ -20,11 +19,7 @@ class BrandMatcher:
 
     Usage:
         matcher = BrandMatcher()
-        brand = matcher.match(
-            title="Nivea Creme 150ml",
-            structured_brand="",  # From JSON-LD
-            gtm_brand=""          # From GTM data
-        )
+        brand = matcher.match_from_title("Nivea Creme 150ml")
         # Returns: "Nivea"
     """
 
@@ -42,39 +37,6 @@ class BrandMatcher:
 
         # Create lowercase lookup for case-insensitive matching
         self.brands_lower = get_brands_lowercase_map(self.known_brands)
-
-    def match(
-        self,
-        title: str,
-        structured_brand: str = "",
-        gtm_brand: str = ""
-    ) -> str:
-        """
-        Match a product to a brand using multiple strategies.
-
-        Priority order:
-        1. Structured data brand (JSON-LD) - most reliable
-        2. GTM data brand - second choice
-        3. Title prefix matching - fallback
-
-        Args:
-            title: Product title
-            structured_brand: Brand from JSON-LD structured data
-            gtm_brand: Brand from GTM dl4Objects
-
-        Returns:
-            Matched brand name (canonical capitalization) or empty string
-        """
-        # Priority 1: Structured data (most reliable)
-        if structured_brand and structured_brand.strip():
-            return structured_brand.strip()
-
-        # Priority 2: GTM data
-        if gtm_brand and gtm_brand.strip():
-            return gtm_brand.strip()
-
-        # Priority 3: Title prefix matching
-        return self.match_from_title(title)
 
     def match_from_title(self, title: str) -> str:
         """

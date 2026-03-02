@@ -61,5 +61,9 @@ credentials*.json
 .shopify_token.json
 config/google-ads.yaml
 
+# Screenshots (Playwright)
+*.png
+*.jpeg
+
 # Theme exports
 theme_export*

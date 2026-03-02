@@ -17,8 +17,6 @@ from ..models import ExtractedProduct
 from .fetcher import PharmacyFetcher
 from .parser import PharmacyParser
 
-BENU_DOMAIN = "benu.bg"
-
 
 class PharmacyExtractor:
     """Fetches pharmacy product pages and extracts structured product data."""
@@ -26,12 +24,11 @@ class PharmacyExtractor:
     def __init__(
         self,
         url: str,
-        site_domain: str = BENU_DOMAIN,
         validate_images: bool = False,
         session: requests.Session | None = None,
     ):
         self.url = url
-        self.site_domain = site_domain
+        self.site_domain = "benu.bg"
         self.validate_images = validate_images
         self._fetcher = PharmacyFetcher(url=url, session=session)
         self._parser: PharmacyParser | None = None
@@ -57,6 +54,10 @@ class PharmacyExtractor:
     @property
     def brand_matcher(self):
         return self._parser.brand_matcher if self._parser else None
+
+    @property
+    def product_type(self) -> str:
+        return self._parser.product_type if self._parser else "otc"
 
     # ── Core operations ───────────────────────────────────────────────────────
 
@@ -108,6 +109,5 @@ class PharmacyExtractor:
             soup=self._fetcher.soup,
             json_ld=self._fetcher.json_ld,
             url=self.url,
-            site_domain=self.site_domain,
             validate_images=self.validate_images,
         )

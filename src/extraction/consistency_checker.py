@@ -96,7 +96,7 @@ class SourceConsistencyChecker:
                 result = check_fn(product)
                 if result:
                     warnings.append(result)
-            except Exception as exc:
+            except (ValueError, TypeError, AttributeError, KeyError) as exc:
                 logger.debug("consistency check %s skipped: %s", check_fn.__name__, exc)
 
         for warning_key, markers, field_name in _TAB_SECTIONS:
@@ -104,7 +104,7 @@ class SourceConsistencyChecker:
                 result = self._check_section(warning_key, markers, getattr(product, field_name, ""), page_text)
                 if result:
                     warnings.append(result)
-            except Exception as exc:
+            except (ValueError, TypeError, AttributeError, KeyError) as exc:
                 logger.debug("consistency check %s skipped: %s", warning_key, exc)
 
         return warnings
@@ -319,24 +319,5 @@ class SourceConsistencyChecker:
 
     def _parse_jsonld_breadcrumbs(self) -> list[str]:
         """Re-parse BreadcrumbList from all JSON-LD script tags."""
-        for script in self._soup.find_all("script", type="application/ld+json"):
-            try:
-                data = json.loads(script.string)
-                breadcrumb_data = None
-                if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
-                    breadcrumb_data = data
-                elif isinstance(data, list):
-                    for item in data:
-                        if isinstance(item, dict) and item.get("@type") == "BreadcrumbList":
-                            breadcrumb_data = item
-                            break
-                if breadcrumb_data:
-                    crumbs = []
-                    for item in breadcrumb_data.get("itemListElement", []):
-                        name = item.get("name") or item.get("item", {}).get("name", "")
-                        if name and name.lower() not in ("начало", "home"):
-                            crumbs.append(name)
-                    return crumbs
-            except Exception:
-                continue
-        return []
+        from .parser import parse_breadcrumb_jsonld
+        return parse_breadcrumb_jsonld(self._soup)

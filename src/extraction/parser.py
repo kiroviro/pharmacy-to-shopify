@@ -30,6 +30,46 @@ logger = logging.getLogger(__name__)
 _VUE_DATA_NOT_PARSED = object()  # sentinel for _cached_vue_data
 
 
+def parse_breadcrumb_jsonld(soup: BeautifulSoup, exclude_title: str | None = None) -> list[str]:
+    """
+    Parse BreadcrumbList from JSON-LD script tags.
+
+    Args:
+        soup: Parsed HTML tree
+        exclude_title: Product title to exclude from breadcrumb (avoids
+            including the product itself as a category)
+
+    Returns:
+        List of breadcrumb category names (excluding "Начало"/"home")
+    """
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string)
+            breadcrumb_data = None
+            if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
+                breadcrumb_data = data
+            elif isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict) and item.get("@type") == "BreadcrumbList":
+                        breadcrumb_data = item
+                        break
+
+            if breadcrumb_data:
+                crumbs = []
+                for item in breadcrumb_data.get("itemListElement", []):
+                    name = item.get("name") or item.get("item", {}).get("name", "")
+                    if name and name.lower() not in ("начало", "home"):
+                        if exclude_title and name == exclude_title:
+                            continue
+                        if exclude_title and (len(name) >= 50 and exclude_title in name):
+                            continue
+                        crumbs.append(name)
+                return crumbs
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            continue
+    return []
+
+
 class PharmacyParser:
     """Extracts product data from a pre-parsed pharmacy page."""
 
@@ -41,7 +81,6 @@ class PharmacyParser:
         soup: BeautifulSoup,
         json_ld: dict | None,
         url: str,
-        site_domain: str = "pharmacy.example.com",
         brand_matcher: BrandMatcher | None = None,
         seo_settings: dict | None = None,
         validate_images: bool = False,
@@ -49,7 +88,7 @@ class PharmacyParser:
         self.soup = soup
         self.json_ld = json_ld
         self.url = url
-        self.site_domain = site_domain
+        self.site_domain = "benu.bg"
         self.validate_images = validate_images
 
         self._cached_title: str | None = None
@@ -346,34 +385,14 @@ class PharmacyParser:
 
     def _extract_categories(self, product_title: str = "") -> list[str]:
         """Extract category breadcrumb."""
-        categories = []
         if not product_title:
             product_title = self._extract_title()
 
-        scripts = self.soup.find_all("script", type="application/ld+json")
-        for script in scripts:
-            try:
-                data = json.loads(script.string)
-                breadcrumb_data = None
-                if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
-                    breadcrumb_data = data
-                elif isinstance(data, list):
-                    for item in data:
-                        if isinstance(item, dict) and item.get("@type") == "BreadcrumbList":
-                            breadcrumb_data = item
-                            break
+        categories = parse_breadcrumb_jsonld(self.soup, exclude_title=product_title)
+        if categories:
+            return categories
 
-                if breadcrumb_data:
-                    for item in breadcrumb_data.get("itemListElement", []):
-                        name = item.get("name") or item.get("item", {}).get("name", "")
-                        if name and name.lower() != "начало" and name != product_title:
-                            if len(name) < 50 or product_title not in name:
-                                categories.append(name)
-                    if categories:
-                        return categories
-            except (json.JSONDecodeError, TypeError, AttributeError):
-                continue
-
+        # HTML fallback
         breadcrumb = self.soup.select(".breadcrumb a, .breadcrumbs a, nav[aria-label='breadcrumb'] a")
         for crumb in breadcrumb:
             text = crumb.get_text(strip=True)
@@ -647,6 +666,15 @@ class PharmacyParser:
 
         return title[:max_len]
 
+    @staticmethod
+    def _format_product_name(title: str, brand: str) -> str:
+        """Return display name with brand prepended (unless title already starts with it)."""
+        if brand and title.lower().startswith(brand.lower()):
+            return title
+        if brand:
+            return f"{brand} {title}"
+        return title
+
     def _generate_seo_description(self, title: str, brand: str, categories: list[str], sections: dict) -> str:
         """Generate structured SEO meta description in Bulgarian."""
         store_name = self._seo_settings.get("store_name", "ViaPharma")
@@ -654,12 +682,7 @@ class PharmacyParser:
 
         category = categories[0] if categories else ""
 
-        if brand and title.lower().startswith(brand.lower()):
-            product_name = title
-        elif brand:
-            product_name = f"{brand} {title}"
-        else:
-            product_name = title
+        product_name = self._format_product_name(title, brand)
 
         details = sections.get("details", "")
         first_sentence = ""
@@ -693,12 +716,7 @@ class PharmacyParser:
         if not images:
             return
 
-        if brand and title.lower().startswith(brand.lower()):
-            base_alt = title
-        elif brand:
-            base_alt = f"{brand} {title}"
-        else:
-            base_alt = title
+        base_alt = self._format_product_name(title, brand)
         total = len(images)
 
         for img in images:

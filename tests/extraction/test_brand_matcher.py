@@ -11,40 +11,6 @@ def matcher(sample_known_brands):
     return BrandMatcher(brands=sample_known_brands)
 
 
-class TestMatch:
-    def test_structured_brand_priority(self, matcher):
-        result = matcher.match(
-            title="Nivea Creme 150ml",
-            structured_brand="StructuredBrand",
-            gtm_brand="GTMBrand",
-        )
-        assert result == "StructuredBrand"
-
-    def test_gtm_brand_second_priority(self, matcher):
-        result = matcher.match(
-            title="Nivea Creme 150ml",
-            structured_brand="",
-            gtm_brand="GTMBrand",
-        )
-        assert result == "GTMBrand"
-
-    def test_title_fallback(self, matcher):
-        result = matcher.match(
-            title="Nivea Creme 150ml",
-            structured_brand="",
-            gtm_brand="",
-        )
-        assert result == "Nivea"
-
-    def test_no_match(self, matcher):
-        result = matcher.match(
-            title="Unknown Product 100ml",
-            structured_brand="",
-            gtm_brand="",
-        )
-        assert result == ""
-
-
 class TestMatchFromTitle:
     def test_single_word_brand(self, matcher):
         assert matcher.match_from_title("Nivea Creme 150ml") == "Nivea"

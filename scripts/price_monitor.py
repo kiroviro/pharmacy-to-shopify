@@ -52,11 +52,11 @@ import requests
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import BENU_USER_AGENT
+from src.common.constants import USER_AGENT
 from src.common.credentials import load_shopify_credentials
 from src.common.csv_utils import iter_product_rows
 from src.common.price_change import PriceChange
-from src.common.price_fetcher import fetch_benu_price as _fetch_benu_price
+from src.common.price_fetcher import fetch_source_price as _fetch_source_price
 from src.shopify.api_client import ShopifyAPIClient
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -83,14 +83,14 @@ class PriceMonitor:
             self.shopify_client = ShopifyAPIClient(shopify_shop, shopify_token)
 
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": BENU_USER_AGENT})
+        self.session.headers.update({"User-Agent": USER_AGENT})
 
         self.changes: list[PriceChange] = []
         self._checked_count: int = 0
 
-    def fetch_benu_price(self, handle: str) -> tuple[float | None, float | None, str | None]:
-        """Fetch live price from benu.bg via shared helper."""
-        return _fetch_benu_price(self.session, handle)
+    def fetch_source_price(self, handle: str) -> tuple[float | None, float | None, str | None]:
+        """Fetch live price from source site via shared helper."""
+        return _fetch_source_price(self.session, handle)
 
     def fetch_shopify_prices(self, handles: list[str]) -> dict[str, tuple[float | None, str | None]]:
         """
@@ -219,7 +219,7 @@ class PriceMonitor:
                 progress_callback(i, total)
 
             # Fetch benu.bg price
-            benu_bgn, benu_eur, benu_error = self.fetch_benu_price(handle)
+            benu_bgn, benu_eur, benu_error = self.fetch_source_price(handle)
 
             if benu_error:
                 logger.debug("Skipping %s: %s", handle, benu_error)
@@ -408,12 +408,6 @@ def main():
         help="Automatically sync prices to Shopify",
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=True,
-        help="Don't actually update Shopify (default)",
-    )
-    parser.add_argument(
         "--delay",
         type=float,
         default=0.5,
@@ -471,11 +465,8 @@ def main():
 
     # Sync to Shopify if requested
     if args.auto_sync and changes:
-        if args.dry_run:
-            logger.info("[DRY RUN] Would update %d products", len(changes))
-        else:
-            updated = monitor.sync_to_shopify(changes, dry_run=False)
-            logger.info("Updated %d products in Shopify", updated)
+        updated = monitor.sync_to_shopify(changes, dry_run=False)
+        logger.info("Updated %d products in Shopify", updated)
 
     # Exit with code based on changes
     sys.exit(0 if not changes else 1)

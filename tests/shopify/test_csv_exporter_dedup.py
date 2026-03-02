@@ -11,7 +11,7 @@ from src.shopify.csv_exporter import ShopifyCSVExporter
 
 @pytest.fixture
 def exporter():
-    return ShopifyCSVExporter(source_domain="pharmacy.example.com")
+    return ShopifyCSVExporter()
 
 
 @pytest.fixture

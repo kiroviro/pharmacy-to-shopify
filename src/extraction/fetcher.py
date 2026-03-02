@@ -17,6 +17,8 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
+from ..common.constants import USER_AGENT
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +39,7 @@ class PharmacyFetcher:
     def fetch(self) -> None:
         """Fetch the product page via HTTP GET."""
         headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "User-Agent": USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
         }

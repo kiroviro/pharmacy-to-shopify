@@ -124,7 +124,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             return_value=(10.00, 5.11, None),
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             return_value=(15.00, 7.67, None),
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -140,7 +140,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             return_value=(20.00, 10.22, None),
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             return_value=(10.00, 5.11, None),
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -155,7 +155,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             return_value=(10.00, 5.11, None),
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             return_value=(10.10, 5.16, None),
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -169,7 +169,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             return_value=(None, None, "Not found on Shopify"),
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             return_value=(10.00, 5.11, None),
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -183,7 +183,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             return_value=(10.00, 5.11, None),
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             return_value=(None, None, "Product not found (404)"),
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -209,7 +209,7 @@ class TestComparePrices:
             "scripts.price_sync.fetch_shopify_price",
             side_effect=lambda s, h: shopify_prices[h],
         ), patch(
-            "scripts.price_sync.fetch_benu_price",
+            "scripts.price_sync.fetch_source_price",
             side_effect=lambda s, h: benu_prices[h],
         ), patch("scripts.price_sync.time.sleep"):
             changes = compare_prices(products, delay=0)
@@ -233,7 +233,7 @@ class TestGenerateShopifyCSV:
                 old_eur=5.11,
                 new_eur=7.67,
                 change_pct=50.0,
-                benu_url="https://benu.bg/prod-a",
+                source_url="https://benu.bg/prod-a",
                 shopify_url="https://viapharma.us/products/prod-a",
             ),
         ]

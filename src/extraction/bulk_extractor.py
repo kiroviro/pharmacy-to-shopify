@@ -39,7 +39,6 @@ class BulkExtractor:
         output_dir: str = "output",
         delay: float = 1.0,
         save_failed_html: bool = False,
-        source_domain: str = "pharmacy.example.com",
         validate: bool = True,
     ):
         """
@@ -50,7 +49,6 @@ class BulkExtractor:
             output_dir: Directory for output files and state
             delay: Delay between requests in seconds
             save_failed_html: Whether to save HTML of failed pages
-            source_domain: Source domain for cleaning references from text
             validate: Whether to run quality validation on each extracted product
         """
         self.output_csv = output_csv
@@ -74,10 +72,10 @@ class BulkExtractor:
         # Ensure output directory exists
         os.makedirs(output_dir, exist_ok=True)
 
-        self.source_domain = source_domain
+        self.source_domain = "benu.bg"
 
         # CSV exporter (single source of truth for row generation)
-        self._csv_exporter = ShopifyCSVExporter(source_domain=source_domain)
+        self._csv_exporter = ShopifyCSVExporter()
         self.fieldnames = SHOPIFY_FIELDNAMES
 
         # Quality tracker (only active when validate=True)
@@ -232,7 +230,7 @@ class BulkExtractor:
 
                 extractor = None
                 try:
-                    extractor = extractor_class(url, session=session, site_domain=self.source_domain)
+                    extractor = extractor_class(url, session=session)
                     extractor.fetch()
                     product = extractor.extract()
 
@@ -277,6 +275,7 @@ class BulkExtractor:
                         rows = self.product_to_csv_rows(product)
                         for row in rows:
                             writer.writerow(row)
+                        csvfile.flush()
 
                         # Track metrics
                         num_images = len(product.images)
@@ -322,7 +321,6 @@ class BulkExtractor:
                 # Save state periodically (every 10 products)
                 if i % 10 == 0:
                     self.save_state()
-                    csvfile.flush()
 
                 # Rate limiting
                 if i < total_urls:

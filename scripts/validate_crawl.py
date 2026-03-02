@@ -17,7 +17,6 @@ Exit codes:
 """
 
 import argparse
-import csv
 import json
 import logging
 import os
@@ -26,27 +25,20 @@ import re
 import sys
 import time
 from collections import Counter, defaultdict
-from urllib.parse import urlparse
 
 import requests
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.common.log_config import setup_logging
-from src.common.text_utils import is_placeholder_domain
 
 logger = logging.getLogger(__name__)
 
 
 def read_products_from_csv(csv_path: str) -> list[dict]:
     """Read rows with a non-empty Title from the CSV."""
-    products = []
-    with open(csv_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("Title", "").strip():
-                products.append(row)
-    return products
+    from src.common.csv_utils import iter_product_rows
+    return list(iter_product_rows(csv_path))
 
 
 def check_duplicate_handles(products: list[dict]) -> list[str]:
@@ -61,84 +53,30 @@ def check_duplicate_skus(products: list[dict]) -> list[str]:
     return [s for s, c in counts.items() if c > 1]
 
 
-def check_image_url(url: str) -> str | None:
-    """Return an issue description if the image URL is invalid, else None."""
-    if not url:
-        return "empty image URL"
-    if not url.startswith("https://"):
-        return f"image URL not https: {url[:60]!r}"
-    try:
-        hostname = urlparse(url).netloc.lower()
-        if is_placeholder_domain(hostname):
-            return f"placeholder image domain: {hostname}"
-    except Exception:
-        pass
-    return None
-
-
 def validate_row(row: dict) -> list[str]:
-    """Run field-level checks on a CSV row. Returns list of issue strings."""
-    issues = []
+    """Run field-level checks on a CSV row via SpecificationValidator."""
+    from src.extraction.validator import SpecificationValidator
+    from src.models import ExtractedProduct, ProductImage
 
-    # Title
-    title = row.get("Title", "")
-    if not title.strip():
-        issues.append("title: empty")
-    elif len(title) < 5:
-        issues.append(f"title: too short ({len(title)} chars)")
-    elif len(title) > 250:
-        issues.append(f"title: too long ({len(title)} chars)")
+    # Map CSV columns to ExtractedProduct fields
+    image_url = row.get("Product image URL", "").strip()
+    images = [ProductImage(source_url=image_url, position=1, alt_text="")] if image_url else []
 
-    # Handle
-    handle = row.get("URL handle", "")
-    if not handle:
-        issues.append("handle: missing")
-    elif not re.fullmatch(r"[a-z0-9-]+", handle):
-        issues.append(f"handle: invalid format ({handle!r})")
-    elif len(handle) > 200:
-        issues.append(f"handle: too long ({len(handle)} chars)")
+    product = ExtractedProduct(
+        title=row.get("Title", "").strip(),
+        url=f"https://benu.bg/{row.get('URL handle', '').strip()}",
+        brand=row.get("Vendor", "").strip(),
+        sku=row.get("SKU", "").strip(),
+        price=row.get("Price", "").strip(),
+        handle=row.get("URL handle", "").strip(),
+        barcode=row.get("Barcode", "").strip(),
+        images=images,
+        tags=[t.strip() for t in row.get("Tags", "").split(",") if t.strip()],
+        product_type=row.get("Type", "").strip(),
+    )
 
-    # Price
-    price_str = row.get("Price", "")
-    price_float = None
-    if not price_str:
-        issues.append("price: missing")
-    else:
-        try:
-            price_float = float(price_str)
-            if price_float <= 0:
-                issues.append(f"price: <= 0 (got {price_float})")
-            elif price_float >= 10000:
-                issues.append(f"price: suspiciously high ({price_float})")
-        except (ValueError, TypeError):
-            issues.append(f"price: not a number ({price_str!r})")
-
-    # Vendor (brand)
-    if not row.get("Vendor", "").strip():
-        issues.append("vendor: missing")
-
-    # SKU
-    if not row.get("SKU", "").strip():
-        issues.append("sku: missing")
-
-    # Product image URL (first image)
-    img_issue = check_image_url(row.get("Product image URL", ""))
-    if img_issue:
-        issues.append(img_issue)
-
-    # Variant Price (should match Price if set)
-    variant_price = row.get("Variant Price", "")
-    if variant_price and price_float is not None:
-        try:
-            if abs(float(variant_price) - price_float) > 0.01:
-                issues.append(
-                    f"variant_price mismatch: Price={price_float}, "
-                    f"Variant Price={variant_price}"
-                )
-        except (ValueError, TypeError):
-            pass
-
-    return issues
+    result = SpecificationValidator(product).validate()
+    return result["issues"]
 
 
 def spot_check_url(

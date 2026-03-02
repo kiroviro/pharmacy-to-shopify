@@ -150,34 +150,28 @@ class ShopifyCollectionCreator:
 
     def _count_vendors(self, csv_path: str) -> Counter:
         """Count products per vendor."""
+        from ..common.csv_utils import iter_product_rows
         vendor_counter = Counter()
         try:
-            with open(csv_path, "r", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if not row.get("Title", "").strip():
-                        continue
-                    vendor = row.get("Vendor", "").strip()
-                    if vendor:
-                        vendor_counter[vendor] += 1
-        except (OSError, csv.Error) as e:
+            for row in iter_product_rows(csv_path):
+                vendor = row.get("Vendor", "").strip()
+                if vendor:
+                    vendor_counter[vendor] += 1
+        except (OSError,) as e:
             logger.error("Failed to read CSV %s: %s", csv_path, e)
         return vendor_counter
 
     def _count_tags(self, csv_path: str) -> Counter:
         """Count products per tag."""
+        from ..common.csv_utils import iter_product_rows
         tags_counter = Counter()
         try:
-            with open(csv_path, "r", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if not row.get("Title", "").strip():
-                        continue
-                    tags_str = row.get("Tags", "")
-                    if tags_str:
-                        tags = [t.strip() for t in tags_str.split(",") if t.strip()]
-                        tags_counter.update(tags)
-        except (OSError, csv.Error) as e:
+            for row in iter_product_rows(csv_path):
+                tags_str = row.get("Tags", "")
+                if tags_str:
+                    tags = [t.strip() for t in tags_str.split(",") if t.strip()]
+                    tags_counter.update(tags)
+        except (OSError,) as e:
             logger.error("Failed to read CSV %s: %s", csv_path, e)
         return tags_counter
 

@@ -159,7 +159,7 @@ class TestCompareMonitorPrices:
         with patch.object(
             monitor, "fetch_shopify_prices", return_value={"prod-a": (10.00, None)}
         ), patch.object(
-            monitor, "fetch_benu_price", return_value=(15.00, 7.67, None)
+            monitor, "fetch_source_price", return_value=(15.00, 7.67, None)
         ), patch("scripts.price_monitor.time.sleep"):
             changes = monitor.compare_prices(["prod-a"], delay=0)
 
@@ -171,7 +171,7 @@ class TestCompareMonitorPrices:
         with patch.object(
             monitor, "fetch_shopify_prices", return_value={"prod-a": (20.00, None)}
         ), patch.object(
-            monitor, "fetch_benu_price", return_value=(10.00, 5.11, None)
+            monitor, "fetch_source_price", return_value=(10.00, 5.11, None)
         ), patch("scripts.price_monitor.time.sleep"):
             changes = monitor.compare_prices(["prod-a"], delay=0)
 
@@ -183,7 +183,7 @@ class TestCompareMonitorPrices:
         with patch.object(
             monitor, "fetch_shopify_prices", return_value={"prod-a": (10.00, None)}
         ), patch.object(
-            monitor, "fetch_benu_price", return_value=(10.10, 5.16, None)
+            monitor, "fetch_source_price", return_value=(10.10, 5.16, None)
         ), patch("scripts.price_monitor.time.sleep"):
             changes = monitor.compare_prices(["prod-a"], delay=0)
 
@@ -193,7 +193,7 @@ class TestCompareMonitorPrices:
         with patch.object(
             monitor, "fetch_shopify_prices", return_value={"prod-a": (10.00, None)}
         ), patch.object(
-            monitor, "fetch_benu_price", return_value=(None, None, "404")
+            monitor, "fetch_source_price", return_value=(None, None, "404")
         ), patch("scripts.price_monitor.time.sleep"):
             changes = monitor.compare_prices(["prod-a"], delay=0)
 

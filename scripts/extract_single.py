@@ -21,11 +21,7 @@ from dataclasses import asdict
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.common.log_config import setup_logging
-from src.extraction import (
-    SpecificationValidator,
-    get_extractor_for_url,
-    get_site_from_url,
-)
+from src.extraction import PharmacyExtractor, SpecificationValidator
 from src.models import ExtractedProduct
 from src.shopify import ShopifyCSVExporter
 
@@ -160,21 +156,15 @@ def main():
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
 
-    # Detect site from URL
-    site = get_site_from_url(args.url)
-    logger.info("Extracting from: %s", site)
     logger.info("URL: %s", args.url)
 
-    # Set default output paths based on site
-    output_json = args.output_json or f"output/{site}/extraction.json"
-    output_csv = args.output_csv or f"output/{site}/product.csv"
+    # Set default output paths
+    output_json = args.output_json or "output/extraction.json"
+    output_csv = args.output_csv or "output/product.csv"
 
     try:
-        # Get appropriate extractor
-        ExtractorClass = get_extractor_for_url(args.url)
-
         # Extract
-        extractor = ExtractorClass(args.url)
+        extractor = PharmacyExtractor(args.url)
         extractor.fetch()
         product = extractor.extract()
 
@@ -183,11 +173,11 @@ def main():
         validation = validator.validate()
 
         # Print report
-        print_report(product, validation, extractor.product_type, site)
+        print_report(product, validation, extractor.product_type, "benu.bg")
 
         # Save JSON
         output_data = {
-            "site": site,
+            "site": "benu.bg",
             "product": asdict(product),
             "validation": validation,
         }
@@ -200,7 +190,7 @@ def main():
 
         # Save Shopify CSV (source references cleaned by exporter)
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-        csv_exporter = ShopifyCSVExporter(source_domain=site)
+        csv_exporter = ShopifyCSVExporter()
         csv_exporter.export_single(product, output_csv)
         logger.info("Shopify CSV saved to: %s", output_csv)
 

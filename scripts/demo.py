@@ -166,7 +166,6 @@ def run_demo():
     print("Initializing extractor...")
     extractor = PharmacyExtractor(
         url="https://demo-pharmacy.example.com/vitamin-c-1000mg",
-        site_domain="demo-pharmacy.example.com"
     )
 
     # Load sample HTML

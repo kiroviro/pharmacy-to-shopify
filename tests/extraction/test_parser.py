@@ -97,7 +97,6 @@ def _make_parser(
         soup=soup,
         json_ld=resolved_json_ld,
         url=url,
-        site_domain="benu.bg",
         brand_matcher=brand_matcher or BrandMatcher(brands={"TestBrand"}),
     )
 
@@ -227,3 +226,136 @@ class TestExtractFull:
         parser = _make_parser(url="https://benu.bg/my-product-slug")
         product = parser.extract()
         assert product.handle == "my-product-slug"
+
+
+# ── categories ───────────────────────────────────────────────────────────────
+
+
+class TestExtractCategories:
+    def test_categories_from_breadcrumb_jsonld(self):
+        ld = _json.dumps({
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"name": "Начало"},
+                {"name": "Витамини"},
+                {"name": "Витамин C"},
+            ],
+        })
+        html = f'<html><head><script type="application/ld+json">{ld}</script></head><body></body></html>'
+        parser = _make_parser(html=html, json_ld=None)
+        cats = parser._extract_categories("Some Product Title")
+        assert "Витамини" in cats
+        assert "Витамин C" in cats
+        assert "Начало" not in cats
+
+    def test_nachalo_always_excluded(self):
+        """'Начало' is filtered regardless of casing."""
+        ld = _json.dumps({
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"name": "Начало"},
+                {"name": "Лекарства"},
+            ],
+        })
+        html = f'<html><head><script type="application/ld+json">{ld}</script></head><body></body></html>'
+        parser = _make_parser(html=html, json_ld=None)
+        cats = parser._extract_categories("Product Title")
+        assert "Лекарства" in cats
+        assert all(c != "Начало" for c in cats)
+
+    def test_categories_html_fallback(self):
+        html = """<html><body>
+        <div class="breadcrumb">
+            <a href="/">Начало</a>
+            <a href="/cat1">Козметика</a>
+            <a href="/cat2">Кремове</a>
+        </div>
+        </body></html>"""
+        parser = _make_parser(html=html, json_ld=None)
+        cats = parser._extract_categories("Product Title")
+        assert "Козметика" in cats
+        assert "Кремове" in cats
+        assert "Начало" not in cats
+
+
+# ── images ───────────────────────────────────────────────────────────────────
+
+
+class TestExtractImages:
+    def test_images_from_json_ld(self):
+        img_url = "https://benu.bg/media/cache/product_view_default/images/products/1/img.webp"
+        html = "<html><body></body></html>"
+        soup = BeautifulSoup(html, "lxml")
+        parser = PharmacyParser(
+            soup=soup,
+            json_ld={"@type": "Product", "name": "Test", "image": [img_url]},
+            url=URL,
+        )
+        images = parser._extract_images()
+        assert len(images) >= 1
+        assert images[0].source_url == img_url
+
+    def test_images_from_gallery_fallback(self):
+        img_url = "https://benu.bg/media/cache/product_view_default/images/products/2/photo.webp"
+        html = f"""<html><body>
+        <div class="product-gallery"><img src="{img_url}"></div>
+        </body></html>"""
+        soup = BeautifulSoup(html, "lxml")
+        parser = PharmacyParser(soup=soup, json_ld=None, url=URL)
+        images = parser._extract_images()
+        assert len(images) >= 1
+        assert images[0].source_url == img_url
+
+    def test_images_dedup(self):
+        img_url = "https://benu.bg/media/cache/product_view_default/images/products/1/img.webp"
+        html = f"""<html><body>
+        <div class="product-gallery"><img src="{img_url}"></div>
+        </body></html>"""
+        soup = BeautifulSoup(html, "lxml")
+        parser = PharmacyParser(
+            soup=soup,
+            json_ld={"@type": "Product", "name": "Test", "image": [img_url]},
+            url=URL,
+        )
+        images = parser._extract_images()
+        assert len(images) == 1
+
+
+# ── tab content ──────────────────────────────────────────────────────────────
+
+
+class TestExtractTabContent:
+    def test_extracts_section_content(self):
+        page_text = (
+            "Какво представлява\n"
+            "Description line 1\n"
+            "Description line 2\n"
+            "Активни съставки\n"
+            "Vitamin C"
+        )
+        soup = BeautifulSoup("<html><body></body></html>", "lxml")
+        parser = PharmacyParser(soup=soup, json_ld=None, url=URL)
+        content = parser._extract_tab_content("Какво представлява", page_text)
+        assert "Description line 1" in content
+        assert "Vitamin C" not in content  # belongs to next section
+
+    def test_noise_filtering(self):
+        """Content containing pharmacist noise phrase is truncated before that phrase."""
+        page_text = (
+            "Какво представлява\n"
+            "Полезен продукт за здравето.\n"
+            "Попитай магистър-фармацевт\n"
+            "Тук има още текст"
+        )
+        soup = BeautifulSoup("<html><body></body></html>", "lxml")
+        parser = PharmacyParser(soup=soup, json_ld=None, url=URL)
+        content = parser._extract_tab_content("Какво представлява", page_text)
+        assert "Полезен продукт" in content
+        assert "магистър-фармацевт" not in content
+
+    def test_content_capped_at_1500_chars(self):
+        long_content = "Какво представлява\n" + "A" * 2000
+        soup = BeautifulSoup("<html><body></body></html>", "lxml")
+        parser = PharmacyParser(soup=soup, json_ld=None, url=URL)
+        content = parser._extract_tab_content("Какво представлява", long_content)
+        assert len(content) <= 1500

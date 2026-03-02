@@ -29,21 +29,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.cleanup import DEFAULT_MAX_SIZE_MB, BrandExporter
 from src.common.log_config import setup_logging
-from src.extraction import (
-    BulkExtractor,
-    get_extractor_for_url,
-    get_site_from_url,
-)
+from src.extraction import BulkExtractor, PharmacyExtractor
 
 logger = logging.getLogger(__name__)
-
-
-def detect_site_from_urls(urls: list) -> str:
-    """Detect site from the first valid URL."""
-    for url in urls:
-        if url.strip():
-            return get_site_from_url(url)
-    raise ValueError("No valid URLs found in input file")
 
 
 def export_to_shopify(
@@ -168,28 +156,20 @@ def main():
         logger.error("No URLs found in input file")
         sys.exit(1)
 
-    # Auto-detect site from URLs
-    site = detect_site_from_urls(urls)
-
-    # Set default output path based on site
-    output_csv = args.output or f"data/{site}/raw/products.csv"
+    # Set default output path
+    output_csv = args.output or "data/benu.bg/raw/products.csv"
 
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
 
-    # Get appropriate extractor class
-    ExtractorClass = get_extractor_for_url(urls[0])
-
     print("=" * 60)
     print("Bulk Product Extraction")
     print("=" * 60)
-    print(f"  Site:             {site}")
     print(f"  Input file:       {args.urls}")
     print(f"  Total URLs:       {len(urls)}")
     print(f"  Output CSV:       {output_csv}")
     print(f"  Request delay:    {args.delay}s")
     print(f"  Resume mode:      {args.resume}")
-    print(f"  Extractor:        {ExtractorClass.__name__}")
     if args.export_shopify:
         print("  Export to Shopify: YES")
         print(f"  Shopify output:   {args.shopify_output_dir}")
@@ -200,13 +180,12 @@ def main():
         output_csv=output_csv,
         delay=args.delay,
         save_failed_html=args.save_failed_html,
-        source_domain=site,
     )
 
     # Run extraction
     extractor.extract_all(
         urls=urls,
-        extractor_class=ExtractorClass,
+        extractor_class=PharmacyExtractor,
         limit=args.limit,
         resume=args.resume,
         continue_on_error=not args.stop_on_error,

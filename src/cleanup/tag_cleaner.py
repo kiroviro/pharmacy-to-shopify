@@ -71,15 +71,12 @@ class TagCleaner:
 
     def _load_vendors(self) -> None:
         """Load all unique vendor names from CSV."""
+        from ..common.csv_utils import iter_product_rows
         logger.info("Loading vendor names...")
-        with open(self.input_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                vendor = row.get('Vendor', '').strip()
-                if vendor:
-                    self.vendor_names.add(vendor.lower())
-
-        logger.info("Found %d unique vendors", len(self.vendor_names))
+        for row in iter_product_rows(self.input_path):
+            vendor = row.get('Vendor', '').strip()
+            if vendor:
+                self.vendor_names.add(vendor.lower())
 
     def _normalize_tag(self, tag: str) -> str:
         """Normalize tag casing using the normalization map."""

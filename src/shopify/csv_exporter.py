@@ -51,16 +51,15 @@ class ShopifyCSVExporter:
         exporter.export_multiple(products, "output/products.csv")
     """
 
-    def __init__(self, source_domain: str = "pharmacy.example.com", default_inventory: int = 11):
+    def __init__(self, default_inventory: int = 11):
         """
         Initialize the exporter.
 
         Args:
-            source_domain: Source domain to remove from text fields
             default_inventory: Default inventory quantity when product has none
         """
         self.fieldnames = SHOPIFY_FIELDNAMES
-        self.source_domain = source_domain
+        self.source_domain = "benu.bg"
         self.default_inventory = default_inventory
 
     def clean_product(self, product: ExtractedProduct) -> ExtractedProduct:

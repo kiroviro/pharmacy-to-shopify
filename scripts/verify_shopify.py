@@ -18,7 +18,6 @@ Exit codes:
 """
 
 import argparse
-import csv
 import logging
 import os
 import random
@@ -37,18 +36,18 @@ _PRICE_TOLERANCE = 0.05
 
 def read_handles_from_csv(csv_path: str) -> list[dict]:
     """Read product rows (with non-empty Title) from raw CSV."""
+    from src.common.csv_utils import iter_product_rows
     products = []
-    with open(csv_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("Title", "").strip() and row.get("URL handle", "").strip():
-                products.append({
-                    "handle": row["URL handle"].strip(),
-                    "title": row.get("Title", "").strip(),
-                    "vendor": row.get("Vendor", "").strip(),
-                    "price": row.get("Price", "").strip(),
-                    "sku": row.get("SKU", "").strip(),
-                })
+    for row in iter_product_rows(csv_path):
+        handle = row.get("URL handle", "").strip()
+        if handle:
+            products.append({
+                "handle": handle,
+                "title": row.get("Title", "").strip(),
+                "vendor": row.get("Vendor", "").strip(),
+                "price": row.get("Price", "").strip(),
+                "sku": row.get("SKU", "").strip(),
+            })
     return products
 
 

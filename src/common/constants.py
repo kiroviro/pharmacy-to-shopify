@@ -9,5 +9,5 @@ This module contains application-wide constants that should have a single source
 # Source: European Council Decision on Bulgaria's participation in ERM II
 EUR_TO_BGN = 1.95583
 
-# HTTP User-Agent for benu.bg scraping requests
-BENU_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"
+# HTTP User-Agent for scraping requests
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36"

@@ -7,7 +7,7 @@ import pytest
 import requests
 
 from src.common.constants import EUR_TO_BGN
-from src.common.price_fetcher import fetch_benu_price
+from src.common.price_fetcher import fetch_source_price
 
 
 def _make_session(html: str = "", status: int = 200) -> MagicMock:
@@ -39,10 +39,41 @@ def _product_html(price: str = "12.99", offers_as_list: bool = False) -> str:
 # ── Happy path ───────────────────────────────────────────────────────────────
 
 
-class TestFetchBenuPrice:
+def _vue_html(price: float = 12.99) -> str:
+    """Minimal HTML page with Vue.js <add-to-cart> component."""
+    vue_json = json.dumps({"variants": [{"price": price, "discountedPrice": price}]})
+    escaped = vue_json.replace('"', "&quot;")
+    return f'<html><body><add-to-cart :product="{escaped}"></add-to-cart></body></html>'
+
+
+class TestFetchSourcePrice:
+    def test_vue_price_preferred_over_json_ld(self):
+        """Vue.js component price takes precedence over JSON-LD."""
+        ld = json.dumps({"@type": "Product", "offers": {"price": "5.00"}})
+        vue_json = json.dumps({"variants": [{"price": 9.99, "discountedPrice": 9.99}]})
+        escaped = vue_json.replace('"', "&quot;")
+        html = (
+            f'<html><head><script type="application/ld+json">{ld}</script></head>'
+            f'<body><add-to-cart :product="{escaped}"></add-to-cart></body></html>'
+        )
+        session = _make_session(html)
+        bgn, eur, err = fetch_source_price(session, "test-product")
+
+        assert err is None
+        assert eur == pytest.approx(9.99, abs=0.01)
+
+    def test_vue_price_extraction(self):
+        """Price from Vue.js component data is extracted correctly."""
+        session = _make_session(_vue_html(7.50))
+        bgn, eur, err = fetch_source_price(session, "test-product")
+
+        assert err is None
+        assert eur == pytest.approx(7.50, abs=0.01)
+        assert bgn == pytest.approx(7.50 * EUR_TO_BGN, abs=0.01)
+
     def test_successful_price_from_json_ld(self):
         session = _make_session(_product_html("12.99"))
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert err is None
         assert eur == pytest.approx(12.99, abs=0.01)
@@ -51,7 +82,7 @@ class TestFetchBenuPrice:
     def test_price_with_list_offers(self):
         """When `offers` is a list, the first item is used."""
         session = _make_session(_product_html("9.50", offers_as_list=True))
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert err is None
         assert eur == pytest.approx(9.50, abs=0.01)
@@ -59,7 +90,7 @@ class TestFetchBenuPrice:
     def test_price_eur_to_bgn_conversion(self):
         """BGN is EUR × EUR_TO_BGN (1.95583), rounded to 2 decimals."""
         session = _make_session(_product_html("10.00"))
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert err is None
         assert bgn == round(10.00 * EUR_TO_BGN, 2)
@@ -67,7 +98,7 @@ class TestFetchBenuPrice:
     def test_comma_decimal_price(self):
         """Price '19,99' (comma separator) is parsed as 19.99."""
         session = _make_session(_product_html("19,99"))
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert err is None
         assert eur == pytest.approx(19.99, abs=0.01)
@@ -81,7 +112,7 @@ class TestFetchBenuPrice:
             f'<script type="application/ld+json">{product}</script>'
         )
         session = _make_session(html)
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert err is None
         assert eur == pytest.approx(5.00, abs=0.01)
@@ -90,10 +121,10 @@ class TestFetchBenuPrice:
 # ── Error paths ──────────────────────────────────────────────────────────────
 
 
-class TestFetchBenuPriceErrors:
+class TestFetchSourcePriceErrors:
     def test_404_returns_not_found_error(self):
         session = _make_session("", status=404)
-        bgn, eur, err = fetch_benu_price(session, "nonexistent")
+        bgn, eur, err = fetch_source_price(session, "nonexistent")
 
         assert bgn is None
         assert eur is None
@@ -101,7 +132,7 @@ class TestFetchBenuPriceErrors:
 
     def test_http_500_returns_error(self):
         session = _make_session("", status=500)
-        bgn, eur, err = fetch_benu_price(session, "broken-product")
+        bgn, eur, err = fetch_source_price(session, "broken-product")
 
         assert bgn is None
         assert err is not None
@@ -110,14 +141,14 @@ class TestFetchBenuPriceErrors:
         session = MagicMock(spec=requests.Session)
         session.get.side_effect = requests.exceptions.ConnectionError("Network down")
 
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert bgn is None
         assert err is not None
 
     def test_no_json_ld_returns_error(self):
         session = _make_session("<html><body>No JSON-LD here</body></html>")
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert bgn is None
         assert "No price" in err
@@ -127,7 +158,7 @@ class TestFetchBenuPriceErrors:
         ld = json.dumps({"@type": "BreadcrumbList", "itemListElement": []})
         html = f'<script type="application/ld+json">{ld}</script>'
         session = _make_session(html)
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert bgn is None
         assert err is not None
@@ -137,7 +168,7 @@ class TestFetchBenuPriceErrors:
         ld = json.dumps({"@type": "Product", "offers": {}})
         html = f'<script type="application/ld+json">{ld}</script>'
         session = _make_session(html)
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert bgn is None
         assert err is not None
@@ -146,7 +177,7 @@ class TestFetchBenuPriceErrors:
         """Invalid JSON in script tag is silently skipped."""
         html = '<script type="application/ld+json">NOT VALID JSON {</script>'
         session = _make_session(html)
-        bgn, eur, err = fetch_benu_price(session, "test-product")
+        bgn, eur, err = fetch_source_price(session, "test-product")
 
         assert bgn is None
         assert err is not None

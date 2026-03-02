@@ -7,7 +7,6 @@ Uses the Shopify Admin API (GraphQL) to create menus with nested items.
 
 from __future__ import annotations
 
-import csv
 import logging
 from collections import Counter
 
@@ -92,37 +91,29 @@ class ShopifyMenuCreator:
 
     def analyze_tags_from_csv(self, csv_path: str, min_products: int = 3) -> dict[str, int]:
         """Analyze tags from CSV and return tag counts."""
+        from ..common.csv_utils import iter_product_rows
         tag_counts = Counter()
-
         try:
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if not row.get('Title', '').strip():
-                        continue
-                    tags_str = row.get('Tags', '')
-                    if tags_str:
-                        tags = [t.strip() for t in tags_str.split(',') if t.strip()]
-                        tag_counts.update(tags)
-        except (OSError, csv.Error) as e:
+            for row in iter_product_rows(csv_path):
+                tags_str = row.get('Tags', '')
+                if tags_str:
+                    tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+                    tag_counts.update(tags)
+        except (OSError,) as e:
             logger.error("Failed to read CSV %s: %s", csv_path, e)
 
         return {tag: count for tag, count in tag_counts.items() if count >= min_products}
 
     def analyze_vendors_from_csv(self, csv_path: str, min_products: int = 3) -> dict[str, int]:
         """Analyze vendors from CSV and return vendor counts."""
+        from ..common.csv_utils import iter_product_rows
         vendor_counts = Counter()
-
         try:
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if not row.get('Title', '').strip():
-                        continue
-                    vendor = row.get('Vendor', '').strip()
-                    if vendor:
-                        vendor_counts[vendor] += 1
-        except (OSError, csv.Error) as e:
+            for row in iter_product_rows(csv_path):
+                vendor = row.get('Vendor', '').strip()
+                if vendor:
+                    vendor_counts[vendor] += 1
+        except (OSError,) as e:
             logger.error("Failed to read CSV %s: %s", csv_path, e)
 
         return {v: c for v, c in vendor_counts.items() if c >= min_products}

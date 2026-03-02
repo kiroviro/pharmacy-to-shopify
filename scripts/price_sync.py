@@ -34,9 +34,9 @@ import requests
 # Add project root to path for proper package imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import BENU_USER_AGENT, EUR_TO_BGN
+from src.common.constants import EUR_TO_BGN, USER_AGENT
 from src.common.price_change import PriceChange
-from src.common.price_fetcher import fetch_benu_price
+from src.common.price_fetcher import fetch_source_price
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def _get_session() -> requests.Session:
     """Return this thread's session, creating it on first use."""
     if not hasattr(_thread_local, "session"):
         _thread_local.session = requests.Session()
-        _thread_local.session.headers.update({"User-Agent": BENU_USER_AGENT})
+        _thread_local.session.headers.update({"User-Agent": USER_AGENT})
     return _thread_local.session
 
 
@@ -101,11 +101,11 @@ def _fetch_shopify_with_delay(
     return (handle, *result)
 
 
-def _fetch_benu_with_delay(
+def _fetch_source_with_delay(
     handle: str, delay: float
 ) -> tuple[str, float | None, float | None, str | None]:
-    """Fetch a single benu.bg price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
-    result = fetch_benu_price(_get_session(), handle)
+    """Fetch a single source price, with rate-limit delay. Returns (handle, bgn, eur, error)."""
+    result = fetch_source_price(_get_session(), handle)
     time.sleep(delay)
     return (handle, *result)
 
@@ -147,18 +147,18 @@ def compare_prices(
             h, bgn, eur, err = future.result()
             shopify_data[h] = (bgn, eur, err)
 
-    # Phase 2: Fetch all benu.bg prices concurrently (each thread uses its own session)
+    # Phase 2: Fetch all source prices concurrently (each thread uses its own session)
     if verbose:
-        print(f"Fetching {total} benu.bg prices (max_workers={max_workers})...")
-    benu_data: dict[str, tuple[float | None, float | None, str | None]] = {}
+        print(f"Fetching {total} source prices (max_workers={max_workers})...")
+    source_data: dict[str, tuple[float | None, float | None, str | None]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
-            pool.submit(_fetch_benu_with_delay, h, delay): h
+            pool.submit(_fetch_source_with_delay, h, delay): h
             for h in handles
         }
         for future in as_completed(futures):
             h, bgn, eur, err = future.result()
-            benu_data[h] = (bgn, eur, err)
+            source_data[h] = (bgn, eur, err)
 
     # Phase 3: Compare pre-fetched data (no HTTP)
     changes = []
@@ -169,20 +169,20 @@ def compare_prices(
 
     for i, (handle, title) in enumerate(products, 1):
         shopify_bgn, shopify_eur, shopify_err = shopify_data.get(handle, (None, None, "Missing"))
-        benu_bgn, benu_eur, benu_err = benu_data.get(handle, (None, None, "Missing"))
+        source_bgn, source_eur, source_err = source_data.get(handle, (None, None, "Missing"))
 
         if shopify_err:
             if verbose:
                 print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {'N/A':>10} | {'N/A':>10} | {shopify_err}")
             continue
 
-        if benu_err:
+        if source_err:
             if verbose:
-                print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {'N/A':>10} | {benu_err}")
+                print(f"{i:4} | {'SKIP':<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {'N/A':>10} | {source_err}")
             continue
 
         # Compare
-        diff = benu_bgn - shopify_bgn
+        diff = source_bgn - shopify_bgn
         diff_pct = (diff / shopify_bgn) * 100 if shopify_bgn else 0
         tolerance = max(0.50, shopify_bgn * 0.02)  # 2% or 0.50 BGN
 
@@ -195,7 +195,7 @@ def compare_prices(
 
         if verbose:
             diff_str = f"+{diff:.2f}" if diff > 0 else f"{diff:.2f}"
-            print(f"{i:4} | {status:<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {benu_bgn:>10.2f} | {diff_str:>8}")
+            print(f"{i:4} | {status:<10} | {handle[:50]:<50} | {shopify_bgn:>10.2f} | {source_bgn:>10.2f} | {diff_str:>8}")
 
         # Record change if significant
         if abs(diff) > tolerance:
@@ -203,11 +203,11 @@ def compare_prices(
                 handle=handle,
                 title=title,
                 old_bgn=shopify_bgn,
-                new_bgn=benu_bgn,
+                new_bgn=source_bgn,
                 old_eur=shopify_eur,
-                new_eur=benu_eur,
+                new_eur=source_eur,
                 change_pct=diff_pct,
-                benu_url=f"https://benu.bg/{handle}",
+                source_url=f"https://benu.bg/{handle}",
                 shopify_url=f"https://viapharma.us/products/{handle}",
             ))
 
@@ -279,14 +279,14 @@ def print_summary(changes: list[PriceChange]) -> None:
         for c in sorted(increases, key=lambda x: -x.change_pct)[:5]:
             print(f"  {c.handle[:40]}...")
             print(f"    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN (+{c.change_pct:.1f}%)")
-            print(f"    {c.benu_url}")
+            print(f"    {c.source_url}")
 
     if decreases:
         print("\n--- TOP DECREASES ---")
         for c in sorted(decreases, key=lambda x: x.change_pct)[:5]:
             print(f"  {c.handle[:40]}...")
             print(f"    {c.old_bgn:.2f} → {c.new_bgn:.2f} BGN ({c.change_pct:.1f}%)")
-            print(f"    {c.benu_url}")
+            print(f"    {c.source_url}")
 
     print("\n" + "=" * 80)
 

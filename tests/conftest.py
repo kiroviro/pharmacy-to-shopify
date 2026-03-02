@@ -1,37 +1,8 @@
 """Shared test fixtures."""
 
-from pathlib import Path
-
 import pytest
 
 from src.models import ExtractedProduct, ProductImage
-
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
-
-
-@pytest.fixture
-def fixtures_dir():
-    """Return path to fixtures directory."""
-    return FIXTURES_DIR
-
-
-@pytest.fixture
-def product_page_html():
-    """Load the product page HTML fixture."""
-    return (FIXTURES_DIR / "product_page.html").read_text(encoding="utf-8")
-
-
-@pytest.fixture
-def product_jsonld():
-    """Load the product JSON-LD fixture."""
-    import json
-    return json.loads((FIXTURES_DIR / "product_jsonld.json").read_text(encoding="utf-8"))
-
-
-@pytest.fixture
-def dl4objects_js():
-    """Load the dl4Objects JavaScript fixture."""
-    return (FIXTURES_DIR / "dl4objects.js").read_text(encoding="utf-8")
 
 
 @pytest.fixture
