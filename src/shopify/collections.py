@@ -81,15 +81,23 @@ class ShopifyCollectionCreator:
         logger.info("Found %d existing smart collections", len(existing))
         return existing
 
-    def _create_collection(self, title: str, column: str, condition: str, handle_prefix: str = "") -> bool:
+    def _create_collection(
+        self,
+        title: str,
+        column: str,
+        condition: str,
+        handle_prefix: str = "",
+        relation: str = "equals",
+    ) -> bool:
         """
         Create a smart collection with a single rule.
 
         Args:
             title: Collection title
-            column: Rule column ("tag" or "vendor")
+            column: Rule column ("tag", "vendor", "variant_compare_at_price", etc.)
             condition: Rule condition value
             handle_prefix: Optional prefix for the handle (e.g., "brand-")
+            relation: Rule relation ("equals", "greater_than", etc.)
 
         Returns:
             True if created successfully
@@ -103,8 +111,8 @@ class ShopifyCollectionCreator:
                 "rules": [
                     {
                         "column": column,
-                        "relation": "equals",
-                        "condition": condition
+                        "relation": relation,
+                        "condition": condition,
                     }
                 ],
                 "disjunctive": False,
@@ -113,7 +121,7 @@ class ShopifyCollectionCreator:
         }
 
         if self.dry_run:
-            print(f"  [DRY RUN] Would create: {title} ({column}: {condition})")
+            print(f"  [DRY RUN] Would create: {title} ({column}: {relation} {condition})")
             return True
 
         result = self.client.rest_request("POST", "smart_collections.json", data)
@@ -134,6 +142,15 @@ class ShopifyCollectionCreator:
         """Create a smart collection based on vendor (brand)."""
         return self._create_collection(vendor, "vendor", vendor, handle_prefix="brand-")
 
+    def create_sale_collection(self, title: str = "Намаления") -> bool:
+        """Create a smart collection for products with compare_at_price set."""
+        return self._create_collection(
+            title=title,
+            column="variant_compare_at_price",
+            condition="0",
+            relation="greater_than",
+        )
+
     def _load_vendors_from_csv(self, csv_path: str) -> set[str]:
         """Load all unique vendor names from CSV (lowercase)."""
         vendors = set()
@@ -151,6 +168,7 @@ class ShopifyCollectionCreator:
     def _count_vendors(self, csv_path: str) -> Counter:
         """Count products per vendor."""
         from ..common.csv_utils import iter_product_rows
+
         vendor_counter = Counter()
         try:
             for row in iter_product_rows(csv_path):
@@ -164,6 +182,7 @@ class ShopifyCollectionCreator:
     def _count_tags(self, csv_path: str) -> Counter:
         """Count products per tag."""
         from ..common.csv_utils import iter_product_rows
+
         tags_counter = Counter()
         try:
             for row in iter_product_rows(csv_path):
@@ -181,7 +200,7 @@ class ShopifyCollectionCreator:
         min_products: int = 3,
         skip_existing: bool = True,
         skip_brands: bool = False,
-        vendors_only: bool = False
+        vendors_only: bool = False,
     ) -> None:
         """
         Create collections from all unique tags in CSV.
@@ -215,10 +234,7 @@ class ShopifyCollectionCreator:
         # Filter out brand tags if requested
         if skip_brands:
             before_count = len(eligible_tags)
-            eligible_tags = {
-                tag: count for tag, count in eligible_tags.items()
-                if tag.lower() not in known_vendors
-            }
+            eligible_tags = {tag: count for tag, count in eligible_tags.items() if tag.lower() not in known_vendors}
             logger.info("Brand tags skipped: %d", before_count - len(eligible_tags))
             logger.info("Tags after brand filter: %d", len(eligible_tags))
 
@@ -252,12 +268,7 @@ class ShopifyCollectionCreator:
 
         self._print_summary()
 
-    def _create_vendor_collections(
-        self,
-        csv_path: str,
-        min_products: int = 3,
-        skip_existing: bool = True
-    ) -> None:
+    def _create_vendor_collections(self, csv_path: str, min_products: int = 3, skip_existing: bool = True) -> None:
         """Create collections from Vendor field (brand collections)."""
         logger.info("Creating brand collections from Vendor field")
 
@@ -317,7 +328,7 @@ class ShopifyCollectionCreator:
         if self.failed_collections:
             print("\n  Failed collections:")
             for fail in self.failed_collections[:10]:
-                tag = fail.get('tag') or fail.get('vendor', 'Unknown')
+                tag = fail.get("tag") or fail.get("vendor", "Unknown")
                 print(f"    - {tag}")
 
         print("=" * 60)
