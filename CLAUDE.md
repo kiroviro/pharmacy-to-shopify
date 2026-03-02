@@ -21,6 +21,11 @@ discover_urls.py → bulk_extract.py → validate_crawl.py → cleanup_tags.py
 → google_ads_pmax.py
 ```
 
+**Scope:** This project owns the **initial product load** (crawl benu.bg → import to Shopify)
+and discount visibility tooling. **Ongoing pricing and repricing** is managed by `viapharma-pricing`
+(Phoenix B2B wholesale prices, promos, cosmetics, new product import). After any viapharma-pricing
+repricing run, execute `scripts/tag_discounted_products.py` here to sync the "Намаление" tag.
+
 ## Scripts
 
 Beyond the 8 pipeline scripts above, grouped by function:
@@ -29,6 +34,8 @@ Beyond the 8 pipeline scripts above, grouped by function:
 |----------|--------|---------|
 | **Price monitoring** | `price_sync.py` | Compare benu.bg prices vs Shopify, export update CSV |
 | | `price_monitor.py` | Ongoing price change detection |
+| **Discount visibility** | `tag_discounted_products.py` | Tag products where compare_at > price with "Намаление"; run after every viapharma-pricing repricing |
+| | `create_sale_collection.py` | Create "Намаления" smart collection (tag-based rule) |
 | **Shopify admin** | `chunk_csv.py` | Split large CSV for Shopify's import limit |
 | | `create_shopify_menus.py` | Build navigation menus via API |
 | | `configure_shopify_filters.py` | Set up storefront filters |
@@ -74,7 +81,8 @@ Three validation layers run during `bulk_extract.py` (zero extra HTTP):
 | `src/shopify/csv_exporter.py` | 56-col CSV; single source of truth for column layout |
 | `src/shopify/api_client.py` | REST + GraphQL Shopify API wrapper |
 | `src/shopify/menus.py` | Hierarchical menu creation via API |
-| `src/shopify/collections.py` | Smart collection creation |
+| `src/shopify/collections.py` | Smart collection creation; `create_sale_collection()` uses tag rule |
+| `src/shopify/tagger.py` | `DiscountTagger` — tags products where compare_at > price; batched GraphQL |
 | `src/common/constants.py` | EUR/BGN rate (1.95583), field defaults |
 | `config/known_brands.yaml` | 450+ brand database |
 
@@ -86,7 +94,7 @@ Three validation layers run during `bulk_extract.py` (zero extra HTTP):
 | `extraction` | 5 | Extractor, bulk orchestration, validation, brand matching |
 | `discovery` | 1 | URL discovery from benu.bg sitemap/category pages |
 | `models` | 1 | Product data model |
-| `shopify` | 4 | CSV export, API client, menus, collections |
+| `shopify` | 5 | CSV export, API client, menus, collections, discount tagger |
 | `cleanup` | 2 | Tag normalization, per-brand CSV export |
 | `validation` | 1 | Crawl quality tracking and gating |
 
