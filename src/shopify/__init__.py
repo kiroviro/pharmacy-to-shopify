@@ -15,15 +15,18 @@ from .csv_exporter import (
     ShopifyCSVExporter,
 )
 from .menus import ShopifyMenuCreator
+from .tagger import DiscountTagger
 
 __all__ = [
     # API Client
-    'ShopifyAPIClient',
+    "ShopifyAPIClient",
     # Collections
-    'ShopifyCollectionCreator',
+    "ShopifyCollectionCreator",
     # Menus
-    'ShopifyMenuCreator',
+    "ShopifyMenuCreator",
     # CSV Export
-    'ShopifyCSVExporter',
-    'SHOPIFY_FIELDNAMES',
+    "ShopifyCSVExporter",
+    "SHOPIFY_FIELDNAMES",
+    # Tagger
+    "DiscountTagger",
 ]
