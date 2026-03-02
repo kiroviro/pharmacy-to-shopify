@@ -1,5 +1,7 @@
 """Tests for src/shopify/tagger.py"""
 
+from unittest.mock import MagicMock
+
 from src.shopify.tagger import DiscountTagger
 
 
@@ -10,6 +12,11 @@ def _tagger(dry_run: bool = True) -> DiscountTagger:
         access_token="shpat_fake",
         dry_run=dry_run,
     )
+
+
+# ---------------------------------------------------------------------------
+# classify_product (pure logic, no API)
+# ---------------------------------------------------------------------------
 
 
 class TestClassifyProduct:
@@ -124,3 +131,88 @@ class TestClassifyProduct:
             },
         }
         assert tagger.classify_product(product) == "add"
+
+
+# ---------------------------------------------------------------------------
+# _mutate_tags_batch
+# ---------------------------------------------------------------------------
+
+
+class TestMutateTagsBatch:
+    """Test batched mutation logic with mocked API."""
+
+    def test_dry_run_returns_count_without_api(self):
+        tagger = _tagger(dry_run=True)
+        tagger.client.graphql_request = MagicMock()
+        result = tagger._mutate_tags_batch("tagsAdd", ["gid://shopify/Product/1", "gid://shopify/Product/2"])
+        assert result == 2
+        tagger.client.graphql_request.assert_not_called()
+
+    def test_empty_list_returns_zero(self):
+        tagger = _tagger(dry_run=False)
+        tagger.client.graphql_request = MagicMock()
+        result = tagger._mutate_tags_batch("tagsAdd", [])
+        assert result == 0
+        tagger.client.graphql_request.assert_not_called()
+
+    def test_successful_batch_returns_count(self):
+        tagger = _tagger(dry_run=False)
+        tagger.client.graphql_request = MagicMock(
+            return_value={
+                "t0": {"userErrors": []},
+                "t1": {"userErrors": []},
+            }
+        )
+        result = tagger._mutate_tags_batch("tagsAdd", ["gid://shopify/Product/1", "gid://shopify/Product/2"])
+        assert result == 2
+
+    def test_partial_failure_returns_success_count(self):
+        tagger = _tagger(dry_run=False)
+        tagger.client.graphql_request = MagicMock(
+            return_value={
+                "t0": {"userErrors": []},
+                "t1": {"userErrors": [{"field": "id", "message": "Not found"}]},
+            }
+        )
+        result = tagger._mutate_tags_batch("tagsAdd", ["gid://shopify/Product/1", "gid://shopify/Product/2"])
+        assert result == 1
+
+    def test_api_failure_returns_zero(self):
+        tagger = _tagger(dry_run=False)
+        tagger.client.graphql_request = MagicMock(return_value=None)
+        result = tagger._mutate_tags_batch("tagsAdd", ["gid://shopify/Product/1"])
+        assert result == 0
+
+
+# ---------------------------------------------------------------------------
+# _flush_batch stats tracking
+# ---------------------------------------------------------------------------
+
+
+class TestFlushBatch:
+    """Test that _flush_batch updates stats correctly."""
+
+    def test_add_batch_updates_added_counter(self):
+        tagger = _tagger(dry_run=True)
+        tagger._flush_batch("tagsAdd", ["gid://shopify/Product/1", "gid://shopify/Product/2"])
+        assert tagger.added == 2
+        assert tagger.failed == 0
+
+    def test_remove_batch_updates_removed_counter(self):
+        tagger = _tagger(dry_run=True)
+        tagger._flush_batch("tagsRemove", ["gid://shopify/Product/1"])
+        assert tagger.removed == 1
+        assert tagger.failed == 0
+
+    def test_failed_mutations_tracked(self):
+        tagger = _tagger(dry_run=False)
+        # Mock partial failure: 1 success, 1 failure
+        tagger.client.graphql_request = MagicMock(
+            return_value={
+                "t0": {"userErrors": []},
+                "t1": {"userErrors": [{"field": "id", "message": "error"}]},
+            }
+        )
+        tagger._flush_batch("tagsAdd", ["gid://shopify/Product/1", "gid://shopify/Product/2"])
+        assert tagger.added == 1
+        assert tagger.failed == 1

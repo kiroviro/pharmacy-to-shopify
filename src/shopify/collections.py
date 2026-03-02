@@ -81,6 +81,16 @@ class ShopifyCollectionCreator:
         logger.info("Found %d existing smart collections", len(existing))
         return existing
 
+    def collection_exists(self, title: str) -> bool:
+        """Check if a smart collection with the given title exists (single API call)."""
+        from urllib.parse import quote
+
+        endpoint = f"smart_collections.json?title={quote(title)}&limit=1"
+        result = self.client.rest_request("GET", endpoint)
+        if not result:
+            return False
+        return bool(result.get("smart_collections"))
+
     def _create_collection(
         self,
         title: str,

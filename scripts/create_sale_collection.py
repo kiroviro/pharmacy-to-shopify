@@ -55,12 +55,10 @@ def main():
         dry_run=args.dry_run,
     )
 
-    # Check if already exists
-    if not args.dry_run:
-        existing = creator.get_existing_collections()
-        if args.title.lower() in existing:
-            print(f"\n  Collection '{args.title}' already exists. Skipping.")
-            return
+    # Check if already exists (single filtered API call)
+    if not args.dry_run and creator.collection_exists(args.title):
+        print(f"\n  Collection '{args.title}' already exists. Skipping.")
+        return
 
     if creator.create_sale_collection(title=args.title):
         print(f"\n  Created collection: {args.title}")

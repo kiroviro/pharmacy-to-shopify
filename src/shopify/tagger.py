@@ -2,7 +2,7 @@
 Shopify Discount Tagger
 
 Tags products as discounted based on compare_at_price vs price.
-Uses Shopify GraphQL Admin API for efficient bulk operations.
+Uses Shopify GraphQL Admin API with batched mutations for efficiency.
 """
 
 from __future__ import annotations
@@ -38,21 +38,7 @@ query products($cursor: String) {
 }
 """
 
-TAGS_ADD_MUTATION = """
-mutation tagsAdd($id: ID!, $tags: [String!]!) {
-    tagsAdd(id: $id, tags: $tags) {
-        userErrors { field message }
-    }
-}
-"""
-
-TAGS_REMOVE_MUTATION = """
-mutation tagsRemove($id: ID!, $tags: [String!]!) {
-    tagsRemove(id: $id, tags: $tags) {
-        userErrors { field message }
-    }
-}
-"""
+BATCH_SIZE = 10  # mutations per GraphQL request
 
 
 class DiscountTagger:
@@ -82,6 +68,7 @@ class DiscountTagger:
         self.total = 0
         self.added = 0
         self.removed = 0
+        self.failed = 0
         self.already_correct = 0
 
     @staticmethod
@@ -124,46 +111,61 @@ class DiscountTagger:
             return "remove"
         return None
 
-    def _add_tag(self, product_id: str) -> bool:
-        """Add discount tag to a product."""
-        if self.dry_run:
-            return True
+    def _mutate_tags_batch(self, operation: str, product_ids: list[str]) -> int:
+        """
+        Execute a batched tag mutation for multiple products.
 
-        result = self.client.graphql_request(
-            TAGS_ADD_MUTATION,
-            {"id": product_id, "tags": [self.tag]},
-        )
+        Args:
+            operation: "tagsAdd" or "tagsRemove"
+            product_ids: list of Shopify product GIDs
+
+        Returns:
+            Number of successfully mutated products.
+        """
+        if self.dry_run or not product_ids:
+            return len(product_ids)
+
+        # Build aliased mutations: t0: tagsAdd(...), t1: tagsAdd(...), ...
+        fragments = []
+        for i, pid in enumerate(product_ids):
+            escaped_id = pid.replace('"', '\\"')
+            escaped_tag = self.tag.replace('"', '\\"')
+            fragments.append(
+                f't{i}: {operation}(id: "{escaped_id}", tags: ["{escaped_tag}"]) {{ userErrors {{ field message }} }}'
+            )
+
+        query = "mutation {\n" + "\n".join(fragments) + "\n}"
+        result = self.client.graphql_request(query)
+
         if not result:
-            return False
+            logger.error("Batch %s failed entirely (%d products)", operation, len(product_ids))
+            return 0
 
-        errors = result.get("tagsAdd", {}).get("userErrors", [])
-        if errors:
-            logger.error("Failed to add tag to %s: %s", product_id, errors)
-            return False
-        return True
+        success = 0
+        for i, pid in enumerate(product_ids):
+            alias = f"t{i}"
+            entry = result.get(alias, {})
+            errors = entry.get("userErrors", [])
+            if errors:
+                logger.error("Failed %s on %s: %s", operation, pid, errors)
+            else:
+                success += 1
 
-    def _remove_tag(self, product_id: str) -> bool:
-        """Remove discount tag from a product."""
-        if self.dry_run:
-            return True
-
-        result = self.client.graphql_request(
-            TAGS_REMOVE_MUTATION,
-            {"id": product_id, "tags": [self.tag]},
-        )
-        if not result:
-            return False
-
-        errors = result.get("tagsRemove", {}).get("userErrors", [])
-        if errors:
-            logger.error("Failed to remove tag from %s: %s", product_id, errors)
-            return False
-        return True
+        return success
 
     def run(self) -> None:
         """Process all products and update tags."""
+        # Reset stats for re-runs
+        self.total = 0
+        self.added = 0
+        self.removed = 0
+        self.failed = 0
+        self.already_correct = 0
+
         cursor = None
         page = 0
+        add_batch: list[str] = []
+        remove_batch: list[str] = []
 
         while True:
             page += 1
@@ -189,28 +191,53 @@ class DiscountTagger:
                 action = self.classify_product(product)
 
                 if action == "add":
-                    product_id = product["id"]
-                    if self._add_tag(product_id):
-                        self.added += 1
-                        logger.debug("Added tag to %s", product_id)
-                    else:
-                        logger.error("Failed to tag %s", product_id)
+                    add_batch.append(product["id"])
                 elif action == "remove":
-                    product_id = product["id"]
-                    if self._remove_tag(product_id):
-                        self.removed += 1
-                        logger.debug("Removed tag from %s", product_id)
-                    else:
-                        logger.error("Failed to untag %s", product_id)
+                    remove_batch.append(product["id"])
                 else:
                     self.already_correct += 1
+
+                # Flush add batch when full
+                if len(add_batch) >= BATCH_SIZE:
+                    self._flush_batch("tagsAdd", add_batch)
+                    add_batch = []
+
+                # Flush remove batch when full
+                if len(remove_batch) >= BATCH_SIZE:
+                    self._flush_batch("tagsRemove", remove_batch)
+                    remove_batch = []
 
             page_info = products_data.get("pageInfo", {})
             if not page_info.get("hasNextPage"):
                 break
             cursor = page_info["endCursor"]
 
+        # Flush remaining
+        if add_batch:
+            self._flush_batch("tagsAdd", add_batch)
+        if remove_batch:
+            self._flush_batch("tagsRemove", remove_batch)
+
         self._print_summary()
+
+    def _flush_batch(self, operation: str, product_ids: list[str]) -> None:
+        """Flush a batch of tag mutations and update stats."""
+        is_add = operation == "tagsAdd"
+        success = self._mutate_tags_batch(operation, product_ids)
+        failed = len(product_ids) - success
+
+        if is_add:
+            self.added += success
+        else:
+            self.removed += success
+        self.failed += failed
+
+        if success:
+            verb = "Added" if is_add else "Removed"
+            logger.debug("%s tag on %d products", verb, success)
+        if failed:
+            verb = "add" if is_add else "remove"
+            logger.error("Failed to %s tag on %d products", verb, failed)
 
     def _print_summary(self) -> None:
         """Print tagging summary."""
@@ -223,4 +250,6 @@ class DiscountTagger:
         print(f"  Tag added:              {self.added}")
         print(f"  Tag removed:            {self.removed}")
         print(f"  Already correct:        {self.already_correct}")
+        if self.failed:
+            print(f"  Failed:                 {self.failed}")
         print("=" * 60)
