@@ -152,14 +152,14 @@ class ShopifyCollectionCreator:
         """Create a smart collection based on vendor (brand)."""
         return self._create_collection(vendor, "vendor", vendor, handle_prefix="brand-")
 
-    def create_sale_collection(self, title: str = "Намаления") -> bool:
-        """Create a smart collection for products with compare_at_price set."""
-        return self._create_collection(
-            title=title,
-            column="variant_compare_at_price",
-            condition="0",
-            relation="greater_than",
-        )
+    def create_sale_collection(self, title: str = "Намаления", tag: str = "Намаление") -> bool:
+        """Create a smart collection for discounted products (tag-based).
+
+        Uses the tag rule so the collection matches exactly what DiscountTagger
+        marks — products where compare_at_price > price. A compare_at_price > 0
+        rule would over-include products with stale compare_at_price data.
+        """
+        return self._create_collection(title=title, column="tag", condition=tag)
 
     def _load_vendors_from_csv(self, csv_path: str) -> set[str]:
         """Load all unique vendor names from CSV (lowercase)."""
