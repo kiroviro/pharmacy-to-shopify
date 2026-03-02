@@ -370,3 +370,4 @@ class TestCreateSaleCollection:
         )
         captured = capsys.readouterr()
         assert "[DRY RUN]" in captured.out
+        assert "greater_than" in captured.out
