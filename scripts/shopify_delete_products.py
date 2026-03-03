@@ -59,7 +59,7 @@ query ($cursor: String) {
 
 PRODUCT_COUNT_QUERY = """
 query {
-  productsCount {
+  productsCount(limit: null) {
     count
   }
 }
