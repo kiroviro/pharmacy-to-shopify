@@ -147,6 +147,10 @@ All in `config/`:
 - 2 Vichy Dercos combo products: empty price (combo price rendered differently — not a code bug)
 - 119 duplicate SKU groups: 106 near-expiry "Годен до" variants + 13 true duplicates
 
+**Shopify API deprecations (deadline Apr 1 2026):**
+- `productsCount` — must pass `(limit: null)` for uncapped count; fixed in `shopify_delete_products.py`
+- `Blog.articlesCount` in Liquid — platform-level property with no argument syntax; no fix possible in Liquid code
+
 ## Shopify Theme
 
 Theme lives in `../../viapharma.us-theme` (sibling directory).
