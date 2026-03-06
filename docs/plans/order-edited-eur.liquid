@@ -1,0 +1,1204 @@
+{% assign delivery_method_types = delivery_agreements | map: 'delivery_method_type' | uniq %}
+{% if delivery_method_types.size > 1 %}
+  {% assign has_split_cart = true %}
+{% else %}
+  {% assign has_split_cart = false %}
+{% endif %}
+{% capture email_title %}Вашата поръчка е актуализирана {% endcapture %}
+<!DOCTYPE html>
+<html lang="bg-BG">
+  <head>
+  <title>{{ email_title }}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+  <style>
+    .button__cell { background: {{ shop.email_accent_color }}; }
+    a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+  </style>
+</head>
+
+  <body>
+    <table class="body">
+      <tr>
+        <td>
+          <table class="header row">
+  <tr>
+    <td class="header__cell">
+      <center>
+
+        <table class="container">
+          <tr>
+            <td>
+
+              <table class="row">
+                <tr>
+                  <td class="shop-name__cell">
+                    {%- if shop.email_logo_url %}
+                      <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                    {%- else %}
+                      <h1 class="shop-name__text">
+                        <a href="{{shop.url}}">{{ shop.name }}</a>
+                      </h1>
+                    {%- endif %}
+                  </td>
+
+                    <td>
+                      <table class="order-po-number__container">
+                        <tr>
+                          <td class="order-number__cell">
+                            <span class="order-number__text">
+                              Поръчка {{ order_name }}
+                            </span>
+                          </td>
+                        </tr>
+                        {%- if po_number %}
+                            <tr>
+                              <td class="po-number__cell">
+                                <span class="po-number__text">
+                                  Номер на PO №{{ po_number }}
+                                </span>
+                              </td>
+                            </tr>
+                        {%- endif %}
+                      </table>
+                    </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+
+      </center>
+    </td>
+  </tr>
+</table>
+
+          <table class="row content">
+  <tr>
+    <td class="content__cell">
+      <center>
+        <table class="container">
+          <tr>
+            <td>
+
+            <h2>{{ email_title }}</h2>
+            <p>{{ email_body }}</p>
+            {% if custom_message != blank %}
+            <p>{{ custom_message }}</p>
+            {% endif %}
+            {% if order_status_url %}
+              <table class="row actions">
+  <tr>
+    <td class="empty-line">&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="actions__cell">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td valign="middle">
+            <table class="button main-action-cell">
+              <tr>
+                <td class="button__cell"><a href="{{ order_status_url }}" class="button__text">Прегледайте поръчката си</a></td>
+              </tr>
+            </table>
+          </td>
+          <td valign="middle" style="padding-left: 15px; vertical-align: middle;">
+            {% if shop.url %}
+    <table class="link secondary-action-cell" style="margin-top: 0; vertical-align: middle;">
+      <tr>
+        <td class="link__cell">или <a href="{{ shop.url }}">Посетете нашия магазин</a></td>
+      </tr>
+    </table>
+{% endif %}
+
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+            {% else %}
+              {% if shop.url %}
+    <table class="row actions">
+      <tr>
+        <td class="actions__cell">
+          <table class="button main-action-cell">
+            <tr>
+              <td class="button__cell"><a href="{{ shop.url }}" class="button__text">Посетете нашия магазин</a></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+{% endif %}
+
+            {% endif %}
+
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
+</table>
+
+          <table class="row section">
+  <tr>
+    <td class="section__cell">
+      <center>
+        <table class="container">
+          <tr>
+            <td>
+              <h3>Актуализирана поръчка</h3>
+            </td>
+          </tr>
+        </table>
+        <table class="container">
+          <tr>
+            <td>
+
+            {% if has_split_cart %}
+
+<table class="row">
+  {% for line in subtotal_line_items %}
+    {% unless line.delivery_agreement %}
+      {% assign legacy_separator = true %}
+
+<tr class="order-list__item">
+  <td class="order-list__item__cell">
+    <table>
+      <td>
+        {% if line.image %}
+          <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+        {% endif %}
+      </td>
+      <td class="order-list__product-description-cell">
+        {% if line.product.title %}
+          {% assign line_title = line.product.title %}
+        {% else %}
+          {% assign line_title = line.title %}
+        {% endif %}
+
+        {% if line.quantity < line.quantity %}
+          {% capture line_display %}
+            {{ line.quantity }} от {{ line.quantity }}
+          {% endcapture %}
+        {% else %}
+          {% capture line_display %}
+            {{ line.quantity }}
+          {% endcapture %}
+        {% endif %}
+
+        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+
+        {% if line.variant.title != 'Default Title' %}
+          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
+        {% endif %}
+
+          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
+            {% for property in line.properties %}
+  {% assign property_first_char = property.first | slice: 0 %}
+  {% if property.last != blank and property_first_char != '_' %}
+    <div class="order-list__item-property">
+      <dt>{{ property.first }}:</dt>
+      <dd>
+      {% if property.last contains '/uploads/' %}
+        <a href="{{ property.last }}" class="link" target="_blank">
+        {{ property.last | split: '/' | last }}
+        </a>
+      {% else %}
+        {{ property.last }}
+      {% endif %}
+      </dd>
+    </div>
+  {% endif %}
+{% endfor %}
+
+          {% endif %}
+
+        {% if line.selling_plan_allocation %}
+          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
+        {% endif %}
+
+        {% if line.discount_allocations %}
+          {% for discount_allocation in line.discount_allocations %}
+            {% if discount_allocation.discount_application.target_selection != 'all' %}
+              <span class="order-list__item-discount-allocation">
+                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                <span>
+                  {{ discount_allocation.discount_application.title | upcase }}
+                  ({%- assign _eur = discount_allocation.amount | divided_by: 1.95583 | round: 0 -%}-€{{ _eur | money_without_currency }} / -{{ discount_allocation.amount | money }} лв.)
+                </span>
+              </span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </td>
+        <td class="order-list__price-cell">
+          {% if line.original_line_price != line.final_line_price %}
+            {%- assign _eur = line.original_line_price | divided_by: 1.95583 | round: 0 -%}
+            <del class="order-list__item-original-price">€{{ _eur | money_without_currency }} ({{ line.original_line_price | money }} лв.)</del>
+          {% endif %}
+          <p class="order-list__item-price">
+            {% if line.final_line_price > 0 %}
+              {%- assign _eur = line.final_line_price | divided_by: 1.95583 | round: 0 -%}
+              €{{ _eur | money_without_currency }}<br><small style="color:#999;">({{ line.final_line_price | money }} лв.)</small>
+              {% if line.unit_price_measurement %}
+  <div class="order-list__unit-price">
+    {%- assign _unit_eur = line.unit_price | divided_by: 1.95583 | round: 0 -%}
+    €{{ _unit_eur | money_without_currency }} / {% if line.unit_price_measurement.reference_value != 1 %}{{ line.unit_price_measurement.reference_value }}{% endif %}{{ line.unit_price_measurement.reference_unit }}
+    <small style="color:#999;">({{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}})</small>
+  </div>
+{% endif %}
+            {% else %}
+              Безплатно
+            {% endif %}
+          </p>
+        </td>
+    </table>
+  </td>
+</tr>
+
+    {% endunless %}
+  {% endfor %}
+</table>
+
+{% if legacy_separator %}
+  <hr class="order-list__delivery-method-type-separator">
+{% endif %}
+
+{% for delivery_agreement in delivery_agreements %}
+  {% if delivery_agreement.line_items != blank %}
+    {% if delivery_agreements.size > 1 %}
+      <h4 class="order-list__delivery-method-type">
+        {{ delivery_agreement.delivery_method_name }}  артикула
+      </h4>
+    {% endif %}
+    <table class="row">
+      {% for line in delivery_agreement.line_items %}
+
+<tr class="order-list__item">
+  <td class="order-list__item__cell">
+    <table>
+      <td>
+        {% if line.image %}
+          <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+        {% endif %}
+      </td>
+      <td class="order-list__product-description-cell">
+        {% if line.product.title %}
+          {% assign line_title = line.product.title %}
+        {% else %}
+          {% assign line_title = line.title %}
+        {% endif %}
+
+        {% if line.quantity < line.quantity %}
+          {% capture line_display %}
+            {{ line.quantity }} от {{ line.quantity }}
+          {% endcapture %}
+        {% else %}
+          {% capture line_display %}
+            {{ line.quantity }}
+          {% endcapture %}
+        {% endif %}
+
+        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+
+        {% if line.variant.title != 'Default Title' %}
+          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
+        {% endif %}
+
+          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
+            {% for property in line.properties %}
+  {% assign property_first_char = property.first | slice: 0 %}
+  {% if property.last != blank and property_first_char != '_' %}
+    <div class="order-list__item-property">
+      <dt>{{ property.first }}:</dt>
+      <dd>
+      {% if property.last contains '/uploads/' %}
+        <a href="{{ property.last }}" class="link" target="_blank">
+        {{ property.last | split: '/' | last }}
+        </a>
+      {% else %}
+        {{ property.last }}
+      {% endif %}
+      </dd>
+    </div>
+  {% endif %}
+{% endfor %}
+
+          {% endif %}
+
+        {% if line.selling_plan_allocation %}
+          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
+        {% endif %}
+
+        {% if line.discount_allocations %}
+          {% for discount_allocation in line.discount_allocations %}
+            {% if discount_allocation.discount_application.target_selection != 'all' %}
+              <span class="order-list__item-discount-allocation">
+                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                <span>
+                  {{ discount_allocation.discount_application.title | upcase }}
+                  ({%- assign _eur = discount_allocation.amount | divided_by: 1.95583 | round: 0 -%}-€{{ _eur | money_without_currency }} / -{{ discount_allocation.amount | money }} лв.)
+                </span>
+              </span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </td>
+        <td class="order-list__price-cell">
+          {% if line.original_line_price != line.final_line_price %}
+            {%- assign _eur = line.original_line_price | divided_by: 1.95583 | round: 0 -%}
+            <del class="order-list__item-original-price">€{{ _eur | money_without_currency }} ({{ line.original_line_price | money }} лв.)</del>
+          {% endif %}
+          <p class="order-list__item-price">
+            {% if line.final_line_price > 0 %}
+              {%- assign _eur = line.final_line_price | divided_by: 1.95583 | round: 0 -%}
+              €{{ _eur | money_without_currency }}<br><small style="color:#999;">({{ line.final_line_price | money }} лв.)</small>
+              {% if line.unit_price_measurement %}
+  <div class="order-list__unit-price">
+    {%- assign _unit_eur = line.unit_price | divided_by: 1.95583 | round: 0 -%}
+    €{{ _unit_eur | money_without_currency }} / {% if line.unit_price_measurement.reference_value != 1 %}{{ line.unit_price_measurement.reference_value }}{% endif %}{{ line.unit_price_measurement.reference_unit }}
+    <small style="color:#999;">({{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}})</small>
+  </div>
+{% endif %}
+            {% else %}
+              Безплатно
+            {% endif %}
+          </p>
+        </td>
+    </table>
+  </td>
+</tr>
+
+      {% endfor %}
+    </table>
+
+    {% unless forloop.last %}
+    <hr class="order-list__delivery-method-type-separator">
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+
+            {% else %}
+
+<table class="row">
+  {% for line in subtotal_line_items %}
+
+<tr class="order-list__item">
+  <td class="order-list__item__cell">
+    <table>
+      <td>
+        {% if line.image %}
+          <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+        {% endif %}
+      </td>
+      <td class="order-list__product-description-cell">
+        {% if line.product.title %}
+          {% assign line_title = line.product.title %}
+        {% else %}
+          {% assign line_title = line.title %}
+        {% endif %}
+
+        {% if line.quantity < line.quantity %}
+          {% capture line_display %}
+            {{ line.quantity }} от {{ line.quantity }}
+          {% endcapture %}
+        {% else %}
+          {% capture line_display %}
+            {{ line.quantity }}
+          {% endcapture %}
+        {% endif %}
+
+        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+
+        {% if line.variant.title != 'Default Title' %}
+          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
+        {% endif %}
+
+          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
+            {% for property in line.properties %}
+  {% assign property_first_char = property.first | slice: 0 %}
+  {% if property.last != blank and property_first_char != '_' %}
+    <div class="order-list__item-property">
+      <dt>{{ property.first }}:</dt>
+      <dd>
+      {% if property.last contains '/uploads/' %}
+        <a href="{{ property.last }}" class="link" target="_blank">
+        {{ property.last | split: '/' | last }}
+        </a>
+      {% else %}
+        {{ property.last }}
+      {% endif %}
+      </dd>
+    </div>
+  {% endif %}
+{% endfor %}
+
+          {% endif %}
+
+        {% if line.selling_plan_allocation %}
+          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
+        {% endif %}
+
+        {% if line.discount_allocations %}
+          {% for discount_allocation in line.discount_allocations %}
+            {% if discount_allocation.discount_application.target_selection != 'all' %}
+              <span class="order-list__item-discount-allocation">
+                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                <span>
+                  {{ discount_allocation.discount_application.title | upcase }}
+                  ({%- assign _eur = discount_allocation.amount | divided_by: 1.95583 | round: 0 -%}-€{{ _eur | money_without_currency }} / -{{ discount_allocation.amount | money }} лв.)
+                </span>
+              </span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </td>
+        <td class="order-list__price-cell">
+          {% if line.original_line_price != line.final_line_price %}
+            {%- assign _eur = line.original_line_price | divided_by: 1.95583 | round: 0 -%}
+            <del class="order-list__item-original-price">€{{ _eur | money_without_currency }} ({{ line.original_line_price | money }} лв.)</del>
+          {% endif %}
+          <p class="order-list__item-price">
+            {% if line.final_line_price > 0 %}
+              {%- assign _eur = line.final_line_price | divided_by: 1.95583 | round: 0 -%}
+              €{{ _eur | money_without_currency }}<br><small style="color:#999;">({{ line.final_line_price | money }} лв.)</small>
+              {% if line.unit_price_measurement %}
+  <div class="order-list__unit-price">
+    {%- assign _unit_eur = line.unit_price | divided_by: 1.95583 | round: 0 -%}
+    €{{ _unit_eur | money_without_currency }} / {% if line.unit_price_measurement.reference_value != 1 %}{{ line.unit_price_measurement.reference_value }}{% endif %}{{ line.unit_price_measurement.reference_unit }}
+    <small style="color:#999;">({{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}})</small>
+  </div>
+{% endif %}
+            {% else %}
+              Безплатно
+            {% endif %}
+          </p>
+        </td>
+    </table>
+  </td>
+</tr>
+
+  {% endfor %}
+</table>
+
+            {% endif %}
+            <table class="row subtotal-lines">
+  <tr>
+    <td class="subtotal-spacer"></td>
+    <td>
+      <table class="row subtotal-table">
+
+
+{% assign total_order_discount_amount = 0 %}
+{% assign has_shipping_discount = false %}
+{% assign epsilon = 0.00001 %}
+
+{% for discount_application in discount_applications %}
+  {% if discount_application.target_selection == 'all' and discount_application.target_type == 'line_item' %}
+    {% assign order_discount_count = order_discount_count | plus: 1 %}
+    {% assign total_order_discount_amount = total_order_discount_amount | plus: discount_application.total_allocated_amount %}
+  {% endif %}
+  {% if discount_application.target_type == 'shipping_line' %}
+    {% assign has_shipping_discount = true %}
+    {% assign shipping_discount_title = discount_application.title %}
+    {% assign discount_value_price = discount_application.total_allocated_amount %}
+    {% assign shipping_amount_minus_discount_value_price = shipping_price | minus: discount_value_price %}
+    {% assign shipping_amount_minus_discount_value_price_abs = shipping_amount_minus_discount_value_price | abs %}
+    {% assign discount_application_value_type = discount_application.value_type | strip %}
+    {% if shipping_amount_minus_discount_value_price_abs < epsilon or discount_application_value_type == 'percentage' and discount_application.value == 100 %}
+      {% assign free_shipping = true %}
+    {% else %}
+      {% assign discounted_shipping_price = shipping_amount_minus_discount_value_price %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Междинна сума</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _sub_raw = subtotal_price | plus: total_order_discount_amount -%}
+      {%- assign _eur = _sub_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _sub_raw | money }} лв.)</small>
+  </td>
+</tr>
+
+
+
+{% if order_discount_count > 0 %}
+  {% if order_discount_count == 1 %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Отстъпка за поръчката</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_order_discount_amount | divided_by: 1.95583 | round: 0 -%}
+      <strong>-€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">(-{{ total_order_discount_amount | money }} лв.)</small>
+  </td>
+</tr>
+
+  {% endif %}
+  {% if order_discount_count > 1 %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Отстъпки за поръчката</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_order_discount_amount | divided_by: 1.95583 | round: 0 -%}
+      <strong>-€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">(-{{ total_order_discount_amount | money }} лв.)</small>
+  </td>
+</tr>
+
+  {% endif %}
+  {% for discount_application in discount_applications %}
+    {% if discount_application.target_selection == 'all' and discount_application.target_type != 'shipping_line' %}
+      <tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span class="subtotal-line__discount">
+        <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+        <span class="subtotal-line__discount-title">
+            {{ discount_application.title }} ({%- assign _eur = discount_application.total_allocated_amount | divided_by: 1.95583 | round: 0 -%}-€{{ _eur | money_without_currency }} / -{{ discount_application.total_allocated_amount | money }} лв.)
+        </span>
+      </span>
+    </p>
+  </td>
+</tr>
+
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
+        {% unless retail_delivery_only %}
+          {% if delivery_method == 'pick-up' %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Взимане</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = shipping_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ shipping_price | money }} лв.)</small>
+  </td>
+</tr>
+
+          {% else %}
+
+  {% if has_shipping_discount %}
+    {% if free_shipping == true %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Изпращане</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+    <del>{% if shipping_price != 0 %}{%- assign _eur = shipping_price | divided_by: 1.95583 | round: 0 -%}€{{ _eur | money_without_currency }} ({{ shipping_price | money}} лв.){% endif %} </del>
+      <strong>Безплатно</strong>
+  </td>
+</tr>
+
+    {% else %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Изпращане</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+    <del>{%- assign _eur = shipping_price | divided_by: 1.95583 | round: 0 -%}€{{ _eur | money_without_currency }} ({{ shipping_price | money }} лв.) </del>
+      {%- assign _eur = discounted_shipping_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ discounted_shipping_price | money }} лв.)</small>
+  </td>
+</tr>
+
+    {% endif %}
+    <tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span class="subtotal-line__discount">
+        <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+        <span class="subtotal-line__discount-title">
+            {{ shipping_discount_title }}
+            {% if discount_value_price != 0 %}
+              ({%- assign _eur = discount_value_price | divided_by: 1.95583 | round: 0 -%}-€{{ _eur | money_without_currency }} / -{{ discount_value_price | money }} лв.)
+            {% endif %}
+        </span>
+      </span>
+    </p>
+  </td>
+</tr>
+
+  {% else %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Изпращане</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = shipping_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ shipping_price | money }} лв.)</small>
+  </td>
+</tr>
+
+  {% endif %}
+
+          {% endif %}
+        {% endunless %}
+
+        {% if total_duties %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Мито</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_duties | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ total_duties | money }} лв.)</small>
+  </td>
+</tr>
+
+        {% endif %}
+
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Данъци</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = tax_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ tax_price | money }} лв.)</small>
+  </td>
+</tr>
+
+
+        {% if total_tip and total_tip > 0 %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Tip</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_tip | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ total_tip | money }} лв.)</small>
+  </td>
+</tr>
+
+        {% endif %}
+      </table>
+
+      {% assign transaction_size = 0 %}
+      {% assign transaction_amount = 0 %}
+      {% assign net_transaction_amount_rounding = 0 %}
+      {% assign authorized_amount = 0 %}
+      {% assign has_refunds = false %}
+      {% assign shopify_pay_captured = false %}
+      {% assign shop_cash_offers_captured = false %}
+      {% for transaction in transactions %}
+        {% if transaction.kind == "sale" or transaction.kind == "capture" %}
+          {% if transaction.status == "success" %}
+            {% if transaction.payment_details.credit_card_company %}
+              {% assign shopify_pay_captured = true %}
+            {% endif %}
+            {% if transaction.gateway == "shop_cash" or transaction.gateway == "shop_offer" %}
+              {% assign shop_cash_offers_captured = true %}
+            {% endif %}
+            {% assign transaction_size = transaction_size | plus: 1 %}
+            {% assign transaction_amount = transaction_amount | plus: transaction.amount %}
+            {% if transaction.amount_rounding != nil %}
+              {% assign net_transaction_amount_rounding = net_transaction_amount_rounding | plus: transaction.amount_rounding %}
+            {% endif %}
+          {% endif %}
+        {% elsif transaction.kind == "authorization" %}
+          {% if transaction.status == "success" %}
+            {% assign authorized_amount = authorized_amount | plus: transaction.amount %}
+          {% endif %}
+        {% elsif transaction.kind == "refund" or transaction.kind == "change" %}
+          {% if transaction.status == "success" or transaction.status == "pending" %}
+            {% assign transaction_size = transaction_size | plus: 1 %}
+            {% assign transaction_amount = transaction_amount | minus: transaction.amount %}
+            {% assign has_refunds = true %}
+            {% if transaction.amount_rounding != nil %}
+              {% assign net_transaction_amount_rounding = net_transaction_amount_rounding | minus: transaction.amount_rounding %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {% # Add shop cash/offer transactions to totals if shopify pay is captured and shop cash/offer is not captured yet %}
+      {% if shopify_pay_captured == true and shop_cash_offers_captured == false %}
+        {% for transaction in transactions %}
+        {% if transaction.status == "success" %}
+          {% if transaction.kind == "authorization" and transaction.gateway == "shop_cash" or transaction.gateway == "shop_offer" %}
+              {% assign transaction_size = transaction_size | plus: 1 %}
+              {% assign transaction_amount = transaction_amount | plus: transaction.amount %}
+              {% if transaction.amount_rounding != nil %}
+                {% assign net_transaction_amount_rounding = net_transaction_amount_rounding | plus: transaction.amount_rounding %}
+              {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      {% endif %}
+      <table class="row subtotal-table subtotal-table--total">
+      {% if payment_terms and payment_terms.automatic_capture_at_fulfillment == false or b2b? %}
+        {% assign next_payment = payment_terms.next_payment %}
+        {% assign due_at_date = next_payment.due_at | date: "%b %d, %Y" %}
+        {% if net_transaction_amount_rounding != 0 %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ total_price | money_with_currency }})</small>
+  </td>
+</tr>
+
+          {% if total_discounts > 0 %}
+            <tr class="subtotal-line">
+              <td></td>
+              <td class="subtotal-line__value total-discount">
+                  {%- assign _eur = total_discounts | divided_by: 1.95583 | round: 0 -%}
+                  Спестихте <span class="total-discount--amount">€{{ _eur | money_without_currency }} ({{ total_discounts | money }} лв.)</span>
+              </td>
+            </tr>
+          {% endif %}
+          <tr><td colspan="2" class="subtotal-table__line"></td></tr>
+          <div class="subtotal-line__value-small">
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Закръгляване на сумата в брой</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _round_abs = net_transaction_amount_rounding | abs -%}
+      {%- assign _eur = _round_abs | divided_by: 1.95583 | round: 0 -%}
+      <strong>{% if net_transaction_amount_rounding < 0 %}-{% endif %}€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({% if net_transaction_amount_rounding < 0 %}-{% endif %}{{ _round_abs | money }} лв.)</small>
+  </td>
+</tr>
+
+          </div>
+          <tr><td colspan="2" class="subtotal-table__line"></td></tr>
+        {% endif %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума, платена днес</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _ta_raw = transaction_amount | plus: net_transaction_amount_rounding -%}
+      {%- assign _eur = _ta_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _ta_raw | money_with_currency }})</small>
+  </td>
+</tr>
+
+        <div class="payment-terms">
+          {% assign next_amount_due = total_price %}
+          {% if next_payment %}
+            {% assign next_amount_due = next_payment.amount_due %}
+          {% elsif total_outstanding > 0 %}
+            {% assign next_amount_due = total_outstanding %}
+          {% endif %}
+
+          {% if payment_terms.type == 'receipt' %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума, дължима при получаване</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = next_amount_due | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ next_amount_due | money_with_currency }})</small>
+  </td>
+</tr>
+
+          {% elsif payment_terms.type == 'fulfillment' %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума, дължима при изпълнение</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = next_amount_due | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ next_amount_due | money_with_currency }})</small>
+  </td>
+</tr>
+
+          {% else %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума, дължима на {{ due_at_date }}</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = next_amount_due | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ next_amount_due | money_with_currency }})</small>
+  </td>
+</tr>
+
+          {% endif %}
+        </div>
+        {% if total_discounts > 0 and net_transaction_amount_rounding == 0 %}
+          <tr class="subtotal-line">
+            <td></td>
+            <td class="subtotal-line__value total-discount">
+                {%- assign _eur = total_discounts | divided_by: 1.95583 | round: 0 -%}
+                Спестихте <span class="total-discount--amount">€{{ _eur | money_without_currency }} ({{ total_discounts | money }} лв.)</span>
+            </td>
+          </tr>
+        {% endif %}
+      {% else %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _eur = total_price | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ total_price | money_with_currency }})</small>
+  </td>
+</tr>
+
+        {% if total_discounts > 0 %}
+          <tr class="subtotal-line">
+            <td></td>
+            <td class="subtotal-line__value total-discount">
+                {%- assign _eur = total_discounts | divided_by: 1.95583 | round: 0 -%}
+                Спестихте <span class="total-discount--amount">€{{ _eur | money_without_currency }} ({{ total_discounts | money }} лв.)</span>
+            </td>
+          </tr>
+        {% endif %}
+        {% if net_transaction_amount_rounding != 0 %}
+          <tr><td colspan="2" class="subtotal-table__line"></td></tr>
+          <div class="subtotal-line__value-small">
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Закръгляване на сумата в брой</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _round_abs = net_transaction_amount_rounding | abs -%}
+      {%- assign _eur = _round_abs | divided_by: 1.95583 | round: 0 -%}
+      <strong>{% if net_transaction_amount_rounding < 0 %}-{% endif %}€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({% if net_transaction_amount_rounding < 0 %}-{% endif %}{{ _round_abs | money }} лв.)</small>
+  </td>
+</tr>
+
+          </div>
+          {% if financial_status == 'paid' %}
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Платено</span>
+        <br>
+        <small>{{ order.transactions | map: 'gateway_display_name' | uniq | join: ', ' }}</small>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _ta_raw = transaction_amount | plus: net_transaction_amount_rounding -%}
+      {%- assign _eur = _ta_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _ta_raw | money_with_currency }})</small>
+  </td>
+</tr>
+
+          {% endif %}
+        {% endif %}
+        {% if transaction_amount != total_price and payment_terms == nil%}
+          {% if transaction_amount == 0 and authorized_amount > 0 and has_refunds == false %}
+          {% else %}
+            <div class="payment-terms">
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Обща сума, платена днес</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _ta_raw = transaction_amount | plus: net_transaction_amount_rounding -%}
+      {%- assign _eur = _ta_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _ta_raw | money_with_currency }})</small>
+  </td>
+</tr>
+
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+      </table>
+
+      {% unless payment_terms %}
+      {% if transaction_size > 1 or transaction_amount < total_price %}
+        <table class="row subtotal-table">
+          <tr><td colspan="2" class="subtotal-table__line"></td></tr>
+          <tr><td colspan="2" class="subtotal-table__small-space"></td></tr>
+
+          {% for transaction in transactions %}
+            {% assign amount_rounding = 0 %}
+            {% if transaction.amount_rounding != 0 %}
+              {% assign amount_rounding =  transaction.amount_rounding %}
+            {% endif %}
+            {% if transaction.status == "success" and transaction.kind == "capture" or transaction.kind == "sale" %}
+              {% if transaction.payment_details.gift_card_last_four_digits %}
+                {% capture transaction_name %}Ваучер за подарък (завършващ на {{ transaction.payment_details.gift_card_last_four_digits }}){% endcapture %}
+              {% elsif transaction.payment_details.credit_card_company %}
+                {% capture transaction_name %}{{ transaction.payment_details.credit_card_company }} (завършваща на {{ transaction.payment_details.credit_card_last_four_digits }}){% endcapture %}
+              {% else %}
+                {% capture transaction_name %}{{ transaction.gateway_display_name }}{% endcapture %}
+              {% endif %}
+
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>{{transaction_name}}</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _t_raw = transaction.amount | plus: amount_rounding -%}
+      {%- assign _eur = _t_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _t_raw | money }} лв.)</small>
+  </td>
+</tr>
+
+            {% elsif shopify_pay_captured and shop_cash_offers_captured == false and transaction.kind == "authorization" and transaction.gateway == "shop_cash" or transaction.gateway == "shop_offer" %}
+              {% capture transaction_name %}{{ transaction.gateway_display_name }}{% endcapture %}
+
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>{{transaction_name}}</span>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _t_raw = transaction.amount | plus: amount_rounding -%}
+      {%- assign _eur = _t_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">({{ _t_raw | money }} лв.)</small>
+  </td>
+</tr>
+
+            {% endif %}
+            {% if transaction.kind == 'refund' and transaction.gateway != "shop_offer" %}
+              {% if transaction.payment_details.gift_card_last_four_digits %}
+                {% assign refund_method_title = transaction.payment_details.type %}
+              {% elsif transaction.payment_details.local_payment %}
+                {% assign refund_method_title = transaction.payment_details.payment_method_name %}
+              {% elsif transaction.payment_details.credit_card_company %}
+                {% assign refund_method_title = transaction.payment_details.credit_card_company %}
+              {% else %}
+                {% assign refund_method_title = transaction.gateway_display_name %}
+              {% endif %}
+
+              {% if transaction.gateway == 'shopify_store_credit' %}
+                {% assign link_url = routes.account_profile_url %}
+                {% capture link_text %}Преглед{% endcapture %}
+              {% else %}
+                {% assign link_url = nil %}
+                {% assign link_text = nil %}
+              {% endif %}
+
+
+<tr class="subtotal-line">
+  <td class="subtotal-line__title">
+    <p>
+      <span>Възстановяване на сума</span>
+        <br>
+        <small>{{ refund_method_title | replace: '_', ' ' | capitalize }}</small>
+          &nbsp;&nbsp;<a href="{{ link_url }}" class="small">{{ link_text }}</a>
+    </p>
+  </td>
+  <td class="subtotal-line__value">
+      {%- assign _t_raw = transaction.amount | plus: amount_rounding -%}
+      {%- assign _eur = _t_raw | divided_by: 1.95583 | round: 0 -%}
+      <strong>-€{{ _eur | money_without_currency }}</strong><br><small style="color:#999;">(-{{ _t_raw | money }} лв.)</small>
+  </td>
+</tr>
+
+            {% endif %}
+          {% endfor %}
+        </table>
+      {% endif %}
+
+
+      {% endunless %}
+    </td>
+  </tr>
+</table>
+
+
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
+</table>
+
+          <table class="row section">
+  <tr>
+    <td class="section__cell">
+      <center>
+        <table class="container">
+          <tr>
+            <td>
+              <h3>Информация за клиента</h3>
+            </td>
+          </tr>
+        </table>
+        <table class="container">
+          <tr>
+            <td>
+
+            <table class="row">
+              <tr>
+                {% if requires_shipping and shipping_address %}
+                <td class="customer-info__item">
+                  <h4>Адрес за доставка</h4>
+                  {{ shipping_address | format_address }}
+                </td>
+                {% endif %}
+                {% if billing_address %}
+                <td class="customer-info__item">
+                  <h4>Адрес за фактуриране</h4>
+                  {{ billing_address | format_address }}
+                </td>
+                {% endif %}
+              </tr>
+            </table>
+            <table class="row">
+              <tr>
+                {% if company_location %}
+                  <td class="customer-info__item">
+                    <h4>Местоположение</h4>
+                    <p>
+                      {{ company_location.name }}
+                    </p>
+                  </td>
+                {% endif %}
+                {% if transactions.size > 0 or payment_terms %}
+                  <td class="customer-info__item">
+                    <h4>Плащане</h4>
+                    <p class="customer-info__item-content">
+                      {% if payment_terms %}
+                        {% assign due_date = payment_terms.next_payment.due_at | default: nil %}
+                        {% if payment_terms.type == 'receipt' or payment_terms.type == 'fulfillment' and payment_terms.next_payment.due_at == nil %}
+                          {{ payment_terms.translated_name }}<br>
+                        {% else %}
+                          {{ payment_terms.translated_name }}: Дължимо на {{ due_date | date: format: 'date' }}<br>
+                        {% endif %}
+                      {% endif %}
+                      {% if transactions.size > 0 %}
+                        {% for transaction in transactions %}
+                          {% if transaction.status == "success" or transaction.status == "pending" %}
+                            {% if transaction.kind == "capture" or transaction.kind == "sale" %}
+                                {% if transaction.payment_details.type == "card" %}
+                                  {% capture credit_card_url %}notifications/{{ transaction.payment_details.credit_card_company | downcase | replace: " ", "_" }}.png{% endcapture %}
+                                  <img src="{{ credit_card_url | shopify_asset_url }}" class="customer-info__item-credit" height="24">
+                                  <span>завършваща на {{ transaction.payment_details.credit_card_last_four_digits }}</span><br>
+                                {% elsif transaction.payment_details.local_payment? %}
+                                  <img src="{{ transaction.payment_details.payment_icon_source | payment_type_img_url }}" class="customer-info__item-credit" height="24">
+                                  <span>{{ transaction.payment_details.payment_method_display_name }}</span><br>
+                                {% elsif transaction.gateway != "shop_offer" %}
+                                  {{ transaction.gateway_display_name }}<br>
+                                {% endif %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </p>
+                  </td>
+                {% endif %}
+              </tr>
+              <tr>
+                {% if requires_shipping and shipping_address %}
+                  {% if shipping_method %}
+                    <td class="customer-info__item">
+                      <h4>Начин на доставка</h4>
+                      <p>{{ shipping_method.title }}</p>
+                    </td>
+                  {% endif %}
+                {% endif %}
+              </tr>
+            </table>
+
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
+</table>
+
+          <table class="row footer">
+  <tr>
+    <td class="footer__cell">
+      <center>
+        <table class="container">
+          <tr>
+            <td>
+
+              <p class="disclaimer__subtext">Ако имате въпроси, отговорете на този имейл или се свържете с нас на <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
+</table>
+
+<img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
