@@ -22,3 +22,17 @@ def test_discoverer_uses_different_agents_across_instances():
         d.close()
     # With 10 UAs and 20 instances, overwhelmingly likely to see >1 unique UA
     assert len(agents) > 1
+
+
+def test_discoverer_sets_proxy_when_provided():
+    proxy_url = "http://user:pass@proxy.example.com:8001"
+    discoverer = PharmacyURLDiscoverer(proxy_url=proxy_url)
+    assert discoverer.session.proxies.get("http") == proxy_url
+    assert discoverer.session.proxies.get("https") == proxy_url
+    discoverer.close()
+
+
+def test_discoverer_no_proxy_by_default():
+    discoverer = PharmacyURLDiscoverer()
+    assert not discoverer.session.proxies
+    discoverer.close()

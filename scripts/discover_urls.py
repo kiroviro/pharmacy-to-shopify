@@ -12,6 +12,7 @@ Usage:
 import argparse
 import logging
 import os
+import random
 import sys
 
 # Add project root to path for imports
@@ -48,6 +49,10 @@ def main():
         action="store_true",
         help="Suppress info messages, show only warnings and errors"
     )
+    parser.add_argument(
+        "--proxies",
+        help="Path to file with proxy URLs (one per line). A random one will be used.",
+    )
 
     args = parser.parse_args()
     setup_logging(verbose=args.verbose, quiet=args.quiet)
@@ -63,11 +68,25 @@ def main():
     print(f"  Output: {output_path}")
     print(f"  Limit:  {args.limit if args.limit else 'none'}")
 
+    proxy_url = None
+    if args.proxies:
+        with open(args.proxies) as f:
+            proxy_list = [
+                line.strip() for line in f
+                if line.strip() and not line.strip().startswith("#")
+            ]
+        if proxy_list:
+            proxy_url = random.choice(proxy_list)
+            print(f"  Proxy:  {proxy_url.split('@')[-1]}")  # log host:port only, not credentials
+        else:
+            print(f"  Proxy:  file empty, running without proxy")
+
     print("  Method: Sitemap")
     discoverer = PharmacyURLDiscoverer(
         verbose=args.verbose,
         base_url="https://benu.bg",
         sitemap_url="https://benu.bg/sitemap.products.xml",
+        proxy_url=proxy_url,
     )
     discoverer.discover_all_products(limit=args.limit, output_file=output_path)
 

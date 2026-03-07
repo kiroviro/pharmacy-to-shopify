@@ -25,6 +25,7 @@ class PharmacyURLDiscoverer:
         verbose: bool = False,
         base_url: str = "https://pharmacy.example.com",
         sitemap_url: str = "https://pharmacy.example.com/sitemap.products.xml",
+        proxy_url: str | None = None,
     ):
         self.base_url = base_url
         self.sitemap_url = sitemap_url
@@ -33,6 +34,8 @@ class PharmacyURLDiscoverer:
             "User-Agent": random.choice(USER_AGENTS),
             **BROWSER_HEADERS,
         })
+        if proxy_url:
+            self.session.proxies = {"http": proxy_url, "https": proxy_url}
         self.product_urls: set[str] = set()
 
     def __enter__(self):
