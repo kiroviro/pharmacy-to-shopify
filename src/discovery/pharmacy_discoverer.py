@@ -7,9 +7,12 @@ Discovers all product URLs from the sitemap.
 from __future__ import annotations
 
 import logging
+import random
 import xml.etree.ElementTree as ET
 
 import requests
+
+from ..common.constants import BROWSER_HEADERS, USER_AGENTS
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +30,8 @@ class PharmacyURLDiscoverer:
         self.sitemap_url = sitemap_url
         self.session = requests.Session()
         self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
+            "User-Agent": random.choice(USER_AGENTS),
+            **BROWSER_HEADERS,
         })
         self.product_urls: set[str] = set()
 
