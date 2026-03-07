@@ -241,7 +241,6 @@ class TestBulkExtractorStateResume:
 def test_jitter_sleep_calls_uniform_with_correct_range():
     """BulkExtractor._jitter_sleep sleeps for uniform(delay, delay*3)."""
     from unittest.mock import patch, call
-    import random as _random
 
     extractor = BulkExtractor(
         output_csv="/tmp/test_jitter.csv",
