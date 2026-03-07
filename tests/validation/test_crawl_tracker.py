@@ -259,6 +259,55 @@ class TestDuplicateSkuDetection:
         assert "8825" in t.duplicate_skus
 
 
+class TestNetworkErrors:
+    def test_initial_network_errors_zero(self):
+        t = CrawlQualityTracker()
+        assert t.network_errors == 0
+
+    def test_record_network_error_increments_counter(self):
+        t = CrawlQualityTracker()
+        t.record_network_error("ProxyError")
+        assert t.network_errors == 1
+
+    def test_record_network_error_appears_in_field_counts(self):
+        t = CrawlQualityTracker()
+        t.record_network_error("ProxyError")
+        assert t.field_error_counts["network_proxyerror"] == 1
+
+    def test_different_network_error_types_tracked_separately(self):
+        t = CrawlQualityTracker()
+        t.record_network_error("ProxyError")
+        t.record_network_error("HTTPError")
+        assert t.field_error_counts["network_proxyerror"] == 1
+        assert t.field_error_counts["network_httperror"] == 1
+
+    def test_network_errors_count_toward_critical_failures_gate(self):
+        t = CrawlQualityTracker()
+        # 94 successful products + 6 network errors = 6% network error rate > 5%
+        for i in range(94):
+            t.record(_product(f"ok{i}"), _result())
+        for i in range(6):
+            t.record_network_error("ProxyError")
+        assert t.has_critical_failures()
+
+    def test_network_errors_below_threshold_no_critical_failure(self):
+        t = CrawlQualityTracker()
+        # 96 successful + 4 network errors = 4% < 5%
+        for i in range(96):
+            t.record(_product(f"ok{i}"), _result())
+        for i in range(4):
+            t.record_network_error("ProxyError")
+        assert not t.has_critical_failures()
+
+    def test_network_errors_shown_in_final_report(self, capsys):
+        t = CrawlQualityTracker()
+        t.record(_product(), _result())
+        t.record_network_error("ProxyError")
+        t.print_final_report()
+        captured = capsys.readouterr()
+        assert "network" in captured.out.lower()
+
+
 class TestFinalReport:
     def test_print_final_report_no_crash(self, capsys):
         t = CrawlQualityTracker()

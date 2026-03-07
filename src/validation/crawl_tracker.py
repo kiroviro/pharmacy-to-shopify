@@ -39,6 +39,7 @@ class CrawlQualityTracker:
         self.valid: int = 0          # no errors
         self.warnings_only: int = 0  # warnings but no errors
         self.errors: int = 0         # at least one error
+        self.network_errors: int = 0 # failed before extraction (HTTP/proxy)
 
         # Per-field error counter: field_name -> count
         self.field_error_counts: dict[str, int] = defaultdict(int)
@@ -101,6 +102,11 @@ class CrawlQualityTracker:
                 self.price_max = price_f
         except (ValueError, TypeError):
             pass
+
+    def record_network_error(self, error_type: str) -> None:
+        """Record a network-level failure (HTTP error, proxy error) where no product was extracted."""
+        self.network_errors += 1
+        self.field_error_counts[f"network_{error_type.lower()}"] += 1
 
     def print_periodic_summary(self, n_processed: int) -> None:
         """Print a one-line quality summary (call every 100 products)."""
@@ -167,14 +173,18 @@ class CrawlQualityTracker:
                 f"\n  Price range: {self.price_min:.2f} – {self.price_max:.2f} BGN"
             )
 
+        if self.network_errors:
+            print(f"  Network errors:   {self.network_errors:>6}  (HTTP/proxy failures)")
+
         print("\n  Gate (>5% errors = FAIL):", gate)
         print("=" * 60)
 
     def has_critical_failures(self, threshold_pct: float = 5.0) -> bool:
-        """Return True if the error rate exceeds threshold_pct."""
-        if self.total == 0:
+        """Return True if the error rate (extraction errors + network errors) exceeds threshold_pct."""
+        total_attempts = self.total + self.network_errors
+        if total_attempts == 0:
             return False
-        return (self.errors / self.total * 100) > threshold_pct
+        return ((self.errors + self.network_errors) / total_attempts * 100) > threshold_pct
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 

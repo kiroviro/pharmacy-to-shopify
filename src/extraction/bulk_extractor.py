@@ -309,6 +309,8 @@ class BulkExtractor:
                         "timestamp": datetime.now().isoformat()
                     })
                     self.processed_urls.add(url)
+                    if self._tracker is not None:
+                        self._tracker.record_network_error(type(e).__name__)
 
                     # Save failed HTML for debugging
                     if self.save_failed_html and extractor is not None:
