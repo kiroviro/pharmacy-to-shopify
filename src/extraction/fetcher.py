@@ -13,11 +13,12 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 
 import requests
 from bs4 import BeautifulSoup
 
-from ..common.constants import USER_AGENT
+from ..common.constants import BROWSER_HEADERS, USER_AGENTS
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +37,17 @@ class PharmacyFetcher:
         self.soup: BeautifulSoup | None = None
         self.json_ld: dict | None = None
 
+    def _build_headers(self) -> dict:
+        """Build a randomized but realistic browser header set."""
+        return {
+            "User-Agent": random.choice(USER_AGENTS),
+            **BROWSER_HEADERS,
+        }
+
     def fetch(self) -> None:
         """Fetch the product page via HTTP GET."""
-        headers = {
-            "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "bg-BG,bg;q=0.9,en;q=0.8",
-        }
         requester = self._session or requests
-        response = requester.get(self.url, headers=headers, timeout=30)
+        response = requester.get(self.url, headers=self._build_headers(), timeout=30)
         response.raise_for_status()
         self._load(response.text)
 
