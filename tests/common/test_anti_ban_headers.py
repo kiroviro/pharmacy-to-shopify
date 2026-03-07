@@ -30,3 +30,8 @@ def test_browser_headers_has_required_keys():
 def test_browser_headers_values_are_strings():
     for k, v in BROWSER_HEADERS.items():
         assert isinstance(v, str), f"{k} value should be a string"
+
+
+def test_browser_headers_does_not_contain_user_agent():
+    # User-Agent must be picked randomly per request, not hardcoded in BROWSER_HEADERS
+    assert "User-Agent" not in BROWSER_HEADERS
