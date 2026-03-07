@@ -6,11 +6,9 @@ fields are populated, the returned ExtractedProduct has the right structure, and
 nothing breaks in the assembly logic.
 """
 
-import pytest
 
 from src.extraction.pharmacy_extractor import PharmacyExtractor
 from src.models.product import ExtractedProduct
-
 
 # Minimal benu.bg-style HTML with all three data sources
 PRODUCT_HTML = '''

@@ -52,8 +52,7 @@ import requests
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import random
-from src.common.constants import USER_AGENTS, BROWSER_HEADERS
+from src.common.constants import BROWSER_HEADERS, USER_AGENTS
 from src.common.credentials import load_shopify_credentials
 from src.common.csv_utils import iter_product_rows
 from src.common.price_change import PriceChange

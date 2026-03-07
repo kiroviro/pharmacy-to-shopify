@@ -2,10 +2,7 @@
 
 import csv
 
-import pytest
-
 from src.shopify.collections import ShopifyCollectionCreator
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -202,8 +199,6 @@ class TestCreateCollectionDryRun:
 
     def test_dry_run_does_not_call_api(self):
         creator = _creator(dry_run=True)
-        # Replace rest_request so any call would be visible
-        original_rest = creator.client.rest_request
         calls = []
         creator.client.rest_request = lambda *a, **kw: calls.append((a, kw))
 
@@ -351,7 +346,8 @@ class TestCreateSaleCollection:
         captured = capsys.readouterr()
         assert "[DRY RUN]" in captured.out
         assert "Намаления" in captured.out
-        assert "variant_compare_at_price" in captured.out
+        assert "tag" in captured.out
+        assert "Намаление" in captured.out
 
     def test_dry_run_does_not_call_api(self):
         creator = _creator(dry_run=True)

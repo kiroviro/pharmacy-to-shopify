@@ -34,8 +34,7 @@ import requests
 # Add project root to path for proper package imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import random
-from src.common.constants import EUR_TO_BGN, USER_AGENTS, BROWSER_HEADERS
+from src.common.constants import BROWSER_HEADERS, EUR_TO_BGN, USER_AGENTS
 from src.common.price_change import PriceChange
 from src.common.price_fetcher import fetch_source_price
 

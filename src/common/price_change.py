@@ -4,7 +4,7 @@ Shared PriceChange dataclass used by price monitoring and sync scripts.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass

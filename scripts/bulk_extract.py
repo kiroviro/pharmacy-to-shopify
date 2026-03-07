@@ -189,7 +189,7 @@ def main():
         if proxies:
             print(f"  Proxies: {len(proxies)} loaded from {args.proxies}")
         else:
-            print(f"  Proxies: file empty, running without proxy")
+            print("  Proxies: file empty, running without proxy")
             proxies = None
 
     # Create bulk extractor

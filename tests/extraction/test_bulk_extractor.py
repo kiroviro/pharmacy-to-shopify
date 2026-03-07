@@ -241,6 +241,7 @@ class TestBulkExtractorStateResume:
 def test_proxy_rotation_sets_session_proxies(tmp_path):
     """When proxies are provided, random.choice picks from the list and sets session.proxies."""
     from unittest.mock import patch
+
     import requests
 
     proxies = [
@@ -288,7 +289,7 @@ def test_no_proxies_by_default(tmp_path):
 
 def test_jitter_sleep_calls_uniform_with_correct_range():
     """BulkExtractor._jitter_sleep sleeps for uniform(delay, delay*3)."""
-    from unittest.mock import patch, call
+    from unittest.mock import patch
 
     extractor = BulkExtractor(
         output_csv="/tmp/test_jitter.csv",

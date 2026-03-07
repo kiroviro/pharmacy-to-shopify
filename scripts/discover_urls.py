@@ -79,7 +79,7 @@ def main():
             proxy_url = random.choice(proxy_list)
             print(f"  Proxy:  {proxy_url.split('@')[-1]}")  # log host:port only, not credentials
         else:
-            print(f"  Proxy:  file empty, running without proxy")
+            print("  Proxy:  file empty, running without proxy")
 
     print("  Method: Sitemap")
     discoverer = PharmacyURLDiscoverer(

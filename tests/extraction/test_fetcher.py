@@ -1,6 +1,6 @@
 """Tests for PharmacyFetcher header building."""
+from src.common.constants import BROWSER_HEADERS, USER_AGENTS
 from src.extraction.fetcher import PharmacyFetcher
-from src.common.constants import USER_AGENTS, BROWSER_HEADERS
 
 
 def test_build_headers_returns_dict_with_user_agent():

@@ -2,8 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
-
 # Test config data — mirrors real YAML structure but small and deterministic
 CATEGORIES = {
     "Козметика": ["Козметика за лице", "Козметика за тяло", "Слънцезащита"],

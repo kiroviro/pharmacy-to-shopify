@@ -1,5 +1,5 @@
 """Tests for anti-ban crawl constants."""
-from src.common.constants import USER_AGENTS, BROWSER_HEADERS
+from src.common.constants import BROWSER_HEADERS, USER_AGENTS
 
 
 def test_user_agents_is_nonempty_list():

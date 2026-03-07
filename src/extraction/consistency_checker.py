@@ -17,7 +17,6 @@ For each field, two independent data sources from the same HTML are compared:
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 from typing import TYPE_CHECKING

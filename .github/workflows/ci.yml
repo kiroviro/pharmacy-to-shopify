@@ -42,4 +42,4 @@ jobs:
           python-version: "3.11"
       - run: pip install detect-secrets
       - run: detect-secrets scan --baseline .secrets.baseline
-      - run: detect-secrets audit --report --baseline .secrets.baseline
+      - run: git diff --exit-code .secrets.baseline

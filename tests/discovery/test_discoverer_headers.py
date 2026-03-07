@@ -1,6 +1,6 @@
 """Tests for PharmacyURLDiscoverer anti-ban headers."""
+from src.common.constants import BROWSER_HEADERS, USER_AGENTS
 from src.discovery.pharmacy_discoverer import PharmacyURLDiscoverer
-from src.common.constants import USER_AGENTS, BROWSER_HEADERS
 
 
 def test_discoverer_session_has_realistic_headers():
