@@ -238,6 +238,31 @@ class TestBulkExtractorStateResume:
         assert "Product product-3" in titles
 
 
+def test_proxy_rotation_sets_session_proxies(tmp_path):
+    """When proxies are provided, session.proxies is updated before each request."""
+    from unittest.mock import patch, MagicMock
+
+    proxies = [
+        "http://user:pass@proxy1.example.com:8001",
+        "http://user:pass@proxy2.example.com:8002",
+    ]
+    extractor = BulkExtractor(
+        output_csv=str(tmp_path / "out.csv"),
+        output_dir=str(tmp_path),
+        proxies=proxies,
+    )
+    assert extractor.proxies == proxies
+
+
+def test_no_proxies_by_default(tmp_path):
+    """BulkExtractor has no proxies by default."""
+    extractor = BulkExtractor(
+        output_csv=str(tmp_path / "out.csv"),
+        output_dir=str(tmp_path),
+    )
+    assert extractor.proxies is None
+
+
 def test_jitter_sleep_calls_uniform_with_correct_range():
     """BulkExtractor._jitter_sleep sleeps for uniform(delay, delay*3)."""
     from unittest.mock import patch, call

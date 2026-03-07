@@ -41,6 +41,7 @@ class BulkExtractor:
         delay: float = 1.0,
         save_failed_html: bool = False,
         validate: bool = True,
+        proxies: list[str] | None = None,
     ):
         """
         Initialize the bulk extractor.
@@ -57,6 +58,7 @@ class BulkExtractor:
         self.delay = delay
         self.save_failed_html = save_failed_html
         self.validate = validate
+        self.proxies = proxies
 
         # Progress tracking
         self.state_file = os.path.join(output_dir, "extraction_state.json")
@@ -236,6 +238,9 @@ class BulkExtractor:
                 extractor = None
                 try:
                     extractor = extractor_class(url, session=session)
+                    if self.proxies:
+                        proxy_url = random.choice(self.proxies)
+                        session.proxies = {"http": proxy_url, "https": proxy_url}
                     extractor.fetch()
                     product = extractor.extract()
 

@@ -131,6 +131,10 @@ def main():
     )
 
     parser.add_argument(
+        "--proxies",
+        help="Path to file with proxy URLs (one per line). Blank lines and # comments ignored.",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose (debug) logging"
@@ -175,11 +179,25 @@ def main():
         print(f"  Shopify output:   {args.shopify_output_dir}")
         print(f"  Max file size:    {args.max_size}MB")
 
+    proxies = None
+    if args.proxies:
+        with open(args.proxies) as f:
+            proxies = [
+                line.strip() for line in f
+                if line.strip() and not line.strip().startswith("#")
+            ]
+        if proxies:
+            print(f"  Proxies: {len(proxies)} loaded from {args.proxies}")
+        else:
+            print(f"  Proxies: file empty, running without proxy")
+            proxies = None
+
     # Create bulk extractor
     extractor = BulkExtractor(
         output_csv=output_csv,
         delay=args.delay,
         save_failed_html=args.save_failed_html,
+        proxies=proxies,
     )
 
     # Run extraction
