@@ -42,6 +42,7 @@ class BulkExtractor:
         save_failed_html: bool = False,
         validate: bool = True,
         proxies: list[str] | None = None,
+        retries: int = 0,
     ):
         """
         Initialize the bulk extractor.
@@ -59,6 +60,7 @@ class BulkExtractor:
         self.save_failed_html = save_failed_html
         self.validate = validate
         self.proxies = proxies
+        self.retries = retries
 
         # Progress tracking
         self.state_file = os.path.join(output_dir, "extraction_state.json")
@@ -237,11 +239,20 @@ class BulkExtractor:
 
                 extractor = None
                 try:
-                    extractor = extractor_class(url, session=session)
-                    if self.proxies:
-                        proxy_url = random.choice(self.proxies)
-                        session.proxies = {"http": proxy_url, "https": proxy_url}
-                    extractor.fetch()
+                    for attempt in range(self.retries + 1):
+                        try:
+                            extractor = extractor_class(url, session=session)
+                            if self.proxies:
+                                proxy_url = random.choice(self.proxies)
+                                session.proxies = {"http": proxy_url, "https": proxy_url}
+                            extractor.fetch()
+                            break  # fetch succeeded
+                        except requests.RequestException as e:
+                            if attempt < self.retries:
+                                logger.warning("Retry %d/%d for %s: %s", attempt + 1, self.retries, url[:60], str(e)[:80])
+                                self._jitter_sleep()
+                            else:
+                                raise  # all retries exhausted
                     product = extractor.extract()
 
                     if product:

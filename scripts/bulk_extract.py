@@ -135,6 +135,12 @@ def main():
         help="Path to file with proxy URLs (one per line). Blank lines and # comments ignored.",
     )
     parser.add_argument(
+        "--retries",
+        type=int,
+        default=3,
+        help="Number of retries on network errors per URL (default: 3)",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose (debug) logging"
@@ -198,6 +204,7 @@ def main():
         delay=args.delay,
         save_failed_html=args.save_failed_html,
         proxies=proxies,
+        retries=args.retries,
     )
 
     # Run extraction

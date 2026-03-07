@@ -278,6 +278,117 @@ def test_proxy_rotation_sets_session_proxies(tmp_path):
     assert session.proxies.get("https") == proxies[0]
 
 
+class TestRetryOnNetworkError:
+    """BulkExtractor retries transient network errors before giving up."""
+
+    def _make_extractor_class(self, fail_count: int):
+        """Return an extractor class whose fetch() fails `fail_count` times then succeeds."""
+        import requests as req
+        counter = {"calls": 0}
+
+        class _RetryExtractor:
+            def __init__(self, url, **kwargs):
+                self.url = url
+                self.html = None
+
+            def fetch(self):
+                counter["calls"] += 1
+                if counter["calls"] <= fail_count:
+                    raise req.ConnectionError("transient error")
+
+            def extract(self):
+                return ExtractedProduct(
+                    title="Retry Product",
+                    url=self.url,
+                    brand="Brand",
+                    sku="SKU-RETRY",
+                    price="9.99",
+                    handle="retry-product",
+                    images=[ProductImage(
+                        source_url="https://benu.bg/media/cache/product_view_default/images/1/1.webp",
+                        position=1,
+                    )],
+                )
+
+        return _RetryExtractor, counter
+
+    def test_succeeds_after_one_failure_with_retries(self, tmp_path):
+        extractor_class, counter = self._make_extractor_class(fail_count=1)
+        bulk = BulkExtractor(
+            output_csv=str(tmp_path / "out.csv"),
+            output_dir=str(tmp_path),
+            delay=0,
+            validate=False,
+            retries=3,
+        )
+        bulk.extract_all(urls=["https://benu.bg/product-1"], extractor_class=extractor_class)
+        assert bulk.total_extracted == 1
+        assert counter["calls"] == 2  # 1 failure + 1 success
+
+    def test_exhausts_retries_and_records_failure(self, tmp_path):
+        extractor_class, counter = self._make_extractor_class(fail_count=99)
+        bulk = BulkExtractor(
+            output_csv=str(tmp_path / "out.csv"),
+            output_dir=str(tmp_path),
+            delay=0,
+            validate=False,
+            retries=2,
+        )
+        bulk.extract_all(
+            urls=["https://benu.bg/product-1"],
+            extractor_class=extractor_class,
+            continue_on_error=True,
+        )
+        assert bulk.total_extracted == 0
+        assert len(bulk.failed_urls) == 1
+        assert counter["calls"] == 3  # 1 initial + 2 retries
+
+    def test_no_retries_by_default(self, tmp_path):
+        extractor_class, counter = self._make_extractor_class(fail_count=1)
+        bulk = BulkExtractor(
+            output_csv=str(tmp_path / "out.csv"),
+            output_dir=str(tmp_path),
+            delay=0,
+            validate=False,
+        )
+        bulk.extract_all(
+            urls=["https://benu.bg/product-1"],
+            extractor_class=extractor_class,
+            continue_on_error=True,
+        )
+        assert bulk.total_extracted == 0
+        assert counter["calls"] == 1  # no retries
+
+    def test_non_network_errors_not_retried(self, tmp_path):
+        """ValueError (bad parse) should not be retried — it won't fix itself."""
+        counter = {"calls": 0}
+
+        class _ParseErrorExtractor:
+            def __init__(self, url, **kwargs):
+                self.url = url
+                self.html = None
+
+            def fetch(self):
+                counter["calls"] += 1
+
+            def extract(self):
+                raise ValueError("No product extracted")
+
+        bulk = BulkExtractor(
+            output_csv=str(tmp_path / "out.csv"),
+            output_dir=str(tmp_path),
+            delay=0,
+            validate=False,
+            retries=3,
+        )
+        bulk.extract_all(
+            urls=["https://benu.bg/product-1"],
+            extractor_class=_ParseErrorExtractor,
+            continue_on_error=True,
+        )
+        assert counter["calls"] == 1  # tried once, no retries
+
+
 def test_no_proxies_by_default(tmp_path):
     """BulkExtractor has no proxies by default."""
     extractor = BulkExtractor(
