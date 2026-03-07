@@ -52,7 +52,8 @@ import requests
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import USER_AGENT
+import random
+from src.common.constants import USER_AGENTS, BROWSER_HEADERS
 from src.common.credentials import load_shopify_credentials
 from src.common.csv_utils import iter_product_rows
 from src.common.price_change import PriceChange
@@ -83,7 +84,7 @@ class PriceMonitor:
             self.shopify_client = ShopifyAPIClient(shopify_shop, shopify_token)
 
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": USER_AGENT})
+        self.session.headers.update({"User-Agent": random.choice(USER_AGENTS), **BROWSER_HEADERS})
 
         self.changes: list[PriceChange] = []
         self._checked_count: int = 0

@@ -34,7 +34,8 @@ import requests
 # Add project root to path for proper package imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.common.constants import EUR_TO_BGN, USER_AGENT
+import random
+from src.common.constants import EUR_TO_BGN, USER_AGENTS, BROWSER_HEADERS
 from src.common.price_change import PriceChange
 from src.common.price_fetcher import fetch_source_price
 
@@ -49,7 +50,7 @@ def _get_session() -> requests.Session:
     """Return this thread's session, creating it on first use."""
     if not hasattr(_thread_local, "session"):
         _thread_local.session = requests.Session()
-        _thread_local.session.headers.update({"User-Agent": USER_AGENT})
+        _thread_local.session.headers.update({"User-Agent": random.choice(USER_AGENTS), **BROWSER_HEADERS})
     return _thread_local.session
 
 
