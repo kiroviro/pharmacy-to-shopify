@@ -18,9 +18,12 @@ python scripts/backup_theme.py     # Download active theme snapshot
 python scripts/discover_urls.py --output data/benu.bg/raw/urls.txt
 python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0
 
-# With proxy rotation (recommended for large crawls):
+# With proxy rotation and retries (recommended for large crawls):
 python scripts/discover_urls.py --proxies proxies.txt
-python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0 --proxies proxies.txt
+python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0 --proxies proxies.txt --retries 3
+
+# Retry failed URLs after a crawl:
+python scripts/bulk_extract.py --urls output/failed_urls.txt --delay 2.0 --proxies proxies.txt --retries 3 --output data/benu.bg/raw/products_retry.csv
 ```
 
 `proxies.txt` — one proxy URL per line (`http://user:pass@host:port`), blank lines and `#` comments ignored. File is gitignored (never committed). See `proxies.txt` in project root for Oxylabs credentials.
@@ -78,7 +81,7 @@ Three independent data sources per product page (all from single HTTP fetch):
 Three validation layers run during `bulk_extract.py` (zero extra HTTP):
 1. `SpecificationValidator` — per-field format/presence
 2. `SourceConsistencyChecker` — cross-check sources 1 & 2 (11 checks)
-3. `CrawlQualityTracker` — aggregate stats; PASS/FAIL gate at >5% errors
+3. `CrawlQualityTracker` — aggregate stats; PASS/FAIL gate at >5% errors (includes network errors: HTTPError, ProxyError)
 
 ## Key Files
 
@@ -156,7 +159,7 @@ All in `config/`:
 **Validation warning format:** `"field_name: description"` (underscores, not dots).
 `CrawlQualityTracker._extract_field()` regex: `r"^([a-z_A-Z][a-z_A-Z0-9 ]+?):"`
 
-**Anti-ban crawl (2026-03-07):** `PharmacyFetcher` rotates from 10 real browser UAs and sends full `BROWSER_HEADERS` (Sec-Fetch-*, Accept-Encoding, etc.) per request. `BulkExtractor` sleeps `random.uniform(delay, delay*3)` between requests. `price_monitor.py` and `price_sync.py` use the same rotation. Optional proxy rotation: pass `--proxies proxies.txt` to `bulk_extract.py` and `discover_urls.py`.
+**Anti-ban crawl (2026-03-07):** `PharmacyFetcher` rotates from 10 real browser UAs and sends full `BROWSER_HEADERS` (Sec-Fetch-*, Accept-Encoding, etc.) per request. `BulkExtractor` sleeps `random.uniform(delay, delay*3)` between requests. `price_monitor.py` and `price_sync.py` use the same rotation. Optional proxy rotation: pass `--proxies proxies.txt` to `bulk_extract.py` and `discover_urls.py`. `--retries N` (default 3) retries `requests.RequestException` failures with jitter sleep; parse errors are not retried. Network errors (HTTPError, ProxyError) count toward the quality gate via `CrawlQualityTracker.record_network_error()`.
 
 **EUR pricing in crawl:** benu.bg serves prices natively in EUR (Vue.js `variant.price` field). `price_eur` = raw EUR; `price` (BGN) = `price_eur × 1.95583`. CSV `Price` column currently exports BGN (Shopify store base). When store base switches to EUR, swap `csv_exporter.py:120` to `product.price_eur` — marked with `TODO(EUR-transition)`.
 
