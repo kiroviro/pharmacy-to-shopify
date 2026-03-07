@@ -13,6 +13,18 @@ python scripts/push_theme.py --all  # Push all theme files to Shopify
 python scripts/backup_theme.py     # Download active theme snapshot
 ```
 
+### Fresh crawl (full pipeline stage 1–2)
+```bash
+python scripts/discover_urls.py --output data/benu.bg/raw/urls.txt
+python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0
+
+# With proxy rotation (recommended for large crawls):
+python scripts/discover_urls.py --proxies proxies.txt
+python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0 --proxies proxies.txt
+```
+
+`proxies.txt` — one proxy URL per line (`http://user:pass@host:port`), blank lines and `#` comments ignored. File is gitignored (never committed). See `proxies.txt` in project root for Oxylabs credentials.
+
 ## Pipeline (8 stages)
 
 ```
@@ -83,7 +95,8 @@ Three validation layers run during `bulk_extract.py` (zero extra HTTP):
 | `src/shopify/menus.py` | Hierarchical menu creation via API |
 | `src/shopify/collections.py` | Smart collection creation; `create_sale_collection()` uses tag rule |
 | `src/shopify/tagger.py` | `DiscountTagger` — tags products where compare_at > price; batched GraphQL |
-| `src/common/constants.py` | EUR/BGN rate (1.95583), field defaults |
+| `src/extraction/fetcher.py` | HTTP fetcher; `_build_headers()` picks random UA from `USER_AGENTS` + `BROWSER_HEADERS` per request |
+| `src/common/constants.py` | EUR/BGN rate (1.95583), `USER_AGENTS` (10 rotating UAs), `BROWSER_HEADERS` (realistic browser headers) |
 | `config/known_brands.yaml` | 450+ brand database |
 
 ## Source Packages
@@ -142,6 +155,10 @@ All in `config/`:
 
 **Validation warning format:** `"field_name: description"` (underscores, not dots).
 `CrawlQualityTracker._extract_field()` regex: `r"^([a-z_A-Z][a-z_A-Z0-9 ]+?):"`
+
+**Anti-ban crawl (2026-03-07):** `PharmacyFetcher` rotates from 10 real browser UAs and sends full `BROWSER_HEADERS` (Sec-Fetch-*, Accept-Encoding, etc.) per request. `BulkExtractor` sleeps `random.uniform(delay, delay*3)` between requests. `price_monitor.py` and `price_sync.py` use the same rotation. Optional proxy rotation: pass `--proxies proxies.txt` to `bulk_extract.py` and `discover_urls.py`.
+
+**EUR pricing in crawl:** benu.bg serves prices natively in EUR (Vue.js `variant.price` field). `price_eur` = raw EUR; `price` (BGN) = `price_eur × 1.95583`. CSV `Price` column currently exports BGN (Shopify store base). When store base switches to EUR, swap `csv_exporter.py:120` to `product.price_eur` — marked with `TODO(EUR-transition)`.
 
 **Known benu.bg data issues:**
 - 2 Vichy Dercos combo products: empty price (combo price rendered differently — not a code bug)
