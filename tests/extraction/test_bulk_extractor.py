@@ -239,19 +239,42 @@ class TestBulkExtractorStateResume:
 
 
 def test_proxy_rotation_sets_session_proxies(tmp_path):
-    """When proxies are provided, session.proxies is updated before each request."""
-    from unittest.mock import patch, MagicMock
+    """When proxies are provided, random.choice picks from the list and sets session.proxies."""
+    from unittest.mock import patch
+    import requests
 
     proxies = [
         "http://user:pass@proxy1.example.com:8001",
         "http://user:pass@proxy2.example.com:8002",
     ]
-    extractor = BulkExtractor(
+    bulk = BulkExtractor(
         output_csv=str(tmp_path / "out.csv"),
         output_dir=str(tmp_path),
         proxies=proxies,
+        validate=False,
     )
-    assert extractor.proxies == proxies
+
+    captured_sessions = []
+    OriginalSession = requests.Session
+
+    class CapturingSession(OriginalSession):
+        def __init__(self):
+            super().__init__()
+            captured_sessions.append(self)
+
+    with patch("src.extraction.bulk_extractor.requests.Session", CapturingSession):
+        with patch("src.extraction.bulk_extractor.random.choice", return_value=proxies[0]) as mock_choice:
+            bulk.extract_all(
+                urls=["https://benu.bg/product-1"],
+                extractor_class=FakeExtractor,
+                limit=1,
+            )
+
+    mock_choice.assert_called_with(proxies)
+    assert len(captured_sessions) == 1
+    session = captured_sessions[0]
+    assert session.proxies.get("http") == proxies[0]
+    assert session.proxies.get("https") == proxies[0]
 
 
 def test_no_proxies_by_default(tmp_path):
