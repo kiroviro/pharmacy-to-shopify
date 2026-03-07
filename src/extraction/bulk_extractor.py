@@ -16,6 +16,7 @@ import csv
 import json
 import logging
 import os
+import random
 import time
 from datetime import datetime
 
@@ -80,6 +81,10 @@ class BulkExtractor:
 
         # Quality tracker (only active when validate=True)
         self._tracker = CrawlQualityTracker() if validate else None
+
+    def _jitter_sleep(self) -> None:
+        """Sleep for a random duration between delay and delay*3 seconds."""
+        time.sleep(random.uniform(self.delay, self.delay * 3.0))
 
     def load_state(self) -> bool:
         """Load previous extraction state for resume."""
@@ -324,7 +329,7 @@ class BulkExtractor:
 
                 # Rate limiting
                 if i < total_urls:
-                    time.sleep(self.delay)
+                    self._jitter_sleep()
 
         session.close()
 

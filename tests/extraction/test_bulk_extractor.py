@@ -236,3 +236,22 @@ class TestBulkExtractorStateResume:
         assert "Product product-1" in titles
         assert "Product product-2" in titles
         assert "Product product-3" in titles
+
+
+def test_jitter_sleep_calls_uniform_with_correct_range():
+    """BulkExtractor._jitter_sleep sleeps for uniform(delay, delay*3)."""
+    from unittest.mock import patch, call
+    import random as _random
+
+    extractor = BulkExtractor(
+        output_csv="/tmp/test_jitter.csv",
+        output_dir="/tmp/test_jitter_dir",
+        delay=1.0,
+    )
+
+    sleep_calls = []
+    with patch("src.extraction.bulk_extractor.time.sleep", side_effect=lambda t: sleep_calls.append(t)):
+        with patch("src.extraction.bulk_extractor.random.uniform", return_value=2.5) as mock_uniform:
+            extractor._jitter_sleep()
+            mock_uniform.assert_called_once_with(1.0, 3.0)
+    assert sleep_calls == [2.5]
