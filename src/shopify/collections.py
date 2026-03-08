@@ -167,6 +167,51 @@ class ShopifyCollectionCreator:
             condition="0",
         )
 
+    def update_sale_collection(self, title: str = "Намаления") -> bool:
+        """Update the existing sale collection rule to compare_at_price > 0.
+
+        Use this when the collection already exists and needs its rule changed
+        in place (preserves SEO history and collection ID).
+        """
+        if self.dry_run:
+            print(f"  [DRY RUN] Would update: {title} → variant_compare_at_price > 0")
+            return True
+
+        from urllib.parse import quote
+
+        result = self.client.rest_request(
+            "GET", f"smart_collections.json?title={quote(title)}&limit=1"
+        )
+        if not result or not result.get("smart_collections"):
+            logger.error("Collection '%s' not found — cannot update", title)
+            return False
+
+        collection_id = result["smart_collections"][0]["id"]
+
+        data = {
+            "smart_collection": {
+                "id": collection_id,
+                "rules": [
+                    {
+                        "column": "variant_compare_at_price",
+                        "relation": "greater_than",
+                        "condition": "0",
+                    }
+                ],
+                "disjunctive": False,
+            }
+        }
+
+        update_result = self.client.rest_request(
+            "PUT", f"smart_collections/{collection_id}.json", data
+        )
+        if update_result and "smart_collection" in update_result:
+            logger.info("Updated: %s (ID: %s) → compare_at_price > 0", title, collection_id)
+            return True
+
+        logger.error("Failed to update: %s", title)
+        return False
+
     def _load_vendors_from_csv(self, csv_path: str) -> set[str]:
         """Load all unique vendor names from CSV (lowercase)."""
         vendors = set()

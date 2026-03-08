@@ -368,3 +368,49 @@ class TestCreateSaleCollection:
         captured = capsys.readouterr()
         assert "[DRY RUN]" in captured.out
         assert "greater_than" in captured.out
+
+
+# ---------------------------------------------------------------------------
+# update_sale_collection (PUT in-place rule update)
+# ---------------------------------------------------------------------------
+
+
+class TestUpdateSaleCollection:
+    def test_returns_false_when_collection_not_found(self):
+        creator = _creator(dry_run=False)
+        creator.client.rest_request = lambda method, endpoint, *a, **kw: (
+            {"smart_collections": []} if method == "GET" else None
+        )
+        result = creator.update_sale_collection()
+        assert result is False
+
+    def test_calls_put_with_correct_rule(self):
+        creator = _creator(dry_run=False)
+        put_calls = []
+
+        def fake_rest(method, endpoint, data=None):
+            if method == "GET":
+                return {"smart_collections": [{"id": 42, "title": "Намаления"}]}
+            if method == "PUT":
+                put_calls.append((endpoint, data))
+                return {"smart_collection": {"id": 42}}
+            return None
+
+        creator.client.rest_request = fake_rest
+        result = creator.update_sale_collection()
+
+        assert result is True
+        assert len(put_calls) == 1
+        endpoint, data = put_calls[0]
+        assert "42" in endpoint
+        rule = data["smart_collection"]["rules"][0]
+        assert rule["column"] == "variant_compare_at_price"
+        assert rule["relation"] == "greater_than"
+        assert rule["condition"] == "0"
+
+    def test_dry_run_does_not_call_api(self):
+        creator = _creator(dry_run=True)
+        calls = []
+        creator.client.rest_request = lambda *a, **kw: calls.append(a)
+        creator.update_sale_collection()
+        assert len(calls) == 0
