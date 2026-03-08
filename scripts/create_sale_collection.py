@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Create a "Намаления" smart collection in Shopify.
+Create or update the "Намаления" smart collection in Shopify.
 
 Auto-includes all products where compare_at_price > 0 (i.e., on sale).
+Shopify evaluates the rule live after every price write — no tagging needed.
 
 Usage:
-    python scripts/create_sale_collection.py              # Create collection
+    python scripts/create_sale_collection.py              # Create collection (first time)
+    python scripts/create_sale_collection.py --update     # Update rule on existing collection
     python scripts/create_sale_collection.py --dry-run    # Preview only
 """
 
