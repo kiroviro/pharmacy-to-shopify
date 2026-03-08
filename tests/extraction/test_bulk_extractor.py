@@ -400,6 +400,7 @@ def test_no_proxies_by_default(tmp_path):
 
 def test_custom_output_dir_receives_state_file(tmp_path):
     """BulkExtractor(output_dir=custom) writes extraction_state.json there, not to 'output/'."""
+    import json
     custom_dir = tmp_path / "my_output"
     bulk = BulkExtractor(
         output_csv=str(tmp_path / "out.csv"),
@@ -410,7 +411,10 @@ def test_custom_output_dir_receives_state_file(tmp_path):
         urls=["https://benu.bg/product-1"],
         extractor_class=FakeExtractor,
     )
-    assert (custom_dir / "extraction_state.json").exists()
+    state_file = custom_dir / "extraction_state.json"
+    assert state_file.exists()
+    state = json.loads(state_file.read_text())
+    assert "processed_urls" in state
 
 
 def test_jitter_sleep_calls_uniform_with_correct_range():

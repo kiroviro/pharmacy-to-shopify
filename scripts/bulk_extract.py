@@ -174,8 +174,9 @@ def main():
     # Set default output path
     output_csv = args.output or "data/benu.bg/raw/products.csv"
 
-    # Ensure output directory exists
-    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    # Ensure output directory exists (guard against bare filename with no dir component)
+    if parent := os.path.dirname(output_csv):
+        os.makedirs(parent, exist_ok=True)
 
     print("=" * 60)
     print("Bulk Product Extraction")
