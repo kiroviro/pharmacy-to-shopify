@@ -165,7 +165,11 @@ def main():
         sys.exit(1)
 
     with open(args.urls, "r", encoding="utf-8") as f:
-        urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        urls = [
+            line.strip().split("\t")[0]
+            for line in f
+            if line.strip() and not line.startswith("#")
+        ]
 
     if not urls:
         logger.error("No URLs found in input file")
