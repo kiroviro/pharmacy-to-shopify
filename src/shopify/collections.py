@@ -152,14 +152,20 @@ class ShopifyCollectionCreator:
         """Create a smart collection based on vendor (brand)."""
         return self._create_collection(vendor, "vendor", vendor, handle_prefix="brand-")
 
-    def create_sale_collection(self, title: str = "Намаления", tag: str = "Намаление") -> bool:
-        """Create a smart collection for discounted products (tag-based).
+    def create_sale_collection(self, title: str = "Намаления") -> bool:
+        """Create a smart collection for discounted products.
 
-        Uses the tag rule so the collection matches exactly what DiscountTagger
-        marks — products where compare_at_price > price. A compare_at_price > 0
-        rule would over-include products with stale compare_at_price data.
+        Uses compare_at_price > 0 so Shopify evaluates membership live on every
+        price write — no tagging script needed. viapharma-pricing sends
+        compare_at_price=None when removing a discount, which clears the field
+        and removes the product from the collection automatically.
         """
-        return self._create_collection(title=title, column="tag", condition=tag)
+        return self._create_collection(
+            title=title,
+            column="variant_compare_at_price",
+            relation="greater_than",
+            condition="0",
+        )
 
     def _load_vendors_from_csv(self, csv_path: str) -> set[str]:
         """Load all unique vendor names from CSV (lowercase)."""

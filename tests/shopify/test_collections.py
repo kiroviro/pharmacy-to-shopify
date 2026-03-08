@@ -346,8 +346,9 @@ class TestCreateSaleCollection:
         captured = capsys.readouterr()
         assert "[DRY RUN]" in captured.out
         assert "Намаления" in captured.out
-        assert "tag" in captured.out
-        assert "Намаление" in captured.out
+        assert "variant_compare_at_price" in captured.out
+        assert "greater_than" in captured.out
+        assert "0" in captured.out
 
     def test_dry_run_does_not_call_api(self):
         creator = _creator(dry_run=True)
