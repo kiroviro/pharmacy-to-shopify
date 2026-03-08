@@ -24,17 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Create a sale smart collection in Shopify")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview only, don't create the collection",
-    )
-    parser.add_argument(
-        "--title",
-        default="Намаления",
-        help="Collection title (default: Намаления)",
-    )
+    parser = argparse.ArgumentParser(description="Create or update the Намаления smart collection")
+    parser.add_argument("--dry-run", action="store_true", help="Preview only, don't modify Shopify")
+    parser.add_argument("--update", action="store_true", help="Update the rule on an existing collection in-place")
+    parser.add_argument("--title", default="Намаления", help="Collection title (default: Намаления)")
     parser.add_argument("--verbose", action="store_true", help="Debug logging")
 
     args = parser.parse_args()
@@ -45,25 +38,25 @@ def main():
     print("=" * 60)
     print("Sale Collection Creator")
     print("=" * 60)
-    print(f"  Shop: {shop}")
-    print(f"  Title: {args.title}")
+    print(f"  Shop:    {shop}")
+    print(f"  Title:   {args.title}")
+    print(f"  Mode:    {'update' if args.update else 'create'}")
     print(f"  Dry run: {args.dry_run}")
 
-    creator = ShopifyCollectionCreator(
-        shop=shop,
-        access_token=token,
-        dry_run=args.dry_run,
-    )
+    creator = ShopifyCollectionCreator(shop=shop, access_token=token, dry_run=args.dry_run)
 
-    # Check if already exists (single filtered API call)
-    if not args.dry_run and creator.collection_exists(args.title):
-        print(f"\n  Collection '{args.title}' already exists. Skipping.")
-        return
-
-    if creator.create_sale_collection(title=args.title):
-        print(f"\n  Created collection: {args.title}")
+    if args.update:
+        ok = creator.update_sale_collection(title=args.title)
+        verb = "Updated" if ok else "Failed to update"
     else:
-        print(f"\n  Failed to create collection: {args.title}")
+        if not args.dry_run and creator.collection_exists(args.title):
+            print(f"\n  Collection '{args.title}' already exists. Use --update to change its rule.")
+            return
+        ok = creator.create_sale_collection(title=args.title)
+        verb = "Created" if ok else "Failed to create"
+
+    print(f"\n  {verb} collection: {args.title}")
+    if not ok:
         sys.exit(1)
 
 
