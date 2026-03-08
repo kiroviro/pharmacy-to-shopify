@@ -135,6 +135,11 @@ def main():
         help="Path to file with proxy URLs (one per line). Blank lines and # comments ignored.",
     )
     parser.add_argument(
+        "--output-dir",
+        default="output",
+        help="Directory for state files and failed_urls.txt (default: output)",
+    )
+    parser.add_argument(
         "--retries",
         type=int,
         default=3,
@@ -201,6 +206,7 @@ def main():
     # Create bulk extractor
     extractor = BulkExtractor(
         output_csv=output_csv,
+        output_dir=args.output_dir,
         delay=args.delay,
         save_failed_html=args.save_failed_html,
         proxies=proxies,

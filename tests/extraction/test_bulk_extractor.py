@@ -398,6 +398,21 @@ def test_no_proxies_by_default(tmp_path):
     assert extractor.proxies is None
 
 
+def test_custom_output_dir_receives_state_file(tmp_path):
+    """BulkExtractor(output_dir=custom) writes extraction_state.json there, not to 'output/'."""
+    custom_dir = tmp_path / "my_output"
+    bulk = BulkExtractor(
+        output_csv=str(tmp_path / "out.csv"),
+        output_dir=str(custom_dir),
+        validate=False,
+    )
+    bulk.extract_all(
+        urls=["https://benu.bg/product-1"],
+        extractor_class=FakeExtractor,
+    )
+    assert (custom_dir / "extraction_state.json").exists()
+
+
 def test_jitter_sleep_calls_uniform_with_correct_range():
     """BulkExtractor._jitter_sleep sleeps for uniform(delay, delay*3)."""
     from unittest.mock import patch
