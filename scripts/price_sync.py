@@ -19,6 +19,8 @@ Usage:
     python3 scripts/price_sync.py --handles "handle1,handle2,handle3"
 """
 
+from __future__ import annotations
+
 import argparse
 import csv
 import logging

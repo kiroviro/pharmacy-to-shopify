@@ -39,6 +39,8 @@ SETUP:
     - SHOPIFY_ACCESS_TOKEN: Admin API access token
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
