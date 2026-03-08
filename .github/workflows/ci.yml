@@ -42,4 +42,17 @@ jobs:
           python-version: "3.11"
       - run: pip install detect-secrets
       - run: detect-secrets scan --baseline .secrets.baseline
-      - run: git diff --exit-code .secrets.baseline
+      - name: Check for new secrets (ignore timestamp)
+        run: |
+          python3 -c "
+          import json, subprocess, sys
+          with open('.secrets.baseline') as f:
+              new = json.load(f)
+          result = subprocess.run(['git', 'show', 'HEAD:.secrets.baseline'], capture_output=True, text=True)
+          old = json.loads(result.stdout)
+          new['generated_at'] = old['generated_at']
+          with open('.secrets.baseline', 'w') as f:
+              json.dump(new, f, indent=2)
+              f.write('\n')
+          "
+          git diff --exit-code .secrets.baseline
