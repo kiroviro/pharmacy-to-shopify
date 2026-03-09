@@ -39,7 +39,13 @@ class TestProductToMainRow:
         assert row["Title"] == full_product.title
         assert row["Vendor"] == full_product.brand
         assert row["SKU"] == full_product.sku
-        assert row["Price"] == full_product.price
+        assert row["Price"] == full_product.price_eur
+
+    def test_price_column_uses_eur_not_bgn(self, exporter, full_product):
+        """EUR transition: Price column must be EUR (price_eur), not BGN (price)."""
+        row = exporter.product_to_main_row(full_product)
+        assert row["Price"] == full_product.price_eur  # "6.39" EUR
+        assert row["Price"] != full_product.price       # not "12.50" BGN
 
     def test_prescription_product_is_draft(self, exporter, minimal_product):
         minimal_product.availability = "Само с рецепта"

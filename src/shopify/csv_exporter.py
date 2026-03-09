@@ -117,9 +117,8 @@ class ShopifyCSVExporter:
             'Option3 name': '',
             'Option3 value': '',
             'Option3 Linked To': '',
-            # TODO(EUR-transition): swap to product.price_eur when Shopify store base currency changes to EUR
-            # and drop the 'Price EUR' column (it will become redundant).
-            'Price': product.price,
+            # Store base currency is EUR (since Jan 2026 Eurozone accession).
+            'Price': product.price_eur,
             'Price EUR': product.price_eur or '',
             'Compare-at price': product.original_price or '',
             'Cost per item': '',
