@@ -22,8 +22,30 @@ python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0
 python scripts/discover_urls.py --proxies proxies.txt
 python scripts/bulk_extract.py --urls data/benu.bg/raw/urls.txt --delay 1.0 --proxies proxies.txt --retries 3
 
-# Retry failed URLs after a crawl:
-python scripts/bulk_extract.py --urls output/failed_urls.txt --delay 2.0 --proxies proxies.txt --retries 3 --output data/benu.bg/raw/products_retry.csv
+# Retry failed URLs after a crawl (two-pass: no proxy first, then with proxies):
+python scripts/bulk_extract.py --urls output/failed_urls.txt --output data/benu.bg/raw/products_retry1.csv --output-dir output/retry1 --delay 1.5 --retries 3
+python scripts/bulk_extract.py --urls output/retry1/failed_urls.txt --output data/benu.bg/raw/products_retry2.csv --output-dir output/retry2 --delay 2.0 --retries 3 --proxies proxies.txt
+
+# Merge retry results into products.csv (run after retries complete):
+python3 -c "
+import pandas as pd
+from pathlib import Path
+main = pd.read_csv('data/benu.bg/raw/products.csv')
+orig_handles = set(main[main['Title'].fillna('').str.strip() != '']['URL handle'].dropna())
+frames = [main]
+for path in ['data/benu.bg/raw/products_retry1.csv', 'data/benu.bg/raw/products_retry2.csv']:
+    p = Path(path)
+    if p.exists() and p.stat().st_size > 200:
+        df = pd.read_csv(path)
+        frames.append(df[~df['URL handle'].isin(orig_handles)])
+        orig_handles |= set(df['URL handle'].dropna())
+merged = pd.concat(frames)
+merged.to_csv('data/benu.bg/raw/products.csv', index=False)
+print(f'Final: {(merged[\"Title\"].fillna(\"\").str.strip() != \"\").sum()} products')
+"
+
+# Split for Shopify import (outputs to output/YYYY.Mon.DD/export_NNN.csv):
+python scripts/chunk_csv.py data/benu.bg/raw/products.csv
 ```
 
 `proxies.txt` — one proxy URL per line (`http://user:pass@host:port`), blank lines and `#` comments ignored. File is gitignored (never committed). See `proxies.txt` in project root for Oxylabs credentials.
@@ -51,7 +73,7 @@ Beyond the 8 pipeline scripts above, grouped by function:
 | | `price_monitor.py` | Ongoing price change detection |
 | **Discount visibility** | `tag_discounted_products.py` | Tag products where compare_at > price with "Намаление"; run after every viapharma-pricing repricing |
 | | `create_sale_collection.py` | Create "Намаления" smart collection (tag-based rule) |
-| **Shopify admin** | `chunk_csv.py` | Split large CSV for Shopify's import limit |
+| **Shopify admin** | `chunk_csv.py` | Split large CSV into Shopify chunks; outputs to `output/YYYY.Mon.DD/export_NNN.csv` |
 | | `create_shopify_menus.py` | Build navigation menus via API |
 | | `configure_shopify_filters.py` | Set up storefront filters |
 | | `shopify_delete_products.py` | Bulk product deletion |
@@ -159,7 +181,9 @@ All in `config/`:
 **Validation warning format:** `"field_name: description"` (underscores, not dots).
 `CrawlQualityTracker._extract_field()` regex: `r"^([a-z_A-Z][a-z_A-Z0-9 ]+?):"`
 
-**Anti-ban crawl (2026-03-07):** `PharmacyFetcher` rotates from 10 real browser UAs and sends full `BROWSER_HEADERS` (Sec-Fetch-*, Accept-Encoding, etc.) per request. `BulkExtractor` sleeps `random.uniform(delay, delay*3)` between requests. `price_monitor.py` and `price_sync.py` use the same rotation. Optional proxy rotation: pass `--proxies proxies.txt` to `bulk_extract.py` and `discover_urls.py`. `--retries N` (default 3) retries `requests.RequestException` failures with jitter sleep; parse errors are not retried. Network errors (HTTPError, ProxyError) count toward the quality gate via `CrawlQualityTracker.record_network_error()`.
+**Anti-ban crawl (2026-03-07):** `PharmacyFetcher` rotates from 10 real browser UAs and sends full `BROWSER_HEADERS` (Sec-Fetch-*, Accept-Encoding, etc.) per request. `BulkExtractor` sleeps `random.uniform(delay, delay*3)` between requests. `price_monitor.py` and `price_sync.py` use the same rotation. Optional proxy rotation: pass `--proxies proxies.txt` to `bulk_extract.py` and `discover_urls.py`. `--retries N` (default 3) retries `requests.RequestException` failures with jitter sleep; parse errors are not retried. Network errors (HTTPError, ProxyError) count toward the quality gate via `CrawlQualityTracker.record_network_error()`. `--output-dir` sets where `extraction_state.json` and `failed_urls.txt` are written (default: `output/`).
+
+**failed_urls.txt format:** Written as `url\terror` (tab-separated). The bulk_extract.py reader strips the error part automatically — safe to pass directly as `--urls` input for retries.
 
 **EUR pricing in crawl:** benu.bg serves prices natively in EUR (Vue.js `variant.price` field). `price_eur` = raw EUR; `price` (BGN) = `price_eur × 1.95583`. CSV `Price` column currently exports BGN (Shopify store base). When store base switches to EUR, swap `csv_exporter.py:120` to `product.price_eur` — marked with `TODO(EUR-transition)`.
 
