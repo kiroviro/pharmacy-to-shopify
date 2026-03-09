@@ -20,7 +20,6 @@ import csv
 import os
 import sys
 from datetime import date
-from pathlib import Path
 
 # Default chunk size (products per file)
 DEFAULT_CHUNK_SIZE = 4000  # Conservative limit under Shopify's 5,000
@@ -104,8 +103,6 @@ def chunk_csv(
 
     # Write chunks to files
     output_files = []
-    base_name = Path(input_csv).stem
-
     for i, chunk in enumerate(chunks, 1):
         output_path = os.path.join(output_dir, f"export_{i:03d}.csv")
 
