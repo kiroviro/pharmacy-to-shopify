@@ -9,13 +9,17 @@ Shopify Import Limits:
 Usage:
     python3 scripts/chunk_csv.py data/benu.bg/raw/products.csv
     python3 scripts/chunk_csv.py data/benu.bg/raw/products.csv --chunk-size 4000
-    python3 scripts/chunk_csv.py data/benu.bg/raw/products.csv --output-dir output/benu.bg
+    python3 scripts/chunk_csv.py data/benu.bg/raw/products.csv --output-dir output/custom
+
+Output files go to output/YYYY.Mon.DD/ by default (e.g. output/2026.Mar.09/)
+and are named export_001.csv, export_002.csv, etc.
 """
 
 import argparse
 import csv
 import os
 import sys
+from datetime import date
 from pathlib import Path
 
 # Default chunk size (products per file)
@@ -103,7 +107,7 @@ def chunk_csv(
     base_name = Path(input_csv).stem
 
     for i, chunk in enumerate(chunks, 1):
-        output_path = os.path.join(output_dir, f"{base_name}_{i:03d}.csv")
+        output_path = os.path.join(output_dir, f"export_{i:03d}.csv")
 
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -144,8 +148,9 @@ def main():
         print(f"Error: File not found: {args.input_csv}")
         sys.exit(1)
 
-    # Default output dir
-    output_dir = args.output_dir or str(Path(args.input_csv).parent)
+    # Default output dir: output/YYYY.Mon.DD/
+    today = date.today().strftime("%Y.%b.%d")
+    output_dir = args.output_dir or f"output/{today}"
 
     # Count products
     print(f"Analyzing {args.input_csv}...")
