@@ -16,6 +16,19 @@ from ..models import ExtractedProduct, ProductImage
 
 logger = logging.getLogger(__name__)
 
+
+def _clean_id(value: str | None) -> str:
+    """Strip .0 float suffix from numeric ID strings (barcode, SKU).
+
+    Pandas reads numeric columns as float64, producing "4607010243104.0".
+    This ensures the CSV always contains "4607010243104".
+    """
+    if not value:
+        return value or ""
+    s = str(value)
+    return s[:-2] if s.endswith(".0") else s
+
+
 # Official Shopify CSV columns (exact template format)
 SHOPIFY_FIELDNAMES = [
     'Title', 'URL handle', 'Description', 'Vendor', 'Product category', 'Type', 'Tags',
@@ -106,8 +119,8 @@ class ShopifyCSVExporter:
             'Tags': tags_str,
             'Published on online store': published,
             'Status': status,
-            'SKU': product.sku,
-            'Barcode': product.barcode,
+            'SKU': _clean_id(product.sku),
+            'Barcode': _clean_id(product.barcode),
             'Option1 name': '',
             'Option1 value': '',
             'Option1 Linked To': '',

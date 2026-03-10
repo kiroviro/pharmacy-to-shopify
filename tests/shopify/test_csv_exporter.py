@@ -47,6 +47,23 @@ class TestProductToMainRow:
         assert row["Price"] == full_product.price_eur  # "6.39" EUR
         assert row["Price"] != full_product.price       # not "12.50" BGN
 
+    def test_barcode_written_as_clean_integer_string(self, exporter, full_product):
+        """Barcode must never have a .0 float suffix in the CSV output."""
+        full_product.barcode = "4607010243104.0"
+        row = exporter.product_to_main_row(full_product)
+        assert row["Barcode"] == "4607010243104"
+
+    def test_sku_written_as_clean_integer_string(self, exporter, full_product):
+        """SKU must never have a .0 float suffix in the CSV output."""
+        full_product.sku = "1004.0"
+        row = exporter.product_to_main_row(full_product)
+        assert row["SKU"] == "1004"
+
+    def test_barcode_with_no_float_suffix_unchanged(self, exporter, full_product):
+        """Clean barcodes (no .0) must pass through unchanged."""
+        row = exporter.product_to_main_row(full_product)
+        assert row["Barcode"] == "3800123456789"
+
     def test_prescription_product_is_draft(self, exporter, minimal_product):
         minimal_product.availability = "Само с рецепта"
         row = exporter.product_to_main_row(minimal_product)
