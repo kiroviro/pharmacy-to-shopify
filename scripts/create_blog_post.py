@@ -76,3 +76,64 @@ def publish_article(
         sys.exit(1)
     article = data["article"]
     return f"https://viapharma.us/blogs/{blog_handle}/{article['handle']}"
+
+
+def main() -> None:
+    import argparse
+    import os
+    from pathlib import Path
+
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    parser = argparse.ArgumentParser(description="Publish a blog post to Shopify.")
+    parser.add_argument("html_file", help="Path to the HTML content file")
+    parser.add_argument("--blog", default="Здравни съвети", help="Blog title (default: Здравни съвети)")
+    parser.add_argument("--dry-run", action="store_true", help="Print metadata without publishing")
+    args = parser.parse_args()
+
+    # Load credentials
+    shop = os.environ.get("SHOPIFY_SHOP_URL", "")
+    token = os.environ.get("SHOPIFY_ACCESS_TOKEN", "")
+    if not shop or not token:
+        print("Error: SHOPIFY_SHOP_URL and SHOPIFY_ACCESS_TOKEN must be set in .env")
+        sys.exit(1)
+    base_url = f"https://{shop}/admin/api/2025-01"
+
+    # Read HTML file
+    html_path = Path(args.html_file)
+    try:
+        body_html = html_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print(f"File not found: {args.html_file}")
+        sys.exit(1)
+
+    article_data = {
+        "title": ARTICLE_TITLE,
+        "author": ARTICLE_AUTHOR,
+        "tags": ARTICLE_TAGS,
+        "body_html": body_html,
+        "published": True,
+    }
+
+    if args.dry_run:
+        print("--- DRY RUN ---")
+        print(f"Blog:    {args.blog}")
+        print(f"Title:   {article_data['title']}")
+        print(f"Author:  {article_data['author']}")
+        print(f"Tags:    {article_data['tags']}")
+        print(f"Body:    {body_html[:200]}...")
+        return
+
+    session = requests.Session()
+    session.headers["X-Shopify-Access-Token"] = token
+
+    blog_id, blog_handle = find_or_create_blog(session, base_url, args.blog)
+    check_no_duplicate(session, base_url, blog_id, ARTICLE_TITLE)
+    url = publish_article(session, base_url, blog_id, blog_handle, article_data)
+    print(f"Published: {url}")
+
+
+if __name__ == "__main__":
+    main()
