@@ -49,7 +49,7 @@ def check_no_duplicate(
     session: requests.Session, base_url: str, blog_id: int, article_title: str
 ) -> None:
     """Exit with error if an article with the same title already exists."""
-    resp = session.get(f"{base_url}/blogs/{blog_id}/articles.json")
+    resp = session.get(f"{base_url}/blogs/{blog_id}/articles.json", params={"limit": 250})
     resp.raise_for_status()
 
     articles = resp.json().get("articles", [])
