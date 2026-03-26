@@ -73,10 +73,14 @@ def publish_article(
     if resp.status_code == 403:
         print(SCOPE_ERROR_MSG)
         sys.exit(1)
-    data = resp.json()
-    if "errors" in data or resp.status_code >= 400:
-        print(f"Error publishing article: {data.get('errors', resp.text)}")
+    if resp.status_code >= 400:
+        try:
+            detail = resp.json().get("errors", resp.text)
+        except Exception:
+            detail = resp.text
+        print(f"Error publishing article: {detail}")
         sys.exit(1)
+    data = resp.json()
     article = data["article"]
     return f"https://viapharma.us/blogs/{blog_handle}/{article['handle']}"
 
