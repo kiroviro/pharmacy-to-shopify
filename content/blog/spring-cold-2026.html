@@ -1,3 +1,55 @@
+<style>
+.blog-product-card {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin: 20px 0 40px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.blog-product-card:hover { border-color: #0096C7; box-shadow: 0 4px 20px rgba(0,150,199,0.12); }
+.blog-product-card__img-wrap {
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  background: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e8edf2;
+  overflow: hidden;
+}
+.blog-product-card__img-wrap img { width: 140px; height: 140px; object-fit: contain; }
+.blog-product-card__info { flex: 1; min-width: 0; }
+.blog-product-card__name { font-weight: 700; font-size: 1.1rem; margin: 0 0 8px; line-height: 1.3; }
+.blog-product-card__price { color: #0096C7; font-weight: 800; font-size: 1.4rem; margin: 0 0 16px; }
+.blog-product-card__btn {
+  display: inline-block;
+  background: #0096C7;
+  color: #fff !important;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: background 0.2s, transform 0.1s;
+}
+.blog-product-card__btn:hover { background: #007aa3; transform: translateY(-1px); }
+@media (max-width: 600px) {
+  .blog-product-card { flex-direction: column; text-align: center; padding: 20px; gap: 16px; }
+  .blog-product-card__img-wrap { width: 140px; height: 140px; }
+  .blog-product-card__img-wrap img { width: 120px; height: 120px; }
+}
+</style>
+
 <p>Като родители, всички сме минавали през онези неспокойни нощи, когато детето ни е болно — треска, запушен нос, суха кашлица. Особено напролет, когато времето се сменя бързо, децата са по-уязвими към вируси и настинки. Тази статия споделя какво препоръча нашият лекар при пролетна настинка — и защо всеки от тези продукти има своята роля.</p>
 
 <h2>Кога да потърсите лекар?</h2>
@@ -8,17 +60,53 @@
 
 <p>Ибупром Синус съдържа ибупрофен (болкоуспокояващ и антипиретик) и псевдоефедрин (деконгестант). Действа едновременно срещу главоболието, температурата и запушения нос — три от най-честите симптоми при пролетния грип. Подходящ е за кратковременна употреба при остри симптоми. Следвайте препоръчаната от лекаря дозировка.</p>
 
+<a class="blog-product-card" href="https://viapharma.us/products/ibuprom-sinus-tabletki-200mg-30mg-h-12">
+  <div class="blog-product-card__img-wrap"><img src="https://cdn.shopify.com/s/files/1/0859/7995/5537/files/334_482343aa-1f46-46c4-95e4-24de3a6fc5f0.webp?v=1773068582" alt="Ибупром Синус" loading="lazy"></div>
+  <div class="blog-product-card__info">
+    <p class="blog-product-card__name">Ибупром Синус таблетки 200мг/30мг х12</p>
+    <p class="blog-product-card__price">€4.49</p>
+    <span class="blog-product-card__btn">Добави в количката</span>
+  </div>
+</a>
+
 <h2><a href="https://viapharma.us/products/nazik-nazalen-sprej-za-deca-10ml">Назик назален спрей за деца</a> — бързо облекчение на конгестията</h2>
 
 <p>Когато носът е запушен, децата не могат да спят и ядат добре. Назик за деца съдържа оксиметазолин в детска доза и действа бързо — в рамките на минути. Препоръчва се 3–4 пъти на ден. Важно: не се прилага повече от 5–7 последователни дни, за да се избегне ефект на рикошет.</p>
+
+<a class="blog-product-card" href="https://viapharma.us/products/nazik-nazalen-sprej-za-deca-10ml">
+  <div class="blog-product-card__img-wrap"><img src="https://cdn.shopify.com/s/files/1/0859/7995/5537/files/77.webp?v=1773073248" alt="Назик назален спрей за деца" loading="lazy"></div>
+  <div class="blog-product-card__info">
+    <p class="blog-product-card__name">Назик назален спрей за деца 10мл</p>
+    <p class="blog-product-card__price">€4.93</p>
+    <span class="blog-product-card__btn">Добави в количката</span>
+  </div>
+</a>
 
 <h2><a href="https://viapharma.us/products/noktitus-sirop-za-suha-kaslica-200-ml">Ноктитус сироп</a> — при суха, дразнеща кашлица</h2>
 
 <p>Сухата кашлица е особено изтощителна — не дава на детето да спи и дразни гърлото. Ноктитус сироп действа успокояващо върху рефлекса на кашлица. Дозировката е по 1 супена лъжица на 5–6 часа според препоръката на лекаря. Приемайте само при суха (непродуктивна) кашлица.</p>
 
+<a class="blog-product-card" href="https://viapharma.us/products/noktitus-sirop-za-suha-kaslica-200-ml">
+  <div class="blog-product-card__img-wrap"><img src="https://cdn.shopify.com/s/files/1/0859/7995/5537/files/6883_c6fdbafe-adab-477f-9b68-ce502919b5d9.webp?v=1773078203" alt="Ноктитус сироп" loading="lazy"></div>
+  <div class="blog-product-card__info">
+    <p class="blog-product-card__name">Ноктитус сироп за суха кашлица 200мл</p>
+    <p class="blog-product-card__price">€10.13</p>
+    <span class="blog-product-card__btn">Добави в количката</span>
+  </div>
+</a>
+
 <h2><a href="https://viapharma.us/products/regulatpro-bio-solucio-350ml">Регулатпро Био</a> — имунна подкрепа и чревен баланс</h2>
 
 <p>При вирусно заболяване (особено ако детето е приемало антибиотици), пробиотикът помага за възстановяване на чревната микрофлора и поддържа имунната система. Регулатпро Био е ферментирален продукт с висока бионаличност. Препоръчва се 3 пъти по 1 супена лъжица дневно по времето на заболяването.</p>
+
+<a class="blog-product-card" href="https://viapharma.us/products/regulatpro-bio-solucio-350ml">
+  <div class="blog-product-card__img-wrap"><img src="https://cdn.shopify.com/s/files/1/0859/7995/5537/files/872_1f8b1f14-91d9-4a8a-acdb-b677c189755e.webp?v=1773074912" alt="Регулатпро Био" loading="lazy"></div>
+  <div class="blog-product-card__info">
+    <p class="blog-product-card__name">Регулатпро Био Солуцио 350мл</p>
+    <p class="blog-product-card__price">€61.04</p>
+    <span class="blog-product-card__btn">Добави в количката</span>
+  </div>
+</a>
 
 <hr>
 
