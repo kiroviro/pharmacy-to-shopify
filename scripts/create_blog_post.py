@@ -50,6 +50,9 @@ def check_no_duplicate(
 ) -> None:
     """Exit with error if an article with the same title already exists."""
     resp = session.get(f"{base_url}/blogs/{blog_id}/articles.json", params={"limit": 250})
+    if resp.status_code == 403:
+        print(SCOPE_ERROR_MSG)
+        sys.exit(1)
     resp.raise_for_status()
 
     articles = resp.json().get("articles", [])
