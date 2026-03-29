@@ -435,6 +435,7 @@ class TestCreateLiquidationCollection:
         assert "Ликвидации" in captured.out
         assert "variant_compare_at_price" in captured.out
         assert "greater_than" in captured.out
+        assert "likvidatsii" in captured.out
 
     def test_dry_run_does_not_call_api(self):
         creator = _creator(dry_run=True)
