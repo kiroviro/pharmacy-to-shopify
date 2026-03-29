@@ -414,3 +414,54 @@ class TestUpdateSaleCollection:
         creator.client.rest_request = lambda *a, **kw: calls.append(a)
         creator.update_sale_collection()
         assert len(calls) == 0
+
+
+# ---------------------------------------------------------------------------
+# Liquidation collection (compare_at_price > 0, handle = likvidatsii)
+# ---------------------------------------------------------------------------
+
+
+class TestCreateLiquidationCollection:
+    def test_dry_run_returns_true(self):
+        creator = _creator(dry_run=True)
+        result = creator.create_liquidation_collection()
+        assert result is True
+
+    def test_dry_run_prints_preview(self, capsys):
+        creator = _creator(dry_run=True)
+        creator.create_liquidation_collection()
+        captured = capsys.readouterr()
+        assert "[DRY RUN]" in captured.out
+        assert "Ликвидации" in captured.out
+        assert "variant_compare_at_price" in captured.out
+        assert "greater_than" in captured.out
+
+    def test_dry_run_does_not_call_api(self):
+        creator = _creator(dry_run=True)
+        calls = []
+        creator.client.rest_request = lambda *a, **kw: calls.append((a, kw))
+        creator.create_liquidation_collection()
+        assert len(calls) == 0
+
+    def test_calls_api_with_correct_handle(self):
+        creator = _creator(dry_run=False)
+        post_calls = []
+
+        def fake_rest(method, endpoint, data=None):
+            if method == "POST":
+                post_calls.append(data)
+                return {"smart_collection": {"id": 99, "title": "Ликвидации"}}
+            return None
+
+        creator.client.rest_request = fake_rest
+        result = creator.create_liquidation_collection()
+
+        assert result is True
+        assert len(post_calls) == 1
+        sc = post_calls[0]["smart_collection"]
+        assert sc["handle"] == "likvidatsii"
+        assert sc["title"] == "Ликвидации"
+        rule = sc["rules"][0]
+        assert rule["column"] == "variant_compare_at_price"
+        assert rule["relation"] == "greater_than"
+        assert rule["condition"] == "0"

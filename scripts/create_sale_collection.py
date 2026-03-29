@@ -26,10 +26,11 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Create or update the Намаления smart collection")
+    parser = argparse.ArgumentParser(description="Create or update sale/liquidation smart collections")
     parser.add_argument("--dry-run", action="store_true", help="Preview only, don't modify Shopify")
     parser.add_argument("--update", action="store_true", help="Update the rule on an existing collection in-place")
     parser.add_argument("--title", default="Намаления", help="Collection title (default: Намаления)")
+    parser.add_argument("--likvidatsii", action="store_true", help="Create the Ликвидации collection (handle: likvidatsii)")
     parser.add_argument("--verbose", action="store_true", help="Debug logging")
 
     args = parser.parse_args()
@@ -41,23 +42,31 @@ def main():
     print("Sale Collection Creator")
     print("=" * 60)
     print(f"  Shop:    {shop}")
-    print(f"  Title:   {args.title}")
-    print(f"  Mode:    {'update' if args.update else 'create'}")
     print(f"  Dry run: {args.dry_run}")
 
     creator = ShopifyCollectionCreator(shop=shop, access_token=token, dry_run=args.dry_run)
 
-    if args.update:
+    if args.likvidatsii:
+        print("  Mode:    create Ликвидации collection")
+        ok = creator.create_liquidation_collection()
+        verb = "Created" if ok else "Failed to create"
+        print(f"\n  {verb} collection: Ликвидации (handle: likvidatsii)")
+    elif args.update:
+        print(f"  Title:   {args.title}")
+        print("  Mode:    update")
         ok = creator.update_sale_collection(title=args.title)
         verb = "Updated" if ok else "Failed to update"
+        print(f"\n  {verb} collection: {args.title}")
     else:
+        print(f"  Title:   {args.title}")
+        print("  Mode:    create")
         if not args.dry_run and creator.collection_exists(args.title):
             print(f"\n  Collection '{args.title}' already exists. Use --update to change its rule.")
             return
         ok = creator.create_sale_collection(title=args.title)
         verb = "Created" if ok else "Failed to create"
+        print(f"\n  {verb} collection: {args.title}")
 
-    print(f"\n  {verb} collection: {args.title}")
     if not ok:
         sys.exit(1)
 
