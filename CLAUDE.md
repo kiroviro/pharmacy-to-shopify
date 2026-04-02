@@ -191,6 +191,14 @@ All in `config/`:
 - 2 Vichy Dercos combo products: empty price (combo price rendered differently — not a code bug)
 - 119 duplicate SKU groups: 106 near-expiry "Годен до" variants + 13 true duplicates
 
+**Google Ads — Bulgarian market limitations:**
+- Google Shopping / Merchant Center feed is **not available in Bulgaria**. PMax campaigns targeting Bulgaria will show "No products for any locations" — this is a platform limitation, not a configuration error.
+- Many Google Ads features are disabled for the Bulgarian market (confirmed by Google partner).
+- Recommended campaign type for Bulgaria: **Dynamic Search Ads (DSA)** — uses URL/content crawling, does not depend on Shopping feed.
+- Google Ads API developer token (`U8t0BWmbOgkKz9hga9_rkw`) has **test-only access** — cannot modify production accounts. Use Playwright browser automation for campaign management until Basic/Standard access is approved.
+- Active account: **825-619-0101 (ViaPharma US, EUR)**. Account 306-969-3810 is canceled (was BGN).
+- Manager account: **966-252-5245 (Viapharma)**.
+
 **Shopify API deprecations (deadline Apr 1 2026):**
 - `productsCount` — must pass `(limit: null)` for uncapped count; fixed in `shopify_delete_products.py`
 - `Blog.articlesCount` in Liquid — platform-level property with no argument syntax; no fix possible in Liquid code
