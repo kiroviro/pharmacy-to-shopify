@@ -86,5 +86,5 @@ def fetch_source_price(
             return None, None, "Product not found (404)"
         status = e.response.status_code if e.response is not None else "unknown"
         return None, None, f"HTTP {status}"
-    except Exception as e:
+    except (requests.RequestException, ValueError, AttributeError) as e:
         return None, None, str(e)[:50]

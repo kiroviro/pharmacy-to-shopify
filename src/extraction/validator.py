@@ -110,7 +110,7 @@ class SpecificationValidator:
                             errors.append(
                                 f"image URL: placeholder domain ({hostname})"
                             )
-                    except Exception:
+                    except (ValueError, AttributeError):
                         pass
 
         # price_eur consistency: if both set, deviation must be <= 1%

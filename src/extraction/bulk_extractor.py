@@ -114,7 +114,7 @@ class BulkExtractor:
                                 len(self.processed_urls), self.total_extracted,
                                 self.total_extracted + self.total_image_rows)
                     return True
-            except Exception as e:
+            except (json.JSONDecodeError, KeyError, OSError) as e:
                 logger.warning("Could not load state: %s", e)
         return False
 
@@ -154,7 +154,7 @@ class BulkExtractor:
                         products += 1
                     else:
                         image_rows += 1
-        except Exception as e:
+        except (OSError, csv.Error) as e:
             logger.warning("Could not read CSV for stats: %s", e)
             return {"products": 0, "image_rows": 0, "total_rows": 0}
 
@@ -377,7 +377,7 @@ class BulkExtractor:
 
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(html)
-        except Exception:
+        except OSError:
             pass
 
     def _print_summary(self, total_attempted: int) -> None:

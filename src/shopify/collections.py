@@ -98,6 +98,7 @@ class ShopifyCollectionCreator:
         condition: str,
         handle_prefix: str = "",
         relation: str = "equals",
+        handle: str = "",
     ) -> bool:
         """
         Create a smart collection with a single rule.
@@ -108,11 +109,14 @@ class ShopifyCollectionCreator:
             condition: Rule condition value
             handle_prefix: Optional prefix for the handle (e.g., "brand-")
             relation: Rule relation ("equals", "greater_than", etc.)
+            handle: Explicit handle override (skips generate_handle if set)
 
         Returns:
             True if created successfully
         """
-        handle = generate_handle(title, prefix=handle_prefix)
+        explicit_handle = bool(handle)
+        if not handle:
+            handle = generate_handle(title, prefix=handle_prefix)
 
         data = {
             "smart_collection": {
@@ -131,7 +135,8 @@ class ShopifyCollectionCreator:
         }
 
         if self.dry_run:
-            print(f"  [DRY RUN] Would create: {title} ({column}: {relation} {condition})")
+            handle_info = f", handle: {handle}" if explicit_handle else ""
+            print(f"  [DRY RUN] Would create: {title} ({column}: {relation} {condition}{handle_info})")
             return True
 
         result = self.client.rest_request("POST", "smart_collections.json", data)
@@ -173,37 +178,13 @@ class ShopifyCollectionCreator:
         Uses a hardcoded handle 'likvidatsii' so the URL is always
         /collections/likvidatsii regardless of how the title is transliterated.
         """
-        handle = "likvidatsii"
-
-        data = {
-            "smart_collection": {
-                "title": title,
-                "handle": handle,
-                "rules": [
-                    {
-                        "column": "variant_compare_at_price",
-                        "relation": "greater_than",
-                        "condition": "0",
-                    }
-                ],
-                "disjunctive": False,
-                "published": True,
-            }
-        }
-
-        if self.dry_run:
-            print(f"  [DRY RUN] Would create: {title} (variant_compare_at_price: greater_than 0, handle: {handle})")
-            return True
-
-        result = self.client.rest_request("POST", "smart_collections.json", data)
-
-        if result and "smart_collection" in result:
-            collection_id = result["smart_collection"]["id"]
-            logger.info("Created: %s (ID: %s, handle: %s)", title, collection_id, handle)
-            return True
-
-        logger.error("Failed to create: %s", title)
-        return False
+        return self._create_collection(
+            title=title,
+            column="variant_compare_at_price",
+            relation="greater_than",
+            condition="0",
+            handle="likvidatsii",
+        )
 
     def update_sale_collection(self, title: str = "Намаления") -> bool:
         """Update the existing sale collection rule to compare_at_price > 0.

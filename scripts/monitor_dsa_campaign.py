@@ -18,27 +18,22 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.common.credentials import load_shopify_credentials
 from src.shopify.api_client import ShopifyAPIClient
 
 CAMPAIGN_START = datetime(2026, 4, 3, tzinfo=timezone.utc)
 DAILY_BUDGET_EUR = 10.0
-CONVERSION_RATE_ALARM = 0.05  # 5% — anything above is suspicious
 
 
 def load_client() -> ShopifyAPIClient:
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    shop = os.environ["SHOPIFY_SHOP_URL"]
-    token = os.environ["SHOPIFY_ACCESS_TOKEN"]
+    shop, token = load_shopify_credentials()
     return ShopifyAPIClient(shop=shop, access_token=token)
 
 
@@ -130,7 +125,8 @@ def main():
     print(f"  └─ Organic/other:     {len(organic_orders)}  (€{organic_revenue:.2f})")
     print()
     print(f"  Revenue:              €{total_revenue:.2f}")
-    print(f"  Est. ad spend:        €{estimated_spend:.2f} (€{DAILY_BUDGET_EUR}/day × {min(args.days, campaign_days)}d)")
+    budget_days = min(args.days, campaign_days)
+    print(f"  Est. ad spend:        €{estimated_spend:.2f} (€{DAILY_BUDGET_EUR}/day × {budget_days}d)")
 
     if estimated_spend > 0:
         roas = google_revenue / estimated_spend

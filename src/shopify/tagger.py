@@ -125,11 +125,15 @@ class DiscountTagger:
         if self.dry_run or not product_ids:
             return len(product_ids)
 
+        _VALID_OPS = ("tagsAdd", "tagsRemove")
+        if operation not in _VALID_OPS:
+            raise ValueError(f"Invalid tag operation: {operation!r} (expected one of {_VALID_OPS})")
+
         # Build aliased mutations: t0: tagsAdd(...), t1: tagsAdd(...), ...
         fragments = []
         for i, pid in enumerate(product_ids):
-            escaped_id = pid.replace('"', '\\"')
-            escaped_tag = self.tag.replace('"', '\\"')
+            escaped_id = pid.replace("\\", "\\\\").replace('"', '\\"')
+            escaped_tag = self.tag.replace("\\", "\\\\").replace('"', '\\"')
             fragments.append(
                 f't{i}: {operation}(id: "{escaped_id}", tags: ["{escaped_tag}"]) {{ userErrors {{ field message }} }}'
             )

@@ -281,7 +281,7 @@ class ShopifyCSVExporter:
                     title = row.get('Title', '').strip()
                     if handle and title:
                         handles.add(handle)
-        except Exception as e:
+        except (OSError, csv.Error) as e:
             logger.warning("Could not read CSV for dedup: %s", e)
         return handles
 
