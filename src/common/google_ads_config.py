@@ -3,7 +3,6 @@
 import logging
 
 import yaml
-from google.ads.googleads.client import GoogleAdsClient
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ def load_google_ads_config(config_path: str = "config/google-ads.yaml", required
     return config
 
 
-def get_google_ads_client(config: dict) -> GoogleAdsClient:
+def get_google_ads_client(config: dict):
     """Create a GoogleAdsClient from config dictionary.
 
     Args:
@@ -54,5 +53,7 @@ def get_google_ads_client(config: dict) -> GoogleAdsClient:
     }
     if config.get("login_customer_id"):
         client_config["login_customer_id"] = str(config["login_customer_id"])
+
+    from google.ads.googleads.client import GoogleAdsClient
 
     return GoogleAdsClient.load_from_dict(client_config)
