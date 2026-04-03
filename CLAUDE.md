@@ -86,6 +86,7 @@ Beyond the 8 pipeline scripts above, grouped by function:
 | **Google Ads** | `google_ads_auth.py` | OAuth token management |
 | | `google_ads_auth_flow.py` | Interactive OAuth flow |
 | | `google_ads_create_account.py` | Create Google Ads sub-account |
+| | `monitor_dsa_campaign.py` | Daily DSA campaign monitor (Google Ads orders vs organic, ROAS) |
 | **Data cleanup** | `dedup_csv.py` | Deduplicate cleaned CSV by SKU (expiry-aware + true-dupe) |
 | **Utilities** | `shopify_oauth.py` | Shopify OAuth helper |
 | | `extract_single.py` | Debug single product extraction |
@@ -116,20 +117,24 @@ Three validation layers run during `bulk_extract.py` (zero extra HTTP):
 | `src/extraction/brand_matcher.py` | Brand name matching against known_brands.yaml |
 | `src/validation/crawl_tracker.py` | Aggregate stats, quality gate |
 | `src/shopify/csv_exporter.py` | 56-col CSV; single source of truth for column layout |
-| `src/shopify/api_client.py` | REST + GraphQL Shopify API wrapper |
+| `src/shopify/api_client.py` | REST + GraphQL Shopify API wrapper; `paginate_rest()` for since_id pagination |
 | `src/shopify/menus.py` | Hierarchical menu creation via API |
 | `src/shopify/collections.py` | Smart collection creation; `create_sale_collection()` uses tag rule |
 | `src/shopify/tagger.py` | `DiscountTagger` — tags products where compare_at > price; batched GraphQL |
-| `src/extraction/fetcher.py` | HTTP fetcher; `_build_headers()` picks random UA from `USER_AGENTS` + `BROWSER_HEADERS` per request |
+| `src/extraction/fetcher.py` | HTTP fetcher; delegates to `session_factory.build_headers()` per request |
+| `src/extraction/classifier.py` | Pure classification functions extracted from parser (form, audience, category, age group) |
 | `src/common/constants.py` | EUR/BGN rate (1.95583), `USER_AGENTS` (10 rotating UAs), `BROWSER_HEADERS` (realistic browser headers) |
+| `src/common/session_factory.py` | Shared HTTP session creation with anti-ban headers; `build_headers()`, `create_session()`, `rotate_headers()` |
+| `src/common/cli.py` | Shared script boilerplate: `base_parser()`, `init_logging()`, `shopify_client_from_env()` |
+| `src/common/google_ads_config.py` | Google Ads YAML config loading and client creation (lazy import of google-ads package) |
 | `config/known_brands.yaml` | 450+ brand database |
 
 ## Source Packages
 
 | Package | Files | Purpose |
 |---------|-------|---------|
-| `common` | 7 | Constants, config loading, text/CSV utilities, transliteration |
-| `extraction` | 5 | Extractor, bulk orchestration, validation, brand matching |
+| `common` | 10 | Constants, config loading, text/CSV utilities, transliteration, session factory, CLI helpers, Google Ads config |
+| `extraction` | 6 | Extractor, bulk orchestration, validation, brand matching, classifier |
 | `discovery` | 1 | URL discovery from benu.bg sitemap/category pages |
 | `models` | 1 | Product data model |
 | `shopify` | 5 | CSV export, API client, menus, collections, discount tagger |
