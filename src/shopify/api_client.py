@@ -216,6 +216,41 @@ class ShopifyAPIClient:
         logger.error("Max retries (%d) exceeded for GraphQL request", self.MAX_RETRIES)
         return None
 
+    def paginate_rest(
+        self,
+        endpoint: str,
+        resource_key: str,
+        page_size: int = 250,
+    ) -> list[dict]:
+        """Paginate a REST list endpoint using since_id.
+
+        Args:
+            endpoint: Base endpoint with query params (e.g. "orders.json?status=any").
+            resource_key: JSON key containing the array (e.g. "orders").
+            page_size: Number of items per page (max 250).
+
+        Returns:
+            All collected items across pages.
+        """
+        separator = "&" if "?" in endpoint else "?"
+        url = f"{endpoint}{separator}limit={page_size}"
+        items: list[dict] = []
+
+        while url:
+            result = self.rest_request("GET", url)
+            if not result:
+                break
+            page = result.get(resource_key, [])
+            if not page:
+                break
+            items.extend(page)
+            if len(page) < page_size:
+                break
+            last_id = page[-1]["id"]
+            url = f"{endpoint}{separator}limit={page_size}&since_id={last_id}"
+
+        return items
+
     def test_connection(self) -> bool:
         """
         Test API connection by fetching shop info.

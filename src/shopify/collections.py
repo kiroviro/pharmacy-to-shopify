@@ -56,27 +56,10 @@ class ShopifyCollectionCreator:
         """Fetch existing collection titles to avoid duplicates."""
         logger.info("Fetching existing collections...")
 
-        existing = set()
-        endpoint = "smart_collections.json?limit=250"
-
-        while endpoint:
-            result = self.client.rest_request("GET", endpoint)
-            if not result:
-                break
-
-            collections = result.get("smart_collections", [])
-            if not collections:
-                break
-
-            for collection in collections:
-                existing.add(collection.get("title", "").lower())
-
-            # Paginate using since_id when a full page is returned
-            if len(collections) == 250:
-                last_id = collections[-1]["id"]
-                endpoint = f"smart_collections.json?limit=250&since_id={last_id}"
-            else:
-                endpoint = None
+        collections = self.client.paginate_rest(
+            "smart_collections.json", "smart_collections"
+        )
+        existing = {c.get("title", "").lower() for c in collections}
 
         logger.info("Found %d existing smart collections", len(existing))
         return existing

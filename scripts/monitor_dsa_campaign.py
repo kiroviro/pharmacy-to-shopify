@@ -68,22 +68,10 @@ def is_google_ads_order(order: dict) -> bool:
 
 def fetch_orders(client: ShopifyAPIClient, since: datetime) -> list[dict]:
     """Fetch all orders since the given datetime."""
-    orders = []
     since_iso = since.strftime("%Y-%m-%dT%H:%M:%S%z")
-    endpoint = f"orders.json?status=any&created_at_min={since_iso}&limit=250"
-
-    while endpoint:
-        result = client.rest_request("GET", endpoint)
-        if not result or "orders" not in result:
-            break
-        orders.extend(result["orders"])
-        # Pagination — check for next link
-        if len(result["orders"]) < 250:
-            break
-        last_id = result["orders"][-1]["id"]
-        endpoint = f"orders.json?status=any&created_at_min={since_iso}&limit=250&since_id={last_id}"
-
-    return orders
+    return client.paginate_rest(
+        f"orders.json?status=any&created_at_min={since_iso}", "orders"
+    )
 
 
 def compute_revenue(orders: list[dict]) -> float:

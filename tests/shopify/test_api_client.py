@@ -164,6 +164,82 @@ class TestGraphqlRequest:
         assert result is None
 
 
+class TestPaginateRest:
+    def test_single_page(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "orders": [{"id": 1}, {"id": 2}]
+        }
+
+        with patch.object(client.session, "get", return_value=mock_response):
+            result = client.paginate_rest("orders.json?status=any", "orders")
+
+        assert result == [{"id": 1}, {"id": 2}]
+
+    def test_multi_page(self, client):
+        page1 = MagicMock()
+        page1.status_code = 200
+        page1.json.return_value = {"items": [{"id": i} for i in range(250)]}
+
+        page2 = MagicMock()
+        page2.status_code = 200
+        page2.json.return_value = {"items": [{"id": 300}, {"id": 301}]}
+
+        with patch.object(client.session, "get", side_effect=[page1, page2]):
+            result = client.paginate_rest("items.json", "items")
+
+        assert len(result) == 252
+        assert result[0]["id"] == 0
+        assert result[-1]["id"] == 301
+
+    def test_empty_response(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"orders": []}
+
+        with patch.object(client.session, "get", return_value=mock_response):
+            result = client.paginate_rest("orders.json", "orders")
+
+        assert result == []
+
+    def test_none_response(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        mock_response.text = "Internal Server Error"
+        mock_response.headers = {"Retry-After": "0"}
+
+        with patch.object(client.session, "get", return_value=mock_response):
+            result = client.paginate_rest("orders.json", "orders")
+
+        assert result == []
+
+    def test_endpoint_without_query_params(self, client):
+        """Endpoint without ? gets ?limit=250 appended."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"collections": [{"id": 1}]}
+
+        with patch.object(client.session, "get", return_value=mock_response) as mock_get:
+            client.paginate_rest("smart_collections.json", "collections")
+
+        called_url = mock_get.call_args[0][0]
+        assert "?limit=250" in called_url
+
+    def test_endpoint_with_query_params(self, client):
+        """Endpoint with ? gets &limit=250 appended."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"orders": [{"id": 1}]}
+
+        with patch.object(client.session, "get", return_value=mock_response) as mock_get:
+            client.paginate_rest("orders.json?status=any", "orders")
+
+        called_url = mock_get.call_args[0][0]
+        assert "&limit=250" in called_url
+        assert "status=any" in called_url
+
+
 class TestTestConnection:
     def test_success(self, client):
         mock_response = MagicMock()
