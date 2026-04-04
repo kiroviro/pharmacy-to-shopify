@@ -29,7 +29,8 @@ from src.common.credentials import load_shopify_credentials
 from src.shopify.api_client import ShopifyAPIClient
 
 CAMPAIGN_START = datetime(2026, 4, 3, tzinfo=timezone.utc)
-DAILY_BUDGET_EUR = 20.0
+DSA_CAMPAIGN_ID = "23713866882"
+DAILY_BUDGET_EUR = 10.0  # reduced from €20 to €10 on 2026-04-04
 
 
 def load_client() -> ShopifyAPIClient:
@@ -37,33 +38,53 @@ def load_client() -> ShopifyAPIClient:
     return ShopifyAPIClient(shop=shop, access_token=token)
 
 
-def is_google_ads_order(order: dict) -> bool:
-    """Check if order came from Google Ads (paid search)."""
-    # Check landing_site for gclid parameter
+def classify_google_ads_order(order: dict) -> str | None:
+    """Classify order as DSA, other Google Ads, or None (organic).
+
+    Returns:
+        "dsa" — from DSA campaign (23713866882)
+        "google_ads" — from another Google Ads campaign (e.g. old PMax)
+        None — organic / not from Google Ads
+    """
     landing = order.get("landing_site") or ""
-    if "gclid" in landing:
-        return True
-
-    # Check referring_site
     referrer = order.get("referring_site") or ""
-    if "google" in referrer.lower() and ("gclid" in referrer or "ads" in referrer.lower()):
-        return True
-
-    # Check UTM tags in landing_site_ref or note attributes
-    if "utm_source=google" in landing and "utm_medium=cpc" in landing:
-        return True
-
-    # Check source_name
-    source = order.get("source_name") or ""
-    if source == "google":
-        return True
-
-    # Check customer visit tracking via note attributes or tags
     tags = order.get("tags") or ""
-    if "google_ads" in tags.lower() or "gclid" in tags.lower():
-        return True
+    source = order.get("source_name") or ""
 
-    return False
+    is_gads = False
+
+    # gclid in landing URL is the strongest signal
+    if "gclid" in landing:
+        is_gads = True
+
+    # gad_source parameter (Google Ads auto-tagging)
+    if "gad_source" in landing:
+        is_gads = True
+
+    # Referring site from Google with ads signals
+    if "google" in referrer.lower() and ("gclid" in referrer or "ads" in referrer.lower()):
+        is_gads = True
+
+    # UTM tags for paid search
+    if "utm_source=google" in landing and "utm_medium=cpc" in landing:
+        is_gads = True
+
+    # source_name "google" (rare but possible)
+    if source == "google":
+        is_gads = True
+
+    # Tags-based detection
+    if "google_ads" in tags.lower() or "gclid" in tags.lower():
+        is_gads = True
+
+    if not is_gads:
+        return None
+
+    # Distinguish DSA from other campaigns via gad_campaignid
+    if f"gad_campaignid={DSA_CAMPAIGN_ID}" in landing:
+        return "dsa"
+
+    return "google_ads"
 
 
 def fetch_orders(client: ShopifyAPIClient, since: datetime) -> list[dict]:
@@ -91,12 +112,24 @@ def main():
     client = load_client()
     orders = fetch_orders(client, since)
 
-    google_orders = [o for o in orders if is_google_ads_order(o)]
-    organic_orders = [o for o in orders if not is_google_ads_order(o)]
+    dsa_orders = []
+    other_gads_orders = []
+    organic_orders = []
 
-    google_revenue = compute_revenue(google_orders)
+    for o in orders:
+        cls = classify_google_ads_order(o)
+        if cls == "dsa":
+            dsa_orders.append(o)
+        elif cls == "google_ads":
+            other_gads_orders.append(o)
+        else:
+            organic_orders.append(o)
+
+    all_gads = dsa_orders + other_gads_orders
+    dsa_revenue = compute_revenue(dsa_orders)
+    other_gads_revenue = compute_revenue(other_gads_orders)
     organic_revenue = compute_revenue(organic_orders)
-    total_revenue = google_revenue + organic_revenue
+    total_revenue = dsa_revenue + other_gads_revenue + organic_revenue
 
     estimated_spend = min(args.days, campaign_days) * DAILY_BUDGET_EUR
 
@@ -109,49 +142,66 @@ def main():
     print(f"  Campaign running: {campaign_days} day(s)")
     print()
     print(f"  Orders (total):       {len(orders)}")
-    print(f"  ├─ Google Ads:        {len(google_orders)}  (€{google_revenue:.2f})")
-    print(f"  └─ Organic/other:     {len(organic_orders)}  (€{organic_revenue:.2f})")
+    print(f"  ├─ DSA campaign:      {len(dsa_orders)}  (€{dsa_revenue:.2f})")
+    if other_gads_orders:
+        print(f"  ├─ Other Google Ads:  {len(other_gads_orders)}  (€{other_gads_revenue:.2f})")
+    print(f"  └─ Organic/direct:    {len(organic_orders)}  (€{organic_revenue:.2f})")
     print()
-    print(f"  Revenue:              €{total_revenue:.2f}")
-    budget_days = min(args.days, campaign_days)
-    print(f"  Est. ad spend:        €{estimated_spend:.2f} (€{DAILY_BUDGET_EUR}/day × {budget_days}d)")
+    print(f"  Revenue (total):      €{total_revenue:.2f}")
+    print(f"  DSA ad spend (est):   €{estimated_spend:.2f} (€{DAILY_BUDGET_EUR}/day × {min(args.days, campaign_days)}d)")
 
-    if estimated_spend > 0:
-        roas = google_revenue / estimated_spend
-        print(f"  Est. ROAS:            {roas:.2f}x")
+    if estimated_spend > 0 and dsa_revenue > 0:
+        roas = dsa_revenue / estimated_spend
+        print(f"  DSA ROAS (est):       {roas:.2f}x")
+    elif estimated_spend > 0:
+        print(f"  DSA ROAS (est):       0.00x (no DSA orders yet)")
     print()
+
+    if len(orders) > 0:
+        gads_pct = len(all_gads) / len(orders) * 100
+        print(f"  Google Ads share:     {gads_pct:.1f}% of orders ({len(all_gads)}/{len(orders)})")
 
     # Alerts
     alerts = []
 
-    if campaign_days >= 3 and len(google_orders) == 0 and args.days >= 3:
+    if campaign_days >= 3 and len(dsa_orders) == 0 and args.days >= 3:
         alerts.append(
-            "⚠ ZERO Google Ads orders after 3+ days — check campaign status, "
+            "⚠ ZERO DSA orders after 3+ days — check campaign status, "
             "ad approval, and conversion tracking in Google Ads UI"
         )
 
-    if len(google_orders) > 0 and estimated_spend > 0:
-        # Rough conversion rate: need click data (not available without API)
-        # But we can flag if revenue seems impossibly high relative to spend
-        if google_revenue > estimated_spend * 50:
+    if campaign_days >= 1 and len(dsa_orders) == 0 and len(all_gads) == 0:
+        alerts.append(
+            "ℹ No gclid/gad_source in any order landing URLs — "
+            "Google Ads auto-tagging may not be enabled, or no ad-driven "
+            "purchases yet. Check: Settings → Auto-tagging in Google Ads."
+        )
+
+    if len(all_gads) > 0 and estimated_spend > 0:
+        gads_revenue = dsa_revenue + other_gads_revenue
+        if gads_revenue > estimated_spend * 50:
             alerts.append(
                 "⚠ Revenue/spend ratio > 50x — verify conversion tracking "
-                "is not double-counting (check Goals → Conversions)"
+                "is not double-counting (Goals → Conversions)"
             )
-
-    if len(orders) > 0:
-        google_pct = len(google_orders) / len(orders) * 100
-        print(f"  Google Ads share:     {google_pct:.1f}% of orders")
 
     if alerts:
         print(f"  {'─'*50}")
         for alert in alerts:
             print(f"  {alert}")
 
+    # Order details for debugging
+    if all_gads:
+        print(f"\n  Google Ads orders detail:")
+        for o in all_gads:
+            cls = classify_google_ads_order(o)
+            landing = o.get("landing_site") or ""
+            print(f"    #{o['order_number']} — €{o['total_price']} ({cls}) landing={landing[:80]}")
+
     print(f"\n{'='*60}")
     print("  Manual checks (Google Ads UI):")
     print("  • Campaign status: ads.google.com → Campaigns → ViaPharma DSA")
-    print("  • Actual clicks & CPC: Campaign → Ad group → Keywords")
+    print("  • Settings → Auto-tagging: must be ON for gclid tracking")
     print("  • Conversion tracking: Goals → Conversions (only Purchase = Primary)")
     print(f"{'='*60}\n")
 
