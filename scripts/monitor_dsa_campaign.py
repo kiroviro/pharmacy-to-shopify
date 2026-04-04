@@ -29,7 +29,7 @@ from src.common.credentials import load_shopify_credentials
 from src.shopify.api_client import ShopifyAPIClient
 
 CAMPAIGN_START = datetime(2026, 4, 3, tzinfo=timezone.utc)
-DAILY_BUDGET_EUR = 10.0
+DAILY_BUDGET_EUR = 20.0
 
 
 def load_client() -> ShopifyAPIClient:
