@@ -43,12 +43,25 @@ function addNegatives(campaign) {
     // Unrelated product category — medical/fashion earrings
     "медицински обеци",
 
-    // Added 2026-04-05 after search terms report review
+    // Added 2026-04-05 after search terms report review (batch 2)
     "марешки",      // Аптеки Марешки chain (many long-tail variants)
     "субра",        // Субра pharmacy chain
     "subra",        // Latin spelling
     "sopharmacy",   // Sopharmacy chain (variant not caught by broad match)
     "софармаси",    // Cyrillic variant
+
+    // Added 2026-04-05 after search terms report review (batch 3)
+    // Rx drug name searches — informational, 0 conversions
+    "нимезил",                  // NSAID, price-comparison searches
+    "тавипек",                  // Rx drug
+    "верутол",                  // Wart treatment brand
+    "verrutol",                 // Latin spelling
+    "левокса",                  // Rx antibiotic
+    "урофертил",                // Manufacturer search, not buyer
+    // Informational
+    "лекарство за сърцето",     // Generic informational, 0 conv
+    // Competitor pharmacy
+    "ванда",                    // Аптека Ванда chain
   ];
 
   Logger.log("\nAdding " + terms.length + " terms × 2 match types = " + (terms.length * 2) + " negatives:");
