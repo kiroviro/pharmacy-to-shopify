@@ -42,6 +42,13 @@ function addNegatives(campaign) {
 
     // Unrelated product category — medical/fashion earrings
     "медицински обеци",
+
+    // Added 2026-04-05 after search terms report review
+    "марешки",      // Аптеки Марешки chain (many long-tail variants)
+    "субра",        // Субра pharmacy chain
+    "subra",        // Latin spelling
+    "sopharmacy",   // Sopharmacy chain (variant not caught by broad match)
+    "софармаси",    // Cyrillic variant
   ];
 
   Logger.log("\nAdding " + terms.length + " terms × 2 match types = " + (terms.length * 2) + " negatives:");
