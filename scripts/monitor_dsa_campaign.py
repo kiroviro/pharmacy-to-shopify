@@ -154,7 +154,7 @@ def main():
         roas = dsa_revenue / estimated_spend
         print(f"  DSA ROAS (est):       {roas:.2f}x")
     elif estimated_spend > 0:
-        print(f"  DSA ROAS (est):       0.00x (no DSA orders yet)")
+        print("  DSA ROAS (est):       0.00x (no DSA orders yet)")
     print()
 
     if len(orders) > 0:
@@ -192,7 +192,7 @@ def main():
 
     # Order details for debugging
     if all_gads:
-        print(f"\n  Google Ads orders detail:")
+        print("\n  Google Ads orders detail:")
         for o in all_gads:
             cls = classify_google_ads_order(o)
             landing = o.get("landing_site") or ""
