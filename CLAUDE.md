@@ -200,9 +200,10 @@ All in `config/`:
 - Google Shopping / Merchant Center feed is **not available in Bulgaria**. PMax campaigns targeting Bulgaria will show "No products for any locations" — this is a platform limitation, not a configuration error.
 - Many Google Ads features are disabled for the Bulgarian market (confirmed by Google partner).
 - Recommended campaign type for Bulgaria: **Dynamic Search Ads (DSA)** — uses URL/content crawling, does not depend on Shopping feed.
-- Google Ads API developer token (`U8t0BWmbOgkKz9hga9_rkw`) has **test-only access** — cannot modify production accounts. Use Playwright browser automation for campaign management until Basic/Standard access is approved.
-- Active account: **825-619-0101 (ViaPharma US, EUR)**. Account 306-969-3810 is canceled (was BGN).
+- Google Ads API developer token (`U8t0BWmbOgkKz9hga9_rkw`) has **test-only access** — cannot modify production accounts. Use **Claude-in-Chrome MCP** for campaign management instead.
+- Active account: **825-619-0101 (ViaPharma US, EUR)**, `ocid=8001809503` in URLs. Account 306-969-3810 is canceled (was BGN).
 - Manager account: **966-252-5245 (Viapharma)**.
+- **Claude-in-Chrome on ads.google.com:** `find` and `computer` (click/type) work; `read_page` and `javascript_tool` are blocked by Google's CSP. Navigate to the campaigns page first — deep URLs sometimes redirect; use `find`/`computer` to drill in from there.
 
 **Shopify API deprecations (deadline Apr 1 2026):**
 - `productsCount` — must pass `(limit: null)` for uncapped count; fixed in `shopify_delete_products.py`

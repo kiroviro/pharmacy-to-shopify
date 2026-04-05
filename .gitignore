@@ -68,3 +68,4 @@ config/google-ads.yaml
 # Theme exports
 theme_export*
 proxies.txt
+.claude.local.md
