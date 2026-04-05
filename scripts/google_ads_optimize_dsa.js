@@ -136,7 +136,16 @@ function addNegativeKeywords(campaign) {
     "фрамар",
     "framar",
     "lilly дрогерия",
-    "dm дрогерия"
+    "dm дрогерия",
+    "galen",
+    "галена",
+    "galena",
+    "гален",
+    "benu",
+    "софарма",
+
+    // Unrelated categories
+    "медицински обеци"
   ];
 
   var count = 0;
