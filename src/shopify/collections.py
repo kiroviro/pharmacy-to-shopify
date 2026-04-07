@@ -155,7 +155,7 @@ class ShopifyCollectionCreator:
             condition="0",
         )
 
-    def create_liquidation_collection(self, title: str = "Ликвидации") -> bool:
+    def create_liquidation_collection(self, title: str = "Супер намаления") -> bool:
         """Create the liquidation smart collection (compare_at_price > 0).
 
         Uses a hardcoded handle 'likvidatsii' so the URL is always
