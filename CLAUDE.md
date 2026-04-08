@@ -196,6 +196,27 @@ All in `config/`:
 - 2 Vichy Dercos combo products: empty price (combo price rendered differently — not a code bug)
 - 119 duplicate SKU groups: 106 near-expiry "Годен до" variants + 13 true duplicates
 
+**Google Ads — Golden Template:** See `docs/google-ads-playbook.md` — authoritative reference for all campaign decisions. Every change must align with it.
+
+**Google Ads — Account targets (from 2026-04-08 audit, score 70/100 → target 90+/100):**
+- RSA ad strength: **Good or Excellent** (never Poor/Average)
+- All final URLs: **https://** (never http)
+- Quality Score: **8+** (current: 3-7)
+- Landing Page Score: **Above Average** (current: Below Average — biggest gap)
+- Ad Relevance: **Above Average** (current: Average)
+- Expected CTR: **Above Average** (current: Average)
+- IS lost to budget: **< 20%** per campaign (current: DSA 95%, PMax 43%)
+- Keywords per ad group: **≤ 20** (current: 32 in DSA)
+- Headline length: **≥ 20 chars** each
+- PMax asset strength: **Excellent** (requires videos + sitelinks + audience signals)
+- Conversion rate: **1-5%** (> 10% signals double-counting tracking bug)
+- Break-even ROAS at 5.3% margin: **18.87x**; target ROAS: **20x+**
+
+**Google Ads — Conversion tracking (verify before every campaign change):**
+- Only `Google Shopping App Purchase` = **Primary** (dynamic order value). All other events = Secondary.
+- Auto-tagging: **ON**. Attribution: **Data-driven** (not Last Click).
+- If conversion rate > 100%: stop everything and audit Goals → Conversions for duplicates.
+
 **Google Ads — Bulgarian market limitations:**
 - Google Shopping / Merchant Center feed is **not available in Bulgaria**. PMax campaigns targeting Bulgaria will show "No products for any locations" — this is a platform limitation, not a configuration error.
 - Many Google Ads features are disabled for the Bulgarian market (confirmed by Google partner).
