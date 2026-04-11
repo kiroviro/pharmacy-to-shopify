@@ -233,13 +233,18 @@ All in `config/`:
 ## Shopify Theme
 
 Theme lives in `../../viapharma.us-theme` (sibling directory).
+
+**Base theme:** **Meka v5.0.3** by Muup ([docs](https://docs.muup.co/collection/855-meka-documentation)). Custom-uploaded (not from Shopify Theme Store — `theme_store_id` is `null`). See `viapharma.us-theme/CUSTOMIZATIONS.md` for the file-by-file list of changes against vanilla Meka and the full migration playbook. See `viapharma.us-theme/CLAUDE.md` for the upgrade workflow.
+
 ```bash
-python scripts/push_theme.py <relative-path-to-file>  # Push single file
-python scripts/push_theme.py --all                     # Push all theme files
-python scripts/backup_theme.py                         # Download active theme
-python scripts/setup_navigation.py                     # 3-level mega menu
-python scripts/setup_mega_columns.py                   # Flat column menus
-python scripts/upload_shop_icons.py                    # SVG icons → Shopify Files
+python scripts/push_theme.py <relative-path-to-file>   # Push single file (live theme)
+python scripts/push_theme.py --all                      # Push all files (live theme)
+python scripts/push_theme.py --theme <id> <file>        # Push to a staging theme (safe during migrations)
+python scripts/push_theme.py --list-themes              # List all themes on the store
+python scripts/backup_theme.py                          # Download active theme
+python scripts/setup_navigation.py                      # 3-level mega menu
+python scripts/setup_mega_columns.py                    # Flat column menus
+python scripts/upload_shop_icons.py                     # SVG icons → Shopify Files
 ```
-Credentials from `.env` or `.shopify_token.json`. Theme ID: `195131081041`.
+Credentials from `.env` or `.shopify_token.json`. Live theme ID: `195131081041`.
 **Pushing to `main` branch auto-deploys to live production at viapharma.us.**
