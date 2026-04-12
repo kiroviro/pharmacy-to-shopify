@@ -1,0 +1,35 @@
+TAG CLEANUP REPORT
+============================================================
+
+Input file: data/benu.bg/raw/products.csv
+Output file: data/benu.bg/processed/products_cleaned.csv
+
+Products processed: 10559
+Products with tags: 9810
+
+L1 CATEGORY COVERAGE
+----------------------------------------
+Missing L1 before cleanup: 554
+Missing L1 after cleanup:  0
+L1 categories added: 1043
+
+L1 categories added by count:
+  Лечение и здраве: 554
+  Майка и дете: 489
+
+TAGS NORMALIZED (case fixes)
+----------------------------------------
+Total: 0
+
+
+BRAND TAGS REMOVED
+----------------------------------------
+Total: 0
+
+
+PROMOTIONAL TAGS REMOVED
+----------------------------------------
+Total: 505
+
+  Майка и дете: 496
+  Креатинови продукти: 9
