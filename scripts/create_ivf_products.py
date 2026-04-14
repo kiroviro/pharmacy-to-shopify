@@ -721,7 +721,7 @@ def create_collection(client, *, dry_run: bool = False) -> dict | None:
     if dry_run:
         print(f"  [DRY RUN] Would create collection: {COLLECTION_TITLE}")
         print(f"            Handle: {COLLECTION_HANDLE}")
-        print(f"            Rule: tag = ivf")
+        print("            Rule: tag = ivf")
         return None
 
     # Check if collection already exists
@@ -738,7 +738,7 @@ def create_collection(client, *, dry_run: bool = False) -> dict | None:
         print(f"  Created collection: {coll['title']} (ID: {coll['id']})")
         return coll
     else:
-        print(f"  FAILED to create collection")
+        print("  FAILED to create collection")
         return None
 
 
@@ -847,7 +847,7 @@ def main() -> None:
             time.sleep(0.5)  # Rate limiting courtesy
 
     # Summary
-    print(f"\n--- Summary ---")
+    print("\n--- Summary ---")
     print(f"Products created: {len(created)}/{len(IVF_PRODUCTS)}"
           f" (skipped {skipped} existing)" if skipped else
           f"Products created: {len(created)}/{len(IVF_PRODUCTS)}")

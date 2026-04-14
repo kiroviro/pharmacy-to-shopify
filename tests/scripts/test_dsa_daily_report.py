@@ -1,18 +1,14 @@
 """Tests for dsa_daily_report.py — report building and email integration."""
 
-from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
-
-import pytest
-
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from scripts.dsa_daily_report import (
     _already_sent_today,
-    _lock_path,
     _mark_sent_today,
     build_report,
 )

@@ -40,8 +40,6 @@ def main() -> None:
 
     # Find IVF products by tag
     print("Fetching IVF products...")
-    products = []
-    page = client.rest_request("GET", "products.json?limit=50&collection_id=&status=active&fields=id,title,variants,images")
     # Paginate through all products to find IVF ones by SKU
     all_products = []
     page = client.rest_request("GET", "products.json?limit=250&fields=id,title,variants,images")
