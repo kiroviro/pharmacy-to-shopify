@@ -183,6 +183,8 @@ All in `config/`:
 - `URL handle` (not `Handle`)
 - `Vendor` (not `Brand`)
 
+**Bulgarian Cyrillic only — never Ukrainian:** Use "И" (Bulgarian), NOT "І" (Ukrainian). Example: "Ин Витро" not "Ін Витро". All customer-facing text on viapharma.us must be Bulgarian Cyrillic.
+
 **Validation warning format:** `"field_name: description"` (underscores, not dots).
 `CrawlQualityTracker._extract_field()` regex: `r"^([a-z_A-Z][a-z_A-Z0-9 ]+?):"`
 
@@ -229,6 +231,11 @@ All in `config/`:
 **Shopify API deprecations (deadline Apr 1 2026):**
 - `productsCount` — must pass `(limit: null)` for uncapped count; fixed in `shopify_delete_products.py`
 - `Blog.articlesCount` in Liquid — platform-level property with no argument syntax; no fix possible in Liquid code
+
+**IVF products (2026-04-13):** 13 prescription-only IVF products on viapharma.us. Scripts: `scripts/create_ivf_products.py` (use `--skip-existing`), `scripts/add_ivf_images.py`. Collection `in-vitro` (ID: 676328440145), rule: `tag = ivf`. All IVF products must have `inventory_management=null` — critical, otherwise `featured-collection.liquid:138` filters them out as unavailable.
+- **Homepage:** `ivf_hero_banner` → `ivf_featured_collection` (in `templates/index.json`, after `likvidatsii-homepage`)
+- **Collection page only:** 3-column info cards (map, contact, Rx info) via `custom-liquid` sections in `templates/collection.in-vitro.json` — do NOT add these to homepage
+- **Theme files:** `sections/ivf-pharmacy-cta.liquid`, `templates/product.ivf.json`, `templates/collection.in-vitro.json`, `templates/page.ivf-apteka.json`
 
 ## Shopify Theme
 
